@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
   try {
     if (Date.now() - cache.at > 20000) {
       const { data } = await loadSnapshot();
-      const site = data && data.site;
+      const site = data && (data.sitePublic || data.site);
       cache = { at: Date.now(), site: site && site.published !== false ? site : null };
     }
     res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=300");

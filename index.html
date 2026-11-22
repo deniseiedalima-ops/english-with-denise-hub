@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EWD Studio — Class Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&family=Quicksand:wght@700&family=Fredoka:wght@600&family=Varela+Round&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
@@ -333,6 +334,12 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .prod-row{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #eee8e4;border-radius:14px;margin-bottom:8px;background:#fffefa;cursor:pointer}
 .prod-row.off{opacity:.5}
 .prod-thumb{width:42px;height:42px;border-radius:12px;flex:0 0 42px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.font-picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.font-pick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid #e8e1eb;background:#fffefa;cursor:pointer;color:#3b3347}
+.font-pick.on{border-color:#9d85b7;background:#f0eaf7;box-shadow:inset 0 0 0 1px #cbbbdc}
+.fp-aa{font-size:26px;line-height:1}
+.fp-name{font-size:12px;color:#7c7388;font-family:Inter,system-ui,sans-serif}
+.fp-sample{font-size:15px}
 .swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #e3dcea;cursor:pointer}
 .sw.on{box-shadow:0 0 0 2px #4a3f58}
@@ -1321,6 +1328,7 @@ var Cloud = {
   snapshot(){
     const d=deepClone(DB);
     (d.meetingNotes||[]).forEach(n=>{ if(n.notionUrl && n.transcript){ n.transcript=""; n.transcriptInNotion=true; } });
+    if(DB.site) d.sitePublic=sitePublicData(); // versão pronta (links do WhatsApp/Instagram montados) para a página pública
     return d;
   },
   schedulePush(){
@@ -2073,7 +2081,20 @@ const SITE_TESTIMONIALS=[
   {id:"t2",url:"https://youtu.be/m6lNSGXziEI",name:"Claudia",quote:""},
   {id:"t3",url:"https://youtu.be/pZCqdZUYM3g",name:"Roberta",quote:""}
 ];
+const SITE_PRODUCTS=[
+  {id:"p_guided",title:"Guided Immersion in English",tag:"Acesso vitalício",color:"azul",
+   desc:"Uma imersão guiada para estudar inglês no seu ritmo.",details:"Compre agora e tenha para sempre.",price:"",cta:"Quero comprar",url:"",visible:true},
+  {id:"p_challenge",title:"30-Day English Challenge",tag:"Aberto 2x por ano",color:"rosa",
+   desc:"30 dias de imersão diária em inglês, com atividades curtas para criar o hábito.",details:"As inscrições abrem duas vezes por ano. Chame no WhatsApp para entrar na lista da próxima turma.",price:"",cta:"Quero entrar na próxima turma",url:"",visible:true},
+  {id:"p_aulas",title:"Aulas ao vivo em duplas ou trios",tag:"Aulas ao vivo",color:"lilas",
+   desc:"Aulas online ao vivo, em dupla ou trio, com material próprio e acompanhamento.",details:"",price:"R$ 300,00/mês",cta:"Quero minha vaga",url:"",visible:true}
+];
+const SITE_FONTS=[["nunito","Nunito","Nunito"],["quicksand","Quicksand","Quicksand"],["fredoka","Fredoka","Fredoka"],["varela","Varela Round","Varela Round"],["mplus","M PLUS Rounded 1c","M PLUS Rounded"]];
+const SITE_DEFAULT_SECTIONS=[{id:"sec_products",kind:"products",visible:true},{id:"sec_testimonials",kind:"testimonials",visible:true},{id:"sec_contact",kind:"contact",visible:true,title:"Fale comigo",sub:"Me chama em qualquer um desses canais 💜"}];
+const SECTION_KINDS={products:"🛍️ Produtos",testimonials:"🎥 Depoimentos",contact:"💬 Fale comigo (contatos)",text:"📝 Texto",links:"🔗 Lista de links",message:"📣 Mensagem em destaque"};
 function ensureSite(){
+  if(DB.site && !Array.isArray(DB.site.sections)){ DB.site.sections=SITE_DEFAULT_SECTIONS.map(x=>({...x})); DB.site.contactTop=false; save(); }
+  if(DB.site && DB.site.productsVersion!==2){ DB.site.products=SITE_PRODUCTS.map(p=>({...p})); DB.site.productsVersion=2; save(); }
   if(DB.site){
     // Preenche os depoimentos se a página já existia com os campos vazios.
     if(!(DB.site.testimonials||[]).some(t=>t.url)){ DB.site.testimonials=SITE_TESTIMONIALS.map(t=>({...t})); save(); }
@@ -2081,7 +2102,7 @@ function ensureSite(){
   }
   const prod=(title,tag,emoji,color,desc)=>({id:"p_"+title.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,30),title,tag,color,desc,details:"",price:"",cta:"Quero participar",url:"",visible:true});
   DB.site={
-    published:true, name:"English with Denise", kicker:"Teacher Denise", accent:"#7a5fa6", buttonColor:"#f2c94c", highlightFirst:true,
+    published:true, font:"nunito", name:"English with Denise", kicker:"Teacher Denise", accent:"#7a5fa6", buttonColor:"#f2c94c", highlightFirst:true,
     bio:"Aulas de inglês online, leves e personalizadas — do A1 ao B2.",
     photo:"", footer:"English with Denise",
     productsTitle:"Meus produtos", productsSub:"Escolha o caminho que combina com você.",
@@ -2091,15 +2112,8 @@ function ensureSite(){
       {id:"l_insta",type:"instagram",label:"Instagram",url:"",visible:true},
       {id:"l_mail",type:"email",label:"E-mail",url:"",visible:true}
     ],
-    products:[
-      prod("Aulas particulares","Aulas ao vivo","🎓","lilas","Aulas individuais, em dupla ou trio, com material próprio e acompanhamento."),
-      prod("30-Day English Challenge","Desafio","🔥","rosa","30 dias de imersão diária em inglês, com atividades curtas para criar o hábito."),
-      prod("Guided Immersion in English","Imersão","🎧","azul",""),
-      prod("The Cozy English Club","Clube cultural","☕","amarelo","Encontros culturais em inglês: filmes, conversas e muito acolhimento."),
-      prod("Mentoria Cultural Individual","Mentoria","🎬","vinho",""),
-      prod("English Studies Hub","Plataforma","📚","verde",""),
-      prod("Manual de Como Aprender Inglês por Conta Própria","E-book","📖","laranja","")
-    ],
+    products:SITE_PRODUCTS.map(p=>({...p})), productsVersion:2,
+    sections:SITE_DEFAULT_SECTIONS.map(x=>({...x})), contactTop:false,
     testimonials:SITE_TESTIMONIALS.map(t=>({...t}))
   };
   save(DB,{touch:false});
@@ -2121,7 +2135,10 @@ function siteLinkUrl(l){
 }
 function sitePublicData(){
   const s=deepClone(DB.site);
-  s.links=s.links.map(l=>({...l,url:siteLinkUrl(l)}));
+  s.links=s.links.map(l=>({...l,url:siteLinkUrl(l),display:(l.type==="instagram"&&l.url&&!/^https?:/.test(l.url))?"@"+String(l.url).replace(/^@/,""):((["whatsapp","email","telegram"].includes(l.type)&&!/^https?:/.test(l.url||""))?l.url:"")}));
+  const w=DB.site.links.find(l=>l.type==="whatsapp"&&l.url&&l.visible!==false);
+  if(w){ const base=siteLinkUrl({...w,message:""}).split("?")[0];
+    s.products.forEach(p=>{ if(!p.url) p.url=base+"?text="+encodeURIComponent(`Oi Denise! Quero saber mais sobre: ${p.title}`); }); }
   return s;
 }
 function sitePreview(){
@@ -2182,11 +2199,23 @@ function renderSite(){
           <div><label>Cor principal</label><input type="color" value="${esc(s.accent||"#7a5fa6")}" oninput="siteSet('accent',this.value)" style="height:44px;padding:4px"></div>
           <div><label>Cor do botão “Saber mais”</label><input type="color" value="${esc(s.buttonColor||"#f2c94c")}" oninput="siteSet('buttonColor',this.value)" style="height:44px;padding:4px"></div>
           <div><label>Rodapé</label><input value="${esc(s.footer||"")}" oninput="siteSet('footer',this.value)"></div>
+          <div class="full"><label>Fonte da página</label>
+            <div class="font-picks">${SITE_FONTS.map(([k,f,n])=>`<button class="font-pick ${(s.font||"nunito")===k?"on":""}" style="font-family:'${f}',sans-serif" onclick="siteSet('font','${k}');renderSite()"><span class="fp-aa">Aa</span><span class="fp-name">${n}</span><span class="fp-sample">English with Denise</span></button>`).join("")}</div></div>
         </div>
       </div>
 
+      <div class="card"><h3 style="margin:0 0 4px">🧩 Seções da página</h3>
+        <div class="muted small" style="margin-bottom:10px">A ordem aqui é a ordem na página. Crie blocos novos quando quiser.</div>
+        ${s.sections.map((x,k)=>`<div class="prod-row ${x.visible===false?"off":""}" onclick="openSiteSection('${x.id}')">
+          <div class="main" style="flex:1;min-width:0"><b>${esc(SECTION_KINDS[x.kind]||x.kind)}</b>${["text","links","message"].includes(x.kind)||x.kind==="contact"?`<div class="meta">${esc(x.title||"(sem título)")}</div>`:""}</div>
+          <div class="mini-actions" onclick="event.stopPropagation()"><button class="btn small" onclick="siteMove('sections','${x.id}',-1)" ${k?"":"disabled"}>↑</button><button class="btn small" onclick="siteMove('sections','${x.id}',1)" ${k<s.sections.length-1?"":"disabled"}>↓</button><button class="btn small" title="${x.visible===false?"Mostrar":"Ocultar"}" onclick="siteListSet('sections','${x.id}','visible',${x.visible===false});renderSite()">${x.visible===false?"🙈":"👁️"}</button>${["text","links","message"].includes(x.kind)?`<button class="btn small danger" onclick="siteRemove('sections','${x.id}')">✕</button>`:""}</div>
+        </div>`).join("")}
+        <div class="toolbar" style="margin-top:6px"><button class="btn small" onclick="siteAddSection('text')">+ Texto</button><button class="btn small" onclick="siteAddSection('links')">+ Lista de links</button><button class="btn small" onclick="siteAddSection('message')">+ Mensagem em destaque</button></div>
+      </div>
+
       <div class="card"><div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">🔗 Botões de contato</h3><button class="btn small" onclick="siteAddLink()">+ Botão</button></div>
-        <div class="muted small" style="margin:6px 0 10px">O primeiro botão fica em destaque. Para WhatsApp, basta o número.</div>
+        <div class="muted small" style="margin:6px 0 10px">Aparecem na seção “Fale comigo” no fim da página. Para WhatsApp, basta o número; Instagram, o @.</div>
+        <label class="homework-check" style="margin-bottom:10px"><input type="checkbox" ${s.contactTop?"checked":""} onchange="siteSet('contactTop',this.checked)"><span>Mostrar também no topo, logo abaixo da bio</span></label>
         ${s.links.map((l,k)=>`<div class="site-item">
           <div class="site-item-row">
             <select onchange="siteListSet('links','${l.id}','type',this.value);renderSite()" style="max-width:170px">${typeOpts(l.type)}</select>
@@ -2227,6 +2256,40 @@ function renderSite(){
     <div class="site-preview"><div class="phone"><iframe id="sitePreview" src="links.html?preview=1" title="Prévia da página"></iframe></div><div class="muted small" style="text-align:center;margin-top:8px">Prévia ao vivo · as mudanças são salvas sozinhas</div></div>
   </div>`;
   const f=document.getElementById("sitePreview"); if(f) f.onload=()=>sitePreview();
+}
+function siteAddSection(kind){
+  const base={id:"sec_"+Date.now(),kind,visible:true};
+  if(kind==="text") Object.assign(base,{title:"Novo texto",sub:"",body:"",align:"left"});
+  if(kind==="links") Object.assign(base,{title:"Links úteis",sub:"",items:[{id:"i"+Date.now(),label:"",url:""}]});
+  if(kind==="message") Object.assign(base,{emoji:"📣",title:"Inscrições abertas!",body:"",tone:"lilas",btnLabel:"",btnUrl:""});
+  const cIdx=DB.site.sections.findIndex(x=>x.kind==="contact");
+  if(cIdx>=0) DB.site.sections.splice(cIdx,0,base); else DB.site.sections.push(base);
+  siteChanged(true); openSiteSection(base.id);
+}
+function secSet(id,field,value){ siteListSet("sections",id,field,value); }
+function secItem(id,iid,field,value){
+  const x=DB.site.sections.find(y=>y.id===id); if(!x) return; x.items=x.items||[];
+  if(field==="add"){ x.items.push({id:"i"+Date.now(),label:"",url:""}); siteChanged(false); openSiteSection(id); return; }
+  if(field==="del"){ x.items=x.items.filter(i=>i.id!==iid); siteChanged(false); openSiteSection(id); return; }
+  const it=x.items.find(i=>i.id===iid); if(it){ it[field]=value; siteChanged(false); }
+}
+function openSiteSection(id){
+  const x=DB.site.sections.find(y=>y.id===id); if(!x) return;
+  if(x.kind==="products"||x.kind==="testimonials"){ closeModal(); const t=x.kind==="products"?"🛍️ Produtos":"🎥 Depoimentos"; alert(`Edite “${t}” no cartão com esse nome, mais abaixo nesta aba.`); return; }
+  const tones=[["lilas","#7a5fa6"],["laranja","#c4661a"],["verde","#2f8a5f"],["amarelo","#d4a91a"],["rosa","#b8326b"],["azul","#2a7fa8"]];
+  let body="";
+  if(x.kind==="contact") body=`<div class="formgrid"><div class="full"><label>Título</label><input value="${esc(x.title||"")}" oninput="secSet('${id}','title',this.value)"></div><div class="full"><label>Subtítulo</label><input value="${esc(x.sub||"")}" oninput="secSet('${id}','sub',this.value)"></div></div><div class="muted small" style="margin-top:10px">Os botões (WhatsApp, e-mail, Instagram...) são editados no cartão “🔗 Botões de contato”.</div>`;
+  if(x.kind==="text") body=`<div class="formgrid"><div class="full"><label>Título</label><input value="${esc(x.title||"")}" oninput="secSet('${id}','title',this.value)"></div><div class="full"><label>Subtítulo (opcional)</label><input value="${esc(x.sub||"")}" oninput="secSet('${id}','sub',this.value)"></div><div class="full"><label>Texto</label><textarea rows="7" oninput="secSet('${id}','body',this.value)" placeholder="Escreva aqui. Quebras de linha são mantidas.">${esc(x.body||"")}</textarea></div><div><label>Alinhamento</label><select onchange="secSet('${id}','align',this.value)"><option value="left" ${x.align!=="center"?"selected":""}>À esquerda</option><option value="center" ${x.align==="center"?"selected":""}>Centralizado</option></select></div></div>`;
+  if(x.kind==="links") body=`<div class="formgrid"><div class="full"><label>Título</label><input value="${esc(x.title||"")}" oninput="secSet('${id}','title',this.value)"></div><div class="full"><label>Subtítulo (opcional)</label><input value="${esc(x.sub||"")}" oninput="secSet('${id}','sub',this.value)"></div></div>
+    <div style="margin-top:12px">${(x.items||[]).map(i=>`<div class="site-item"><div class="site-item-row"><input value="${esc(i.label||"")}" placeholder="Texto do botão" oninput="secItem('${id}','${i.id}','label',this.value)"><button class="btn small danger" onclick="secItem('${id}','${i.id}','del')">✕</button></div><div class="site-item-row"><input value="${esc(i.url||"")}" placeholder="https://..." oninput="secItem('${id}','${i.id}','url',this.value)"></div></div>`).join("")}</div>
+    <button class="btn small" onclick="secItem('${id}',null,'add')">+ Link</button>`;
+  if(x.kind==="message") body=`<div class="formgrid"><div><label>Emoji</label><input value="${esc(x.emoji||"")}" maxlength="4" oninput="secSet('${id}','emoji',this.value)"></div><div><label>Cor</label><div class="swatches">${tones.map(([k,c])=>`<button class="sw ${(x.tone||"lilas")===k?"on":""}" style="background:${c}" title="${k}" onclick="secSet('${id}','tone','${k}');openSiteSection('${id}')"></button>`).join("")}</div></div>
+    <div class="full"><label>Título</label><input value="${esc(x.title||"")}" oninput="secSet('${id}','title',this.value)" placeholder="Ex.: Inscrições abertas para o 30-Day Challenge!"></div>
+    <div class="full"><label>Mensagem</label><textarea rows="4" oninput="secSet('${id}','body',this.value)" placeholder="Um aviso, novidade ou recado para quem visita a página.">${esc(x.body||"")}</textarea></div>
+    <div><label>Botão (opcional)</label><input value="${esc(x.btnLabel||"")}" placeholder="Quero participar" oninput="secSet('${id}','btnLabel',this.value)"></div><div><label>Link do botão</label><input value="${esc(x.btnUrl||"")}" placeholder="https://..." oninput="secSet('${id}','btnUrl',this.value)"></div></div>`;
+  showModal(`<div class="modalhead"><div><h2>${esc(SECTION_KINDS[x.kind])}</h2><div class="muted small">Aparece na página na posição definida em “Seções da página”.</div></div><button class="btn" onclick="closeModal()">Concluir</button></div>${body}
+    <div class="toolbar" style="justify-content:space-between;margin-top:16px">${["text","links","message"].includes(x.kind)?`<button class="btn danger" onclick="closeModal();siteRemove('sections','${id}')">Excluir seção</button>`:"<span></span>"}<button class="btn primary" onclick="closeModal()">Concluir</button></div>`);
+  window.__onModalClose=()=>renderSite();
 }
 function siteNewProduct(){
   const p={id:"p_"+Date.now(),title:"Novo produto",tag:"",color:"lilas",desc:"",details:"",price:"",cta:"Quero participar",url:"",visible:true};
