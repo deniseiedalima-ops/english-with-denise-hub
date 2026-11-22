@@ -2068,8 +2068,17 @@ const SITE_LINK_TYPES=[["whatsapp","💬 WhatsApp"],["instagram","📸 Instagram
 const SITE_COLORS=[["rosa","#e8367f"],["azul","#3ec5ee"],["amarelo","#f2c230"],["lilas","#9b5de5"],["laranja","#f2832a"],["verde","#2fb486"],["vinho","#b5179e"]];
 var SITE_UI={previewReady:false};
 
+const SITE_TESTIMONIALS=[
+  {id:"t1",url:"https://youtu.be/1ioQXdso34E",name:"Raphaella",quote:""},
+  {id:"t2",url:"https://youtu.be/m6lNSGXziEI",name:"Claudia",quote:""},
+  {id:"t3",url:"https://youtu.be/pZCqdZUYM3g",name:"Roberta",quote:""}
+];
 function ensureSite(){
-  if(DB.site) return;
+  if(DB.site){
+    // Preenche os depoimentos se a página já existia com os campos vazios.
+    if(!(DB.site.testimonials||[]).some(t=>t.url)){ DB.site.testimonials=SITE_TESTIMONIALS.map(t=>({...t})); save(); }
+    return;
+  }
   const prod=(title,tag,emoji,color,desc)=>({id:"p_"+title.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,30),title,tag,color,desc,details:"",price:"",cta:"Quero participar",url:"",visible:true});
   DB.site={
     published:true, name:"English with Denise", kicker:"Teacher Denise", accent:"#7a5fa6", buttonColor:"#f2c94c", highlightFirst:true,
@@ -2091,7 +2100,7 @@ function ensureSite(){
       prod("English Studies Hub","Plataforma","📚","verde",""),
       prod("Manual de Como Aprender Inglês por Conta Própria","E-book","📖","laranja","")
     ],
-    testimonials:[{id:"t1",url:"",name:"",quote:""},{id:"t2",url:"",name:"",quote:""},{id:"t3",url:"",name:"",quote:""}]
+    testimonials:SITE_TESTIMONIALS.map(t=>({...t}))
   };
   save(DB,{touch:false});
 }
