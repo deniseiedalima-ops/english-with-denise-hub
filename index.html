@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EWD Studio — Class Dashboard</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#5b4b8a; --accent2:#ede9fe; --ok:#e8f5e9; --warn:#fff7e6; --bad:#fdecec; --blue:#eaf2ff;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:#171923;color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh}
+.brand{font-weight:800;font-size:20px;margin:0 0 4px}.sub{font-size:12px;color:#aeb4c0;margin-bottom:22px}
+nav button{width:100%;text-align:left;background:transparent;border:0;color:#d7dbe3;padding:11px 12px;border-radius:10px;margin:3px 0;cursor:pointer}
+nav button.active,nav button:hover{background:#2a2f3a;color:#fff}
+main{padding:26px;max-width:1500px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px}
+h1{font-size:28px;margin:0} h2{font-size:20px;margin:0 0 14px} h3{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted)} .small{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.span12{grid-column:span 12}.span8{grid-column:span 8}.span6{grid-column:span 6}.span4{grid-column:span 4}.span3{grid-column:span 3}
+.kpi{font-size:30px;font-weight:800;margin-top:4px}
+.list{display:flex;flex-direction:column;gap:9px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.row .main{min-width:0}.row .title{font-weight:700}.row .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;background:#eef2f7}
+.badge.a1{background:#fff2cc}.badge.a2{background:#e6f4ff}.badge.b1{background:#ede9fe}.badge.conv{background:#e8f5e9}
+.btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)} .btn.danger{background:#fff;color:#b91c1c}
+.btn.small{padding:6px 8px;font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+textarea{min-height:82px;resize:vertical}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#4b5563}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.formgrid .full{grid-column:1/-1}
+.statuses{display:flex;gap:8px;flex-wrap:wrap}
+.status{padding:9px 11px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer}
+.status.selected{outline:2px solid var(--accent);background:var(--accent2)}
+.progress{display:flex;gap:8px;flex-wrap:wrap}.progress button{flex:1;min-width:70px}
+.section{display:none}.section.active{display:block}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
+.table th{font-size:12px;color:#6b7280}
+.lesson-detail{background:#fafafa;border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.notice{padding:11px 12px;border-radius:10px;background:var(--warn);font-size:13px}
+.ok{background:var(--ok)} .dangerbox{background:var(--bad)} .blue{background:var(--blue)}
+.searchbar{display:flex;gap:8px;margin-bottom:12px}.searchbar input{flex:1}
+.modalback{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modalback.show{display:flex}.modal{background:#fff;width:min(760px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:18px}
+.modalhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+.hr{height:1px;background:var(--line);margin:14px 0}
+.warm-suggestion{border-left:4px solid var(--accent);padding-left:10px}
+@media(max-width:900px){.app{grid-template-columns:1fr}aside{position:relative;height:auto}nav{display:flex;overflow:auto}nav button{min-width:max-content}main{padding:16px}.span8,.span6,.span4,.span3{grid-column:span 12}.formgrid{grid-template-columns:1fr}}
+.history-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:800px){.history-summary{grid-template-columns:repeat(2,1fr)}}
+
+.planning-day{margin-bottom:18px;overflow:hidden}
+.planning-day-title{padding:16px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
+.planning-day-title h3{margin:0 0 3px}
+.time-cell{white-space:nowrap;width:100px}
+
+.member-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.member-field{background:#f7f8fb;border:1px solid #e4e7ec;border-radius:10px;padding:10px}
+.member-field label{margin-bottom:6px}
+@media(max-width:760px){.member-fields{grid-template-columns:1fr}}
+
+.student-edit-btn{white-space:nowrap}
+
+.homework-line{margin-top:8px}
+.homework-check{display:inline-flex;align-items:center;gap:6px;margin-right:12px;font-size:12px;cursor:pointer}
+.homework-check input{width:16px;height:16px;cursor:pointer}
+.homework-check input:checked + span{font-weight:700}
+.homework-group{display:flex;flex-wrap:wrap;gap:4px 8px}
+
+.today-title-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.today-homework-inline{margin-left:auto;display:inline-flex;align-items:center}
+.homework-check{white-space:nowrap}
+</style>
+<style>
+.member-attendance{display:flex;flex-direction:column;gap:10px}
+.member-attendance-row{border:1px solid var(--border,#ddd);border-radius:14px;padding:12px;background:#fff}
+.member-statuses{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.member-statuses .status{font-size:14px;padding:8px 10px}
+@media(max-width:800px){.member-statuses .status{flex:1 1 140px}}
+
+.curriculum-note{padding:10px 12px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent2);color:var(--ink);font-size:12px;margin:10px 0}
+@media(max-width:850px){.app{grid-template-columns:1fr}aside{position:relative;height:auto;padding:14px}nav{display:flex;overflow-x:auto;gap:5px}nav button{white-space:nowrap;width:auto;flex:0 0 auto}main{padding:16px}}
+</style>
+
+<style id="ewd-aesthetic-refresh">
+:root{
+  --bg:#f7f5f2;--panel:#fffefa;--ink:#343044;--muted:#898494;--line:#ebe6e1;
+  --accent:#8068a8;--accent2:#f0eaf7;--ok:#eaf4ed;--warn:#fbf2df;--bad:#faeaea;--blue:#edf3f8;
+  --lavender:#e9e0f2;--rose:#f5e6e8;--sage:#e8eee6;--cream:#fffefa;
+  --shadow:0 12px 35px rgba(57,43,72,.065);
+}
+body{background:var(--bg);color:var(--ink);font-family:Inter,"Aptos",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+.app{grid-template-columns:252px minmax(0,1fr);gap:0}
+aside{
+  background:linear-gradient(180deg,#eee7f4 0%,#f3edf3 48%,#f2eee8 100%);
+  color:#443b51;padding:28px 18px;box-shadow:inset -1px 0 #e7dfea;
+}
+.brand{font-family:Georgia,serif;font-size:27px;letter-spacing:-.06em;color:#5e4d76;margin:4px 8px 3px}
+.sub{color:#898094;font-size:11px;line-height:1.55;margin:0 8px 28px}
+nav{display:flex;flex-direction:column;gap:6px}
+nav button{
+  display:flex;align-items:center;gap:10px;text-align:left;width:100%;border:1px solid transparent;
+  color:#70677b;padding:12px 13px;border-radius:13px;margin:0;background:transparent;
+  font-size:13px;font-weight:650;transition:all .2s ease
+}
+nav button:hover{background:#ffffffa8;color:#5b4b70;transform:translateX(2px)}
+nav button.active{background:#fffefa;color:#5e4b78;border-color:#e8dfed;box-shadow:0 5px 16px #6a547a12}
+main{padding:34px clamp(20px,3vw,48px) 60px;max-width:1700px;width:100%}
+.topbar{padding:0 0 22px;margin-bottom:24px;border-bottom:1px solid #e9e3df}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;font-size:34px;letter-spacing:-.045em;color:#373044}
+h2{font-family:Georgia,serif;font-weight:500;font-size:23px;letter-spacing:-.025em;color:#41364f;margin-bottom:16px}
+h3{font-size:15px;font-weight:750;color:#453c50}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid #ece6e2;border-radius:19px;padding:21px;box-shadow:var(--shadow);transition:transform .2s ease,box-shadow .2s ease}
+.card:hover{box-shadow:0 15px 38px rgba(57,43,72,.09)}
+.kpi{font-family:Georgia,serif;font-size:35px;font-weight:500;color:#5f4b79;margin-top:5px}
+.badge{border-radius:999px;padding:5px 10px;font-size:10px;letter-spacing:.04em}
+.badge.a1{background:#f8efd9;color:#90723b}.badge.a2{background:#e8f0f3;color:#557483}
+.badge.b1{background:#eee7f5;color:#70588d}.badge.conv{background:#e8eee6;color:#62795f}
+.btn{border:1px solid #e6dfeb;background:#fffefa;color:#655879;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;transition:all .18s ease}
+.btn:hover{border-color:#cbbbdc;background:#f8f4fb;transform:translateY(-1px)}
+.btn.primary{background:#796294;color:#fff;border-color:#796294;box-shadow:0 5px 14px #79629425}
+.btn.primary:hover{background:#66517f;box-shadow:0 8px 18px #79629435}
+.btn.danger{color:#b65e67;background:#fff8f7;border-color:#f0dada}
+.row{background:#fffefa;border:1px solid #eee8e4;border-radius:15px;padding:14px 15px;transition:border-color .18s,transform .18s}
+.row:hover{border-color:#d8cbe3;transform:translateY(-1px)}
+.row .title{font-size:13px;color:#433a4d}
+.row .meta{font-size:11px;color:#96909b}
+input,select,textarea{border:1px solid #e7e0e9;border-radius:11px;background:#fffefa;color:#393346;padding:11px 12px;outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus,select:focus,textarea:focus{border-color:#ad98c4;box-shadow:0 0 0 3px #eee7f5}
+label{color:#70677b;font-size:11px;letter-spacing:.015em}
+textarea{min-height:100px}
+.status{border:1px solid #e8e1eb;border-radius:999px;background:#fffefa;color:#776e80;padding:9px 13px;font-size:11px;font-weight:650}
+.status.selected{outline:0;border-color:#9d85b7;background:#f0eaf7;color:#634d7e;box-shadow:inset 0 0 0 1px #cbbbdc}
+.notice{border-radius:13px;padding:13px 15px;border:1px solid #efe5d1;background:#fbf5e8;color:#736344}
+.notice.blue{background:#eff4f7;border-color:#e1e9ed;color:#5f707a}
+.notice.ok{background:#edf4ed;border-color:#dfeade;color:#5d745d}
+.lesson-detail{background:#f8f5fa;border:1px solid #ebe3f0;border-radius:13px;padding:14px;color:#71667d}
+.tablewrap{border:1px solid #ece6e2;border-radius:16px;background:#fffefa}
+.table{border-collapse:separate;border-spacing:0}
+.table th{background:#f7f3f8;color:#776c83;font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+.table td{color:#50485a;border-bottom:1px solid #f0ebe7}
+.modalback{background:rgba(48,39,57,.38);backdrop-filter:blur(7px);padding:24px}
+.modal{background:#fffefa;border:1px solid #eee7e1;border-radius:23px;padding:26px;box-shadow:0 25px 90px #30243b30}
+.modalhead{padding-bottom:15px;border-bottom:1px solid #eee8e3}
+.modalhead h2{margin:0 0 4px;font-size:25px}
+.hr{background:#eee8e3;margin:18px 0}
+.formgrid{gap:15px}
+.formgrid>div{min-width:0}
+.formgrid .full{grid-column:1/-1}
+.statuses,.progress{gap:7px}
+.progress button{min-width:65px}
+.homework-check{color:#82788c;font-size:11px}
+.homework-check input{accent-color:#8068a8}
+.member-attendance-row{background:#fbf9fc;border-color:#eee7f1;border-radius:13px}
+.member-field{background:#f8f5f8;border-color:#eee6ef}
+.searchbar{align-items:center}
+.searchbar input{border-radius:999px;padding:12px 17px}
+.history-summary{gap:13px}
+.planning-day{border:1px solid #ece6e2;border-radius:19px;background:#fffefa}
+.planning-day-title{background:#faf7fa;border-color:#eee7ef;padding:18px 20px}
+.section{animation:ewdFade .28s ease}
+@keyframes ewdFade{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* Today view: clear schedule cards and quick actions */
+#today .grid>.card.span3{background:linear-gradient(145deg,#fffefa,#f7f2f8);min-height:112px}
+#today .grid>.card.span3:nth-child(2){background:linear-gradient(145deg,#fffefa,#f8f0ee)}
+#today .grid>.card.span3:nth-child(3){background:linear-gradient(145deg,#fffefa,#f0f4ed)}
+#today .grid>.card.span3:nth-child(4){background:linear-gradient(145deg,#fffefa,#f1f4f7)}
+#today .card.span12>.list{gap:10px}
+#today .row{align-items:center;gap:16px}
+#today .row .main{flex:1}
+#today .row .btn{flex:0 0 auto}
+#today .today-title-line{gap:8px}
+#today .today-homework-inline{margin-left:8px}
+#today .homework-check{background:#f7f3f8;padding:6px 9px;border-radius:999px}
+#today .card.span12{margin-top:2px}
+/* Make registration modal feel like a focused workspace */
+#modal .formgrid>div{background:#fcfafb;border:1px solid #f0eaf0;border-radius:13px;padding:12px}
+#modal .formgrid>div.full{background:#fcfafb}
+#modal .formgrid label{display:block;margin-bottom:7px}
+#modal .formgrid input,#modal .formgrid select,#modal .formgrid textarea{background:#fff}
+#modal #rLesson{min-height:150px;border-radius:12px}
+#modal .member-attendance-row{margin-bottom:8px}
+#modal .toolbar{justify-content:flex-end;padding-top:14px;border-top:1px solid #eee8e3}
+#modal .toolbar .btn.primary{padding:12px 22px;font-size:13px}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}
+ aside{position:relative;height:auto;padding:16px 18px}
+ .brand{font-size:24px}
+ .sub{margin-bottom:12px}
+ nav{display:flex;flex-direction:row;overflow-x:auto;gap:5px;padding-bottom:3px}
+ nav button{white-space:nowrap;width:auto;flex:0 0 auto;padding:10px 12px}
+ main{padding:22px 16px 45px}
+}
+@media(max-width:600px){
+ h1{font-size:29px}
+ .topbar{align-items:flex-start;flex-direction:column}
+ .toolbar{width:100%}
+ .toolbar .btn{flex:1}
+ .card{padding:16px;border-radius:16px}
+ #today .row{align-items:flex-start;flex-direction:column}
+ #today .row>.btn{width:100%}
+ #today .today-title-line{align-items:flex-start;flex-direction:column}
+ #today .today-homework-inline{margin-left:0}
+ .modalback{padding:8px}
+ .modal{padding:17px;border-radius:17px;max-height:95vh}
+ .formgrid{grid-template-columns:1fr}
+ .formgrid .full{grid-column:1}
+ .member-statuses .status{flex:1 1 130px}
+}
+@media(prefers-reduced-motion:reduce){.section{animation:none}*{transition:none!important}}
+</style>
+
+
+<style id="ewd-inactive-students">
+.admin-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-section-head h2{margin:0 0 4px}
+.pill-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 10px;border-radius:99px;background:#f0eaf7;color:#6b5684;font-size:12px;font-weight:800}
+.admin-student-list{display:grid;gap:9px}
+.admin-student-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.admin-student-main{min-width:0;flex:1}
+.admin-student-main b{font-size:13px;color:#453c50}
+.admin-student-row .btn{white-space:nowrap}
+@media(max-width:600px){.admin-student-row{align-items:flex-start}.admin-student-row .btn{padding:8px 10px}}
+</style>
+
+<style id="ewd-manual-makeups">
+#today .card .toolbar h2{font-family:Georgia,serif}
+#makeups .tablewrap{overflow-x:auto}
+#makeups table{min-width:760px;width:100%}
+#makeups .toolbar{gap:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand">ewd<span style="color:#a58cbd">.</span> studio</div>
+  <div class="sub">ENGLISH WITH DENISE<br>Class management & student records</div>
+  <nav id="nav">
+    <button data-view="today" class="active">🏠 Hoje</button>
+    <button data-view="students">👥 Alunos</button>
+    <button data-view="lessons">📚 Lições</button>
+    <button data-view="warmups">🔥 Warm-ups</button>
+    <button data-view="planning">🗓️ Planning Class</button>
+    <button data-view="meeting">🎙️ Meeting Notes → Notion</button>
+    <button data-view="ideas">💡 Posts & Ideias</button>
+    <button data-view="assessment">📝 Notas & Avaliações</button>
+    <button data-view="makeups">🔄 Reposições</button>
+    <button data-view="history">📋 Histórico</button>
+    <button data-view="admin">⚙️ Administração</button>
+  </nav>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div><h1 id="pageTitle">Hoje</h1><div id="todayLabel" class="muted small"></div></div>
+    <div class="toolbar">
+      <button class="btn" onclick="exportBackup()">⬇️ Backup</button>
+      <label class="btn" style="margin:0;cursor:pointer">⬆️ Importar<input id="importFile" type="file" accept=".json" style="display:none"></label>
+    </div>
+  </div>
+
+  <section id="today" class="section active"></section>
+  <section id="students" class="section"></section>
+  <section id="lessons" class="section"></section>
+  <section id="warmups" class="section"></section>
+  <section id="planning" class="section"></section>
+  <section id="meeting" class="section"></section>
+  <section id="ideas" class="section"></section>
+  <section id="assessment" class="section"></section>
+  <section id="makeups" class="section"></section>
+  <section id="history" class="section"></section>
+  <section id="admin" class="section"></section>
+</main>
+</div>
+
+<div id="modalBack" class="modalback"><div id="modal" class="modal"></div></div>
+
+<script>
+const INITIAL = {"students":[{"name":"Glenda","level":"A2","day":"Segunda","time":"16:00–17:00","group":"Individual","last":"PLACEMENT TEST","progress":100,"notes":"Última aula: Placement Test."},{"name":"Sabrina","level":"A1","day":"Segunda","time":"17:00–18:00","group":"Individual","last":"PLACEMENT TEST","progress":100,"notes":"Última aula: Placement Test."},{"name":"Julio + Kawan","level":"B1","day":"Segunda","time":"19:00–20:00","group":"Dupla","last":"2B — Describe travel problems","progress":100,"notes":"Thais Botelho saiu e foi mantida como inativa fora da agenda."},{"name":"Alex","level":"A2","day":"Segunda","time":"20:00–21:00","group":"Individual","last":"PERSONALITY TRAITS — ADJECTIVES","progress":100,"notes":""},{"name":"Yara Naya","level":"B1","day":"Terça","time":"09:00–10:00","group":"Individual","last":"Aula personalizada — projeto de pós-doutorado","progress":100,"notes":"Aula personalizada."},{"name":"Raphaella + Maria Isabella","level":"B1","day":"Terça","time":"10:00–11:00","group":"Dupla","last":"THE WAY OF LIVING","progress":100,"notes":"Aula personalizada."},{"name":"Rafael Fontes","level":"A2","day":"Terça","time":"14:00–15:00","group":"Individual","last":"Adverbs of Frequency","progress":100,"notes":""},{"name":"Ana Karolina","level":"A2","day":"Terça","time":"15:00–16:00","group":"Individual","last":"","progress":0,"notes":"Sem última aula registrada."},{"name":"Roberta Letícia","level":"B1","day":"Terça","time":"17:00–18:00","group":"Individual","last":"2A — Talk about past vacations","progress":100,"notes":""},{"name":"Virginia","level":"A1","day":"Quarta","time":"09:00–10:00","group":"Individual","last":"6A — At the Café","progress":100,"notes":""},{"name":"Vitor","level":"A2","day":"Quarta","time":"10:00–11:00","group":"Individual","last":"Talk about jobs (Conversation)","progress":100,"notes":""},{"name":"Isadora","level":"A2","day":"Quarta","time":"14:15–15:15","group":"Individual","last":"","progress":0,"notes":"Sem última aula registrada."},{"name":"Milena Porto","level":"B1","day":"Quarta","time":"15:30–16:30","group":"Individual","last":"Aula personalizada — conversation about life","progress":100,"notes":"Warm-up anterior: Taboo."},{"name":"Fernanda","level":"B1","day":"Quarta","time":"17:00–18:00","group":"Individual","last":"THE WAY OF LIVING","progress":50,"notes":"Continuar a mesma aula."},{"name":"Yara Naya","level":"B1","day":"Quinta","time":"15:00–16:00","group":"Individual","last":"","progress":0,"notes":"Segundo encontro semanal."},{"name":"Naize Santos + Milena Inacio","level":"A1","day":"Quinta","time":"16:00–17:00","group":"Dupla","last":"5C — WH Questions","progress":100,"notes":""},{"name":"Laura Catarine","level":"A1","day":"Quinta","time":"17:00–18:00","group":"Individual","last":"2C — Jenny at the Hotel","progress":100,"notes":""},{"name":"Lorenna + Claudia","level":"B1","day":"Sexta","time":"11:00–12:00","group":"Dupla","last":"","progress":0,"notes":"Sem última aula registrada."},{"name":"Pedro Henrique + Isabella Rissi","level":"A2","day":"Sexta","time":"14:00–15:00","group":"Dupla","last":"12A — I Was So Nervous!","progress":100,"notes":""},{"name":"Gustavo","level":"B1","day":"Sexta","time":"15:00–16:00","group":"Individual","last":"2B — Describe travel problems","progress":100,"notes":""},{"name":"Thais de Fátima + Geovanna Inacio + Emilly Fonseca","level":"A2","day":"Sexta","time":"16:00–17:00","group":"Trio","last":"2A — Talk about jobs","progress":100,"notes":""}],"warmups":["Taboo","2 Pics = 1 Word","Last Word","Jeopardy","Supermarket Game","Visual Memory","Family Feud","Flashwords","2 Truths and 1 Lie","What Am I?","What's the Word?","Texting Language","Wheel of Fortune"],"lessons":[{"level":"CONV","code":"C1","title":"PLACEMENT CLASS","goal":"Saber o nivelamento da aluna e gostos","grammar":"","vocab":"","pages":"","homework":""},{"level":"CONV","code":"C2","title":"NEW FACES, NEW STORIES","goal":"Introduce yourself, ask and answer questions about personal information, and get to know other people.","grammar":"Verb to be + Have got","vocab":"age, country, nationality, student, job, family, pet, hobby","pages":"","homework":"Questões 9, 10, 11 e 12 (Extra Tasks)"},{"level":"CONV","code":"C3","title":"MY DAILY LIFE — EVERYDAY VERBS","goal":"Talk about everyday activities and describe what people do in their daily lives.","grammar":"Present Simple","vocab":"everyday verbs, daily activities, daily life, routine","pages":"","homework":"Atividades extras + Quizlet"},{"level":"CONV","code":"C4","title":"THE PERFECT PLACE TO WORK","goal":"Describe workspaces, talk about desk setups and express preferences.","grammar":"Present Simple","vocab":"desk, chair, computer, keyboard, mouse, monitor, lamp, notebook, tidy, messy, cosy, bright, modern, minimalist, workspace","pages":"","homework":"Revisão do vocabulário no Quizlet"},{"level":"CONV","code":"C5","title":"THE FIRST HOT DAYS","goal":"Falar sobre verão, dias quentes, atividades de lazer e experiências de verão.","grammar":"Present Simple","vocab":"summer, hot days, free time, summer activities, experiences","pages":"","homework":"Atividades extras + Quizlet"},{"level":"CONV","code":"C6","title":"EVERYDAY VERBS 2.0","goal":"Talk about everyday routines and use a wider range of everyday verbs.","grammar":"Present Simple","vocab":"20 additional everyday verbs; busy; routine; daily activities; advice","pages":"","homework":"A Very Strange Town + Quizlet"},{"level":"CONV","code":"C7","title":"IT'S TIME TO STUDY","goal":"Talk about study habits, ways of learning English and study techniques.","grammar":"Present Simple","vocab":"study online, do homework, practise English, make mistakes, learn new words, ask/answer a question, pass a test, Pomodoro, spaced repetition","pages":"","homework":"Atividades extras + Quizlet"},{"level":"CONV","code":"C8","title":"THE WAY OF LIVING","goal":"Rotinas, estilos de vida, vida em uma van e atividades do dia a dia.","grammar":"Present Simple x Present Continuous","vocab":"van, routine, wake up, travel, explore, campsite, laundry, cook, pack, outdoors","pages":"","homework":"Questões 14, 15, 16, 17 e 18"},{"level":"CONV","code":"C9","title":"COULD YOU TRAVEL THE WORLD WITHOUT FLYING?","goal":"Talk about travel preferences, choices and different ways of travelling.","grammar":"","vocab":"accommodation, arrival, departure, check in, hitchhike, delay, direction, sightseeing, currency, destination, suitcase","pages":"","homework":"Questões 15–19 + Quizlet"},{"level":"CONV","code":"C10","title":"NATURAL BEAUTY ROUTINE","goal":"Talk about beauty, makeup and different aspects of a beauty routine.","grammar":"","vocab":"beauty, makeup, face, beauty routine, makeup expressions","pages":"","homework":"Vocabulary task + make-up tutorial dubbing + Quizlet"},{"level":"CONV","code":"C11","title":"STAYING HEALTHY","goal":"Talk about health problems, symptoms and possible solutions/recommendations.","grammar":"Modal Verbs","vocab":"ache, pain, sore, hurt, illness, health problems, symptoms, solutions","pages":"","homework":"Extra Task + Quizlet"},{"level":"A1","code":"1","title":"1A — The Greetings","goal":"Aprender e praticar os pronomes pessoais do inglês","grammar":"Subject and object pronouns","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"2","title":"1C — As Pessoas do Inglês","goal":"Explicar os principais sons e fonemas do inglês americano + palavras chaves","grammar":"Main sounds and phonemes of American English","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"3","title":"2A — American Pronunciation","goal":"Praticar as saudações e começos de conversas","grammar":"Greetings, introductions, formal and informal expressions","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"4","title":"2C — Jenny at the Hotel","goal":"Praticar um diálogo real de check-in em hotel","grammar":"Verb to have, modal can, hotel check-in vocabulary","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"5","title":"3A — The Introductions","goal":"Praticar as apresentações em conversas + saudações","grammar":"Introducing yourself and others, spelling names","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"6","title":"3D — Verb to Be","goal":"Consolidar o uso do verbo to be em contextos variados","grammar":"Verb to be: full review and practice","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"7","title":"4A — Countries and Nationalities","goal":"Aprender sobre os países e nacionalidades + verbos usuais","grammar":"Countries, nationalities, common verbs","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"8","title":"4C — Proximity and Distance","goal":"Aprender a expressar proximidade e distância em inglês","grammar":"Demonstrative pronouns (this/that/these/those)","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"9","title":"5A — Occupations","goal":"Aprender sobre as profissões + características","grammar":"Jobs and personality traits","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"10","title":"5C — WH Questions","goal":"Aprender e praticar as perguntas com WH words","grammar":"What, where, when, who, why, how","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"11","title":"6A — At the Café","goal":"Praticar em situação de cafeteria tudo o que foi aprendido","grammar":"Real-life conversation at a café","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"12","title":"6C — Prepositions of Place","goal":"Aprender as preposições de lugar — parte 1","grammar":"Prepositions of place (in, on, under, next to, etc.)","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"13","title":"7 - AVALIAÇÃO 1 a 6","goal":"","grammar":"Review of 1-6","vocab":"","pages":"","homework":"","link":"https://wayground.com/admin/assessment/6a426a06a748caffcd313d59?source=lesson_share"},{"level":"A1","code":"14","title":"8A — The Places in the City","goal":"Aprender locais da cidade e introduzir o presente contínuo","grammar":"Places in the city, vocabulary","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"15","title":"8C — What's Everyone Doing?","goal":"Praticar o presente contínuo descrevendo ações em andamento","grammar":"Present continuous in real context","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"16","title":"9A — Family","goal":"Falar sobre a família e suas características","grammar":"Family members and personality/appearance description","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"17","title":"9C — This Is My Father","goal":"Aprender a perguntar e falar sobre fotos da família","grammar":"Talking about and asking about photos","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"18","title":"10A — You Are Going To…","goal":"Aprender sobre o futuro com going to","grammar":"Future with going to (introduction)","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"19","title":"10C — What Are You Going to Do This Weekend?","goal":"Praticar o going to perguntando e respondendo sobre planos","grammar":"Future plans in real context","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"20","title":"11A — At the Travel Agency","goal":"Praticar em situação de agência de viagens tudo o que foi aprendido","grammar":"Real-life conversation at a travel agency","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"21","title":"11B — Seasons, Days and Months","goal":"Aprender os dias da semana, meses e estações do ano","grammar":"Seasons of the year, days of the week, months","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"22","title":"12A - I was so nervous!","goal":"Aprender a falar o to be no passado","grammar":"Past Simple of to be","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"23","title":"12C - Yesterday was a very special day!","goal":"Praticar bem muito o to be no passado","grammar":"Practice of to be in the past","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"24","title":"13A - She was a nice person!","goal":"Praticar os irregulares e regulares no passado","grammar":"Practice of simple past affirmative","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"25","title":"13C - What did it happen?","goal":"Praticar as perguntas e as negativas no passado","grammar":"Practice of simple past interrogatives and questions","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"26","title":"14A - Final Review A1","goal":"","grammar":"Practice oral speaking + todo resto","vocab":"","pages":"","homework":"","link":""},{"level":"A1","code":"27","title":"15 - AVALIAÇÃO 1 a 12","goal":"","grammar":"Review of 7-12","vocab":"","pages":"","homework":"","link":""},{"level":"A2","code":"16","title":"WELCOME TO A2","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"17","title":"HOME SWEET HOME","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"18","title":"DO OR DOES?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"19","title":"HOUSEHOLD CHORES","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"20","title":"ROUTINES","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"21","title":"A SCHEDULED ROUTINE","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"22","title":"MY ROUTINE PROJECT","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"23","title":"I WOULD…","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"24","title":"WHAT IS IT IN YOUR FRIDGE?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"25","title":"I CAN OR I COULD?!","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"26","title":"SHOW DE PERGUNTAS 1","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"27","title":"PROGRESS CHECK A2","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"28","title":"TALKING ABOUT OUTFITS","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"29","title":"WHAT'S IN MY BAG?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"30","title":"IN MY CHILDHOOD...","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"31","title":"I DIDN'T PROPOSE!","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"32","title":"WHAT DID YOU DO?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"33","title":"THE LOST BACKPACK","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"34","title":"MY MONTH RECAP","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"35","title":"MY MIXED LIFE","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"36","title":"SHOW DE PERGUNTAS 2","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"A2","code":"37","title":"FINAL TEST 2","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"30","title":"WELCOME TO B1","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"31","title":"THE ELEVATOR INCIDENT","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"32","title":"BEST THING I NEVER HAD","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"33","title":"MY MILKSHAKE IS BETTER THAN YOURS!","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"34","title":"THIS OR THAT","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"35","title":"WHAT ARE YOU GOOD AT?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"36","title":"WHAT DO YOU WORRY ABOUT?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"37","title":"BEFORE DOING, AFTER DOING","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"38","title":"SHOW DE PERGUNTAS 3","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"39","title":"WHAT WILL YOU DO TONIGHT?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"40","title":"FIRST CONDITIONAL","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"41","title":"MODAL VERBS","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"42","title":"SECOND CONDITIONAL","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"43","title":"MY OPINIONS","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"44","title":"SHOW DE PERGUNTAS 4","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"46.1","title":"PHRASAL VERBS 1","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"45","title":"PHRASAL VERBS 2","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"46.2","title":"I'VE WATCHED MANY THINGS","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"47","title":"HAVE YOU EVER...?","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"48","title":"MY LIFE RECAP","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"49","title":"FINAL REVIEW","goal":"","grammar":"","vocab":"","pages":"","homework":""},{"level":"B1","code":"50","title":"MOCK TEST 1","goal":"","grammar":"","vocab":"","pages":"","homework":""}],"inactiveStudents":[{"name":"Thais Botelho","level":"B1","reason":"Saiu","active":false}],"records":[{"id":1788561225894,"date":"2026-09-04","student":"Lorenna + Claudia","schedule":"Lorenna + Claudia|Sexta|11:00–12:00","status":"🔄 Rep. Pendente","warmup":"","lesson":"Não tivemos aulas. Motivo: eu estava no dentista","progress":100,"stoppedAt":"","homeworkDone":"✅ Sim","note":""},{"id":1788561270909,"date":"2026-09-04","student":"Pedro Henrique + Isabella Rissi","schedule":"Pedro Henrique + Isabella Rissi|Sexta|14:00–15:00","status":"✔️ Rep. Feita","warmup":"","lesson":"Não tivemos aulas. Motivo: Pedro e Isabella estavam ocupados. Foi enviado um listening.","progress":100,"stoppedAt":"","homeworkDone":"✅ Sim","note":""},{"id":1788561408195,"date":"2026-09-04","student":"Gustavo","schedule":"Gustavo|Sexta|15:00–16:00","status":"✅ Presente","warmup":"","lesson":"2B — Describe travel problems","progress":50,"stoppedAt":"","homeworkDone":"✅ Sim","note":"O homework enviado foi somente um PDF contendo a história do áudio 2.02 da unidade (Flight attendant had a problem in plane)"},{"id":1788561489677,"date":"2026-09-04","student":"Thais de Fátima + Geovanna Inacio + Emilly Fonseca","schedule":"Thais de Fátima + Geovanna Inacio + Emilly Fonseca|Sexta|16:00–17:00","status":"✅ Presente","warmup":"","lesson":"2B — Talk about study habits","progress":75,"stoppedAt":"","homeworkDone":"✅ Sim","note":"Faltou a página 2 da subunidade mas já passei o homework. Geovanna faltou."}],"warmupUsage":[],"customLessons":[]};
+const DAYMAP = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const STORAGE_KEY = "ewd_diario_v1";
+
+function deepClone(x){return JSON.parse(JSON.stringify(x))}
+function groupMembers(s){
+  if(Array.isArray(s.members) && s.members.length) return s.members;
+  return String(s.name||"").split("+").map(x=>x.trim()).filter(Boolean);
+}
+function ensureGroupData(data){
+  data.students = Array.isArray(data.students) ? data.students : [];
+  data.students.forEach(s=>{
+    const members = groupMembers(s);
+    s.members = members.length ? members : [s.name];
+  });
+  data.records = Array.isArray(data.records) ? data.records : [];
+  data.records.forEach(r=>{
+    if(!Array.isArray(r.attendance)){
+      const members = String(r.student||"").split("+").map(x=>x.trim()).filter(Boolean);
+      const names = members.length ? members : [r.student];
+      r.attendance = names.map(name=>({name,status:r.status}));
+      // Preserve the explicit existing note that Geovanna missed this class.
+      if((r.note||"").toLowerCase().includes("geovanna") && (r.note||"").toLowerCase().includes("faltou")){
+        const g=r.attendance.find(a=>a.name.toLowerCase().includes("geovanna"));
+        if(g) g.status="❌ Falta";
+      }
+    }
+  });
+  data.customLessons = Array.isArray(data.customLessons) ? data.customLessons : [];
+  data.warmupUsage = Array.isArray(data.warmupUsage) ? data.warmupUsage : [];
+  return data;
+}
+const CURRICULUM_VERSION = "2026-11-02-v1";
+function applyCurriculum(data){
+  if(data.curriculumVersion !== CURRICULUM_VERSION){
+    const fresh = INITIAL.lessons.filter(l=>["A1","A2","B1"].includes(l.level));
+    data.lessons = [...(data.lessons||[]).filter(l=>!["A1","A2","B1"].includes(l.level)), ...fresh];
+    data.curriculumVersion = CURRICULUM_VERSION;
+  }
+  // Atualização pontual do nível da dupla; a versão impede sobrescrever futuras edições manuais.
+  if(data.studentLevelVersion !== "2026-11-06-pedro-isabella-a2"){
+    const dupla = (data.students||[]).find(s=>s.name === "Pedro Henrique + Isabella Rissi" && s.day === "Sexta" && s.time === "14:00–15:00");
+    if(dupla) dupla.level = "A2";
+    data.studentLevelVersion = "2026-11-06-pedro-isabella-a2";
+  }
+  return data;
+}
+function load(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved){
+    try{
+      const data = applyCurriculum(ensureGroupData(JSON.parse(saved)));
+      save(data);
+      return data;
+    }catch(e){}
+  }
+  const data = applyCurriculum(ensureGroupData(deepClone(INITIAL)));
+  save(data); return data;
+}
+let DB = load();
+if(!DB.weeklyPlanning) DB.weeklyPlanning = {};
+if(!DB.meetingNotes) DB.meetingNotes = [];
+if(!DB.ideas) DB.ideas = [];
+function save(data=DB){ensureGroupData(data);localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function badge(level){return `<span class="badge ${level.toLowerCase()}">${esc(level)}</span>`}
+function allLessons(){return [...DB.lessons,...(DB.customLessons||[])]}
+function studentKey(s){return `${s.name}|${s.day}|${s.time}`}
+function canonicalName(name){return name}
+function studentHistory(name){
+  return (DB.records||[]).filter(r=>{
+    if(r.student===name) return true;
+    return Array.isArray(r.attendance) && r.attendance.some(a=>a.name===name);
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+}
+function individualHistory(name){
+  return (DB.records||[]).filter(r=>{
+    if(r.student===name && !Array.isArray(r.attendance)) return true;
+    return Array.isArray(r.attendance) && r.attendance.some(a=>a.name===name);
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+}
+function memberStatus(record,name){
+  const a=Array.isArray(record.attendance)?record.attendance.find(x=>x.name===name):null;
+  return a?.status || record.status || "";
+}
+function warmHistory(name){return (DB.warmupUsage||[]).filter(r=>r.student===name).sort((a,b)=>b.date.localeCompare(a.date))}
+function currentDay(){return DAYMAP[new Date().getDay()]}
+function dateBR(iso){if(!iso)return""; const [y,m,d]=iso.slice(0,10).split("-"); return `${d}/${m}/${y}`}
+function todayISO(){return new Date().toISOString().slice(0,10)}
+
+function go(view){
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
+  document.getElementById(view).classList.add("active");
+  document.querySelector(`#nav button[data-view="${view}"]`).classList.add("active");
+  const titles={today:"Hoje",students:"Alunos",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  pageTitle.textContent=titles[view];
+  renderAll();
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.view));
+todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
+
+function renderAll(){
+  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+}
+
+function homeworkKey(name){
+  return `${todayISO()}|${name}`;
+}
+function isHomeworkSent(name){
+  return !!(DB.homeworkSent && DB.homeworkSent[homeworkKey(name)]);
+}
+function toggleHomeworkSent(name, checked){
+  if(!DB.homeworkSent) DB.homeworkSent={};
+  const key=homeworkKey(name);
+  if(checked) DB.homeworkSent[key]=true;
+  else delete DB.homeworkSent[key];
+  save();
+  renderToday();
+}
+function homeworkCheck(name){
+  const checked=isHomeworkSent(name);
+  return `<label class="homework-check" title="Marque somente depois de enviar o homework no aplicativo">
+    <input type="checkbox" ${checked?"checked":""} onchange='toggleHomeworkSent(${JSON.stringify(name)},this.checked)'>
+    <span>Homework</span>
+  </label>`;
+}
+
+function renderToday(){
+  const day=currentDay();
+  const sched=DB.students.filter(s=>s.day===day);
+  // Continuidade mostra somente alunos do dia selecionado que ainda não concluíram a última aula.
+  const partials=DB.students.filter(s=>{
+    if(s.day!==day) return false;
+    const h=studentHistory(s.name)[0];
+    const progress=h ? Number(h.progress) : Number(s.progress||0);
+    return progress>0 && progress<100;
+  });
+  const pending=(DB.records||[]).filter(r=>r.status==="🔄 Rep. Pendente");
+  // Recupera o Planning Class preenchido para cada aluno/turma no dia de hoje.
+  const planningWeek=getMondayISO();
+  const todaysPlannings=sched.map(s=>{
+    const p=DB.weeklyPlanning?.[planningKey(planningWeek,s)]||{};
+    return {...s, plannedLesson:(p.lesson||"").trim(), plannedNotes:(p.notes||"").trim()};
+  }).filter(s=>s.plannedLesson||s.plannedNotes);
+  const rows=sched.map(s=>{
+    const hist=studentHistory(s.name);
+    const last=hist[0];
+    const shown = last ? `${last.lesson||"Aula sem título"} · ${last.progress||0}%` : (s.last ? `${s.last} · ${s.progress||0}%` : "Sem registro");
+    const members=groupMembers(s);
+    const hw = members.length>1
+      ? `<div class="homework-group">${members.map(n=>`${homeworkCheck(n)}`).join("")}</div>`
+      : homeworkCheck(members[0]||s.name);
+    return `<div class="row">
+      <div class="main">
+        <div class="title today-title-line">
+          <span>${esc(s.time)} · ${esc(s.name)} ${badge(s.level)}</span>
+          <span class="today-homework-inline">${hw}</span>
+        </div>
+        <div class="meta">Último: <b>${esc(shown)}</b></div>
+      </div>
+      <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar aula</button>
+    </div>`
+  }).join("") || `<div class="muted">Nenhuma aula cadastrada para ${day}.</div>`;
+
+  today.innerHTML=`
+  <div class="grid">
+    <div class="card span3"><div class="muted small">Aulas hoje</div><div class="kpi">${sched.length}</div></div>
+    <div class="card span3"><div class="muted small">Reposições pendentes</div><div class="kpi">${pending.length}</div></div>
+    <div class="card span3"><div class="muted small">Aulas parciais</div><div class="kpi">${partials.length}</div></div>
+    <div class="card span3"><div class="muted small">Registros totais</div><div class="kpi">${(DB.records||[]).length}</div></div>
+    <div class="card span12"><h2>Agenda de ${day}</h2>
+      <div class="notice blue small" style="margin-bottom:12px">☑️ Marque <b>Homework</b> somente depois que você enviar a tarefa no aplicativo. O check fica salvo no diário para a data de hoje.</div>
+      <div class="list">${rows}</div>
+    </div>
+    <div class="card span12">
+      <div class="toolbar" style="justify-content:space-between;align-items:center">
+        <div><h2 style="margin:0">Planning Lessons · ${day}</h2>
+        <div class="muted small">Aulas planejadas na aba Planning Class para os alunos de hoje.</div></div>
+        <button class="btn small" onclick="go('planning')">Editar Planning Class</button>
+      </div>
+      ${todaysPlannings.length?todaysPlannings.map(s=>`
+        <div class="row" style="margin-top:9px;align-items:flex-start">
+          <div class="main">
+            <div class="title"><b>${esc(s.time)} · ${esc(s.name)}</b> ${badge(s.level)}</div>
+            ${s.plannedLesson?`<div style="margin-top:5px"><b>Aula planejada:</b> ${esc(s.plannedLesson)}</div>`:""}
+            ${s.plannedNotes?`<div class="meta" style="margin-top:4px"><b>Observações:</b> ${esc(s.plannedNotes)}</div>`:""}
+          </div>
+        </div>`).join(""):`<div class="muted" style="margin-top:12px">Nenhuma Planning Lesson preenchida para os alunos de hoje. Adicione as aulas na aba Planning Class para que apareçam aqui.</div>`}
+    </div>
+    <div class="card span12"><h2>Continuidade · ${day}</h2>
+      <div class="muted small" style="margin:-8px 0 12px">Alunos deste dia que precisam continuar uma aula iniciada anteriormente.</div>
+      ${partials.length?partials.map(s=>{
+        const h=studentHistory(s.name)[0];
+        const lesson=h?.lesson || s.last || "Aula em andamento";
+        const progress=Number(h?.progress ?? s.progress ?? 0);
+        return `<div class="notice" style="margin-bottom:8px"><b>${esc(s.name)}</b><br>${esc(lesson)} · ${progress}% concluído</div>`;
+      }).join(""):`<div class="muted">Nenhuma aula parcial para ${day}.</div>`}
+    </div>
+    <div class="card span12"><div class="toolbar" style="justify-content:space-between"><div><h2 style="margin:0">Reposições de ${day}</h2><div class="muted small">Reposições agendadas manualmente para hoje.</div></div><button class="btn primary" onclick="openAddMakeup()">+ Adicionar reposição</button></div>
+      ${(DB.records||[]).filter(r=>r.manualMakeup && (r.makeupDate||r.date)===todayISO()).map(r=>`<div class="row" style="margin-top:9px"><div class="main"><div class="title"><b>${esc(r.student)}</b> · ${esc(r.lesson||"Aula não informada")}</div><div class="meta">${esc(r.note||"Reposição agendada")} · ${esc(r.status)}</div></div>${r.status==="🔄 Rep. Pendente"?`<button class="btn small" onclick="completeMakeup(${r.id})">Marcar feita</button>`:""}</div>`).join("") || `<div class="muted" style="margin-top:12px">Nenhuma reposição agendada para hoje.</div>`}
+    </div>
+  </div>`;
+}
+
+function renderStudents(){
+  students.innerHTML=`
+    <div class="searchbar"><input id="studentSearch" placeholder="Buscar aluno..." oninput="filterStudents()"><button class="btn primary" onclick="openAddStudent()">+ Novo aluno</button><span class="muted small" style="margin-left:8px">Use ✏️ Editar cadastro em cada cadastro para corrigir a agenda.</span></div>
+    <div id="studentList" class="grid">
+      ${DB.students.map((s,i)=>studentCard(s,i)).join("")}
+    </div>`;
+}
+function studentCard(s,i){
+  const hist=studentHistory(s.name), last=hist[0];
+  const members=groupMembers(s);
+  const memberButtons = members.length>1 ? `
+    <div class="small muted" style="margin-top:10px"><b>Histórico individual:</b></div>
+    <div class="toolbar" style="margin-top:6px;flex-wrap:wrap">
+      ${members.map(name=>`<button class="btn small" onclick='openIndividualHistory(${JSON.stringify(name)})'>${esc(name)}</button>`).join("")}
+    </div>` : "";
+  return `<div class="card span4 student-card" data-name="${esc(s.name.toLowerCase()+" "+members.join(" ").toLowerCase())}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+      <h3>${esc(s.name)}</h3>${badge(s.level)}
+    </div>
+    <div class="muted small">${esc(s.day)} · ${esc(s.time)} · ${esc(s.group)}</div>
+    ${members.length>1?`<div class="notice blue small" style="margin-top:10px">Esta turma tem ${members.length} alunos. A presença pode ser registrada individualmente.</div>`:""}
+    <div class="hr"></div>
+    <div class="small"><b>Última aula:</b> ${esc(last?.lesson || s.last || "Sem registro")}</div>
+    <div class="small" style="margin-top:5px"><b>Progresso:</b> ${last?.progress ?? s.progress ?? 0}%</div>
+    ${memberButtons}
+    <div class="toolbar" style="margin-top:12px;flex-wrap:wrap">
+      <button class="btn small" onclick='openStudent(${i})'>Ver histórico da turma</button>
+      <button class="btn small" onclick='openEditStudent(${i})'>✏️ Editar cadastro</button>
+      <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar</button>
+    </div>
+  </div>`;
+}
+function filterStudents(){
+  const q=studentSearch.value.toLowerCase();
+  document.querySelectorAll(".student-card").forEach(el=>el.style.display=el.dataset.name.includes(q)?"block":"none");
+}
+
+function renderLessons(){
+  const levels=["A1","A2","B1","B2","CONV"];
+  lessons.innerHTML=`
+  <div class="curriculum-note">A1, A2 e B1 foram atualizados com os novos cronogramas enviados. O cronograma B2 ainda não foi recebido; lições personalizadas e níveis de conversação permanecem preservados.</div>
+  <div class="toolbar" style="margin-bottom:12px">
+    <input id="lessonSearch" placeholder="Buscar por código, título, grammar ou vocabulary..." oninput="filterLessons()" style="max-width:560px">
+    <select id="lessonLevel" onchange="filterLessons()" style="max-width:180px"><option value="">Todos os níveis</option>${levels.map(l=>`<option>${l}</option>`).join("")}</select>
+    <button class="btn primary" onclick="openAddLesson()">+ Nova lição</button>
+  </div>
+  <div id="lessonTable" class="card tablewrap"></div>`;
+  filterLessons();
+}
+function filterLessons(){
+  const q=(document.getElementById("lessonSearch")?.value||"").toLowerCase();
+  const level=document.getElementById("lessonLevel")?.value||"";
+  const rows=allLessons().filter(l=>(!level||l.level===level) && JSON.stringify(l).toLowerCase().includes(q));
+  lessonTable.innerHTML=`<table class="table"><thead><tr><th>Nível</th><th>Código</th><th>Lição</th><th>Grammar</th><th>Homework</th><th></th></tr></thead><tbody>
+  ${rows.map((l,i)=>`<tr><td>${badge(l.level)}</td><td>${esc(l.code)}</td><td><b>${esc(l.title)}</b><br><span class="muted">${esc(l.goal||"")}</span></td><td>${esc(l.grammar||"")}</td><td>${esc(l.homework||"")}</td><td><button class="btn small" onclick='showLesson(${JSON.stringify(l.code)},${JSON.stringify(l.level)})'>Ver</button></td></tr>`).join("")}
+  </tbody></table>`;
+}
+function showLesson(code,level){
+  const l=allLessons().find(x=>x.code===code&&x.level===level); if(!l)return;
+  showModal(`<div class="modalhead"><div><h2>${esc(l.code)} — ${esc(l.title)}</h2>${badge(l.level)}</div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="lesson-detail"><p><b>Target Goal:</b> ${esc(l.goal||"—")}</p><p><b>Grammar:</b> ${esc(l.grammar||"—")}</p><p><b>Vocabulary:</b> ${esc(l.vocab||"—")}</p><p><b>Páginas:</b> ${esc(l.pages||"—")}</p><p><b>Homework:</b> ${esc(l.homework||"—")}</p>${l.link?`<p><b>Material:</b> <a href="${esc(l.link)}" target="_blank" rel="noopener">Abrir material</a></p>`:""}</div>`);
+}
+
+function renderWarmups(){
+  const usage=DB.warmupUsage||[];
+  warmups.innerHTML=`
+    <div class="toolbar" style="margin-bottom:12px"><button class="btn primary" onclick="openAddWarmup()">+ Novo warm-up</button></div>
+    <div class="grid">
+      <div class="card span8"><h2>Biblioteca</h2><div class="list">
+        ${DB.warmups.map(w=>{const n=usage.filter(u=>u.warmup===w).length;return `<div class="row"><div><b>${esc(w)}</b><div class="meta">Usado ${n} vez(es)</div></div></div>`}).join("")}
+      </div></div>
+      <div class="card span4"><h2>Regra de rotação</h2><div class="notice blue">Ao registrar uma aula, o sistema prioriza warm-ups nunca usados com aquele aluno e, depois, os usados há mais tempo.</div>
+      <div class="hr"></div><h3>Uso recente</h3>
+      ${usage.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(u=>`<div class="small" style="margin:6px 0">${dateBR(u.date)} · <b>${esc(u.warmup)}</b> · ${esc(u.student)}</div>`).join("")||'<div class="muted small">Ainda não há uso registrado.</div>'}</div>
+    </div>`;
+}
+
+
+function getMondayISO(d=new Date()){
+  const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=x.getDay();
+  x.setDate(x.getDate()+(day===0?-6:1-day));
+  return x.toISOString().slice(0,10);
+}
+function addDaysISO(iso,days){
+  const d=new Date(iso+"T12:00:00");
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+function planningKey(week,s){
+  return `${week}|${s.name}|${s.day}|${s.time}`;
+}
+function savePlanningValue(key,field,value){
+  if(!DB.weeklyPlanning) DB.weeklyPlanning={};
+  if(!DB.weeklyPlanning[key]) DB.weeklyPlanning[key]={lesson:"",notes:""};
+  DB.weeklyPlanning[key][field]=value;
+  save();
+}
+function carryPlanningForward(){
+  const week=document.getElementById("planningWeek")?.value || getMondayISO();
+  const prev=addDaysISO(week,-7);
+  DB.students.forEach(s=>{
+    const oldKey=planningKey(prev,s), newKey=planningKey(week,s);
+    if(DB.weeklyPlanning?.[oldKey] && !DB.weeklyPlanning?.[newKey]){
+      DB.weeklyPlanning[newKey]=JSON.parse(JSON.stringify(DB.weeklyPlanning[oldKey]));
+    }
+  });
+  save(); renderPlanning();
+}
+function clearPlanningWeek(){
+  const week=document.getElementById("planningWeek")?.value || getMondayISO();
+  if(!confirm("Limpar todas as sugestões desta semana?")) return;
+  Object.keys(DB.weeklyPlanning||{}).forEach(k=>{if(k.startsWith(week+"|")) delete DB.weeklyPlanning[k]});
+  save(); renderPlanning();
+}
+function renderPlanning(){
+  if(typeof planning==="undefined") return;
+  const week=document.getElementById("planningWeek")?.value || getMondayISO();
+  const order=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+  const list=[...DB.students].sort((a,b)=>{
+    const da=order.indexOf(a.day), db=order.indexOf(b.day);
+    return da!==db ? da-db : (a.time||"").localeCompare(b.time||"");
+  });
+
+  const daySections=order.map(day=>{
+    const dayStudents=list.filter(s=>s.day===day);
+    if(!dayStudents.length) return "";
+
+    const rows=dayStudents.map(s=>{
+      const key=planningKey(week,s);
+      const p=DB.weeklyPlanning?.[key]||{lesson:"",notes:""};
+      const hist=studentHistory(s.name), last=hist[0];
+      const lastLesson=last?.lesson || s.last || "Sem registro";
+      const lastProgress=last?.progress ?? s.progress ?? 0;
+
+      return `<tr>
+        <td class="time-cell"><b>${esc(s.time)}</b></td>
+        <td><b>${esc(s.name)}</b><br>${badge(s.level)} <span class="muted small">${esc(s.group||"")}</span></td>
+        <td>${esc(lastLesson)}${lastProgress?` <span class="muted">· ${lastProgress}%</span>`:""}</td>
+        <td style="min-width:320px"><input value="${esc(p.lesson||"")}" placeholder="Ex.: 3A — Talk about routines / aula personalizada" oninput='savePlanningValue(${JSON.stringify(key)},"lesson",this.value)'></td>
+        <td style="min-width:240px"><input value="${esc(p.notes||"")}" placeholder="Warm-up, material, observação..." oninput='savePlanningValue(${JSON.stringify(key)},"notes",this.value)'></td>
+      </tr>`;
+    }).join("");
+
+    return `
+      <div class="planning-day card">
+        <div class="planning-day-title">
+          <div>
+            <h3>📅 ${esc(day)}</h3>
+            <span class="muted small">${dayStudents.length} aluno(s)/turma(s)</span>
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Horário</th>
+                <th>Aluno(s)</th>
+                <th>Última aula</th>
+                <th>Planning Class — aula pensada</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join("");
+
+  planning.innerHTML=`
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <h2>Sugestão de Aulas da Semana</h2>
+          <div class="muted">Seu Planning Class semanal, separado por dia. As anotações são salvas automaticamente neste computador.</div>
+        </div>
+        <div class="toolbar">
+          <div><label>Semana iniciando em</label><input id="planningWeek" type="date" value="${week}" onchange="renderPlanning()" style="min-width:170px"></div>
+          <button class="btn" onclick="carryPlanningForward()">↪️ Copiar semana anterior</button>
+          <button class="btn danger" onclick="clearPlanningWeek()">Limpar semana</button>
+        </div>
+      </div>
+    </div>
+    ${daySections}`;
+}
+
+
+let assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:new Date().toISOString().slice(0,10),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};
+
+function assessmentDateBR(v){if(!v)return"";return new Date(v+"T12:00:00").toLocaleDateString("pt-BR")}
+function calcAssessmentTotal(){let x=[["aScore","aMax"],["bScore","bMax"],["cScore","cMax"]].map(([s,m])=>({s:parseFloat(assessmentDraft[s]),m:parseFloat(assessmentDraft[m])})).filter(x=>!isNaN(x.s)&&!isNaN(x.m)&&x.m>0);return{x:x,total:x.reduce((a,y)=>a+y.s,0),max:x.reduce((a,y)=>a+y.m,0)}}
+function setAssessmentField(f,v){assessmentDraft[f]=v;let t=calcAssessmentTotal(),e=document.getElementById("assessmentTotalPreview");if(e)e.textContent=t.max?`${t.total}/${t.max} pontos`:""}
+function clearAssessment(){if(!confirm("Limpar todos os campos desta avaliação?"))return;assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:new Date().toISOString().slice(0,10),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};renderAssessment()}
+function assessmentSection(title,s,max,fb){return`<h2>${title}</h2>${s!==""?`<p><b>● Pontuação:</b> ${esc(s)}/${esc(max)} pts</p>`:""}${fb?`<p>${esc(fb).replace(/\n/g,"<br>")}</p>`:""}`}
+function generateAssessmentHTML(){
+ const d=assessmentDraft,t=calcAssessmentTotal(),attention=d.attention?d.attention.split("\n").filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join(""):"",questions=d.practiceQuestions?d.practiceQuestions.split("\n").filter(Boolean).map((x,i)=>`<p><b>${i+1}</b> ${esc(x)}</p>`).join(""):"";
+ return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(d.assessmentTitle)} — ${esc(d.student)}</title><style>@page{size:A4;margin:18mm 17mm}body{font-family:Arial,sans-serif;color:#283548;line-height:1.45;font-size:11.5pt}.doc{max-width:780px;margin:auto}.brand{text-align:center;color:#8e76c6;font-weight:800;letter-spacing:.8px;margin-bottom:15px}h1{text-align:center;color:#273449;font-size:22pt;margin:0}.sub{text-align:center;color:#697386;margin-bottom:22px}h2{font-size:14pt;color:#8e76c6;border-bottom:1px solid #bcaee0;padding:7px 0 5px;margin:22px 0 9px}.result{background:#f2edfb;border-left:5px solid #8e76c6;padding:13px 16px;margin:18px 0}.attention{background:#fff9f0;border-left:5px solid #e2872f;padding:12px 16px;margin:16px 0}.practice{background:#f5f0fb;border:1px solid #cfc2e9;padding:14px 16px}.footer{text-align:center;color:#8e76c6;font-weight:700;margin-top:28px}</style>
+<style id="ewd-aesthetic-refresh">
+:root{
+  --bg:#f7f5f2;--panel:#fffefa;--ink:#343044;--muted:#898494;--line:#ebe6e1;
+  --accent:#8068a8;--accent2:#f0eaf7;--ok:#eaf4ed;--warn:#fbf2df;--bad:#faeaea;--blue:#edf3f8;
+  --lavender:#e9e0f2;--rose:#f5e6e8;--sage:#e8eee6;--cream:#fffefa;
+  --shadow:0 12px 35px rgba(57,43,72,.065);
+}
+body{background:var(--bg);color:var(--ink);font-family:Inter,"Aptos",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+.app{grid-template-columns:252px minmax(0,1fr);gap:0}
+aside{
+  background:linear-gradient(180deg,#eee7f4 0%,#f3edf3 48%,#f2eee8 100%);
+  color:#443b51;padding:28px 18px;box-shadow:inset -1px 0 #e7dfea;
+}
+.brand{font-family:Georgia,serif;font-size:27px;letter-spacing:-.06em;color:#5e4d76;margin:4px 8px 3px}
+.sub{color:#898094;font-size:11px;line-height:1.55;margin:0 8px 28px}
+nav{display:flex;flex-direction:column;gap:6px}
+nav button{
+  display:flex;align-items:center;gap:10px;text-align:left;width:100%;border:1px solid transparent;
+  color:#70677b;padding:12px 13px;border-radius:13px;margin:0;background:transparent;
+  font-size:13px;font-weight:650;transition:all .2s ease
+}
+nav button:hover{background:#ffffffa8;color:#5b4b70;transform:translateX(2px)}
+nav button.active{background:#fffefa;color:#5e4b78;border-color:#e8dfed;box-shadow:0 5px 16px #6a547a12}
+main{padding:34px clamp(20px,3vw,48px) 60px;max-width:1700px;width:100%}
+.topbar{padding:0 0 22px;margin-bottom:24px;border-bottom:1px solid #e9e3df}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;font-size:34px;letter-spacing:-.045em;color:#373044}
+h2{font-family:Georgia,serif;font-weight:500;font-size:23px;letter-spacing:-.025em;color:#41364f;margin-bottom:16px}
+h3{font-size:15px;font-weight:750;color:#453c50}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid #ece6e2;border-radius:19px;padding:21px;box-shadow:var(--shadow);transition:transform .2s ease,box-shadow .2s ease}
+.card:hover{box-shadow:0 15px 38px rgba(57,43,72,.09)}
+.kpi{font-family:Georgia,serif;font-size:35px;font-weight:500;color:#5f4b79;margin-top:5px}
+.badge{border-radius:999px;padding:5px 10px;font-size:10px;letter-spacing:.04em}
+.badge.a1{background:#f8efd9;color:#90723b}.badge.a2{background:#e8f0f3;color:#557483}
+.badge.b1{background:#eee7f5;color:#70588d}.badge.conv{background:#e8eee6;color:#62795f}
+.btn{border:1px solid #e6dfeb;background:#fffefa;color:#655879;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;transition:all .18s ease}
+.btn:hover{border-color:#cbbbdc;background:#f8f4fb;transform:translateY(-1px)}
+.btn.primary{background:#796294;color:#fff;border-color:#796294;box-shadow:0 5px 14px #79629425}
+.btn.primary:hover{background:#66517f;box-shadow:0 8px 18px #79629435}
+.btn.danger{color:#b65e67;background:#fff8f7;border-color:#f0dada}
+.row{background:#fffefa;border:1px solid #eee8e4;border-radius:15px;padding:14px 15px;transition:border-color .18s,transform .18s}
+.row:hover{border-color:#d8cbe3;transform:translateY(-1px)}
+.row .title{font-size:13px;color:#433a4d}
+.row .meta{font-size:11px;color:#96909b}
+input,select,textarea{border:1px solid #e7e0e9;border-radius:11px;background:#fffefa;color:#393346;padding:11px 12px;outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus,select:focus,textarea:focus{border-color:#ad98c4;box-shadow:0 0 0 3px #eee7f5}
+label{color:#70677b;font-size:11px;letter-spacing:.015em}
+textarea{min-height:100px}
+.status{border:1px solid #e8e1eb;border-radius:999px;background:#fffefa;color:#776e80;padding:9px 13px;font-size:11px;font-weight:650}
+.status.selected{outline:0;border-color:#9d85b7;background:#f0eaf7;color:#634d7e;box-shadow:inset 0 0 0 1px #cbbbdc}
+.notice{border-radius:13px;padding:13px 15px;border:1px solid #efe5d1;background:#fbf5e8;color:#736344}
+.notice.blue{background:#eff4f7;border-color:#e1e9ed;color:#5f707a}
+.notice.ok{background:#edf4ed;border-color:#dfeade;color:#5d745d}
+.lesson-detail{background:#f8f5fa;border:1px solid #ebe3f0;border-radius:13px;padding:14px;color:#71667d}
+.tablewrap{border:1px solid #ece6e2;border-radius:16px;background:#fffefa}
+.table{border-collapse:separate;border-spacing:0}
+.table th{background:#f7f3f8;color:#776c83;font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+.table td{color:#50485a;border-bottom:1px solid #f0ebe7}
+.modalback{background:rgba(48,39,57,.38);backdrop-filter:blur(7px);padding:24px}
+.modal{background:#fffefa;border:1px solid #eee7e1;border-radius:23px;padding:26px;box-shadow:0 25px 90px #30243b30}
+.modalhead{padding-bottom:15px;border-bottom:1px solid #eee8e3}
+.modalhead h2{margin:0 0 4px;font-size:25px}
+.hr{background:#eee8e3;margin:18px 0}
+.formgrid{gap:15px}
+.formgrid>div{min-width:0}
+.formgrid .full{grid-column:1/-1}
+.statuses,.progress{gap:7px}
+.progress button{min-width:65px}
+.homework-check{color:#82788c;font-size:11px}
+.homework-check input{accent-color:#8068a8}
+.member-attendance-row{background:#fbf9fc;border-color:#eee7f1;border-radius:13px}
+.member-field{background:#f8f5f8;border-color:#eee6ef}
+.searchbar{align-items:center}
+.searchbar input{border-radius:999px;padding:12px 17px}
+.history-summary{gap:13px}
+.planning-day{border:1px solid #ece6e2;border-radius:19px;background:#fffefa}
+.planning-day-title{background:#faf7fa;border-color:#eee7ef;padding:18px 20px}
+.section{animation:ewdFade .28s ease}
+@keyframes ewdFade{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* Today view: clear schedule cards and quick actions */
+#today .grid>.card.span3{background:linear-gradient(145deg,#fffefa,#f7f2f8);min-height:112px}
+#today .grid>.card.span3:nth-child(2){background:linear-gradient(145deg,#fffefa,#f8f0ee)}
+#today .grid>.card.span3:nth-child(3){background:linear-gradient(145deg,#fffefa,#f0f4ed)}
+#today .grid>.card.span3:nth-child(4){background:linear-gradient(145deg,#fffefa,#f1f4f7)}
+#today .card.span12>.list{gap:10px}
+#today .row{align-items:center;gap:16px}
+#today .row .main{flex:1}
+#today .row .btn{flex:0 0 auto}
+#today .today-title-line{gap:8px}
+#today .today-homework-inline{margin-left:8px}
+#today .homework-check{background:#f7f3f8;padding:6px 9px;border-radius:999px}
+#today .card.span12{margin-top:2px}
+/* Make registration modal feel like a focused workspace */
+#modal .formgrid>div{background:#fcfafb;border:1px solid #f0eaf0;border-radius:13px;padding:12px}
+#modal .formgrid>div.full{background:#fcfafb}
+#modal .formgrid label{display:block;margin-bottom:7px}
+#modal .formgrid input,#modal .formgrid select,#modal .formgrid textarea{background:#fff}
+#modal #rLesson{min-height:150px;border-radius:12px}
+#modal .member-attendance-row{margin-bottom:8px}
+#modal .toolbar{justify-content:flex-end;padding-top:14px;border-top:1px solid #eee8e3}
+#modal .toolbar .btn.primary{padding:12px 22px;font-size:13px}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}
+ aside{position:relative;height:auto;padding:16px 18px}
+ .brand{font-size:24px}
+ .sub{margin-bottom:12px}
+ nav{display:flex;flex-direction:row;overflow-x:auto;gap:5px;padding-bottom:3px}
+ nav button{white-space:nowrap;width:auto;flex:0 0 auto;padding:10px 12px}
+ main{padding:22px 16px 45px}
+}
+@media(max-width:600px){
+ h1{font-size:29px}
+ .topbar{align-items:flex-start;flex-direction:column}
+ .toolbar{width:100%}
+ .toolbar .btn{flex:1}
+ .card{padding:16px;border-radius:16px}
+ #today .row{align-items:flex-start;flex-direction:column}
+ #today .row>.btn{width:100%}
+ #today .today-title-line{align-items:flex-start;flex-direction:column}
+ #today .today-homework-inline{margin-left:0}
+ .modalback{padding:8px}
+ .modal{padding:17px;border-radius:17px;max-height:95vh}
+ .formgrid{grid-template-columns:1fr}
+ .formgrid .full{grid-column:1}
+ .member-statuses .status{flex:1 1 130px}
+}
+@media(prefers-reduced-motion:reduce){.section{animation:none}*{transition:none!important}}
+</style>
+
+
+<style id="ewd-inactive-students">
+.admin-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-section-head h2{margin:0 0 4px}
+.pill-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 10px;border-radius:99px;background:#f0eaf7;color:#6b5684;font-size:12px;font-weight:800}
+.admin-student-list{display:grid;gap:9px}
+.admin-student-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.admin-student-main{min-width:0;flex:1}
+.admin-student-main b{font-size:13px;color:#453c50}
+.admin-student-row .btn{white-space:nowrap}
+@media(max-width:600px){.admin-student-row{align-items:flex-start}.admin-student-row .btn{padding:8px 10px}}
+</style>
+
+<style id="ewd-manual-makeups">
+#today .card .toolbar h2{font-family:Georgia,serif}
+#makeups .tablewrap{overflow-x:auto}
+#makeups table{min-width:760px;width:100%}
+#makeups .toolbar{gap:12px;flex-wrap:wrap}
+</style>
+</head><body><div class="doc"><div class="brand">ENGLISH WITH DENISE</div><h1>${esc(d.assessmentTitle)} — ${esc(d.student)}</h1><div class="sub">${esc(d.level)}${d.date?" · "+assessmentDateBR(d.date):""}</div>${assessmentSection("Section A – Reading & Writing",d.aScore,d.aMax,d.aFeedback)}${assessmentSection("Section B – Listening",d.bScore,d.bMax,d.bFeedback)}${assessmentSection("Section C – Speaking",d.cScore,d.cMax,d.cFeedback)}<div class="result"><h2 style="border:0;margin-top:0">Resultado Final</h2>${d.aScore!==""?`<div>Reading & Writing: <b>${esc(d.aScore)}/${esc(d.aMax)}</b></div>`:""}${d.bScore!==""?`<div>Listening: <b>${esc(d.bScore)}/${esc(d.bMax)}</b></div>`:""}${d.cScore!==""?`<div>Speaking: <b>${esc(d.cScore)}/${esc(d.cMax)}</b></div>`:""}${t.max?`<div style="margin-top:8px;font-size:14pt"><b>TOTAL: ${t.total}/${t.max} pontos</b></div>`:""}</div>${d.general?`<h2>Observações Gerais</h2><p>${esc(d.general).replace(/\n/g,"<br>")}</p>`:""}${attention?`<div class="attention"><h2 style="border:0;margin-top:0;color:#e2872f">1 SEUS PONTOS DE ATENÇÃO</h2><ul>${attention}</ul></div>`:""}${(d.practiceTitle||d.practiceBefore||questions)?`<h2>2 PRATIQUE | ${esc(d.practiceTitle)}</h2>${d.practiceBefore?`<p>${esc(d.practiceBefore).replace(/\n/g,"<br>")}</p>`:""}${questions?`<div class="practice">${questions}</div>`:""}`:""}${(d.homeworkAttention||d.homeworkInstructions)?`<h2>Atividade de Casa — ${esc(d.student)}</h2>${d.homeworkAttention?`<p>${esc(d.homeworkAttention).replace(/\n/g,"<br>")}</p>`:""}${d.homeworkInstructions?`<div class="practice">${esc(d.homeworkInstructions).replace(/\n/g,"<br>")}</div>`:""}`:""}<div class="footer">ENGLISH WITH DENISE</div></div></body></html>`}
+function downloadAssessmentDoc(){if(!assessmentDraft.student.trim()){alert("Digite o nome do aluno.");return}let blob=new Blob([generateAssessmentHTML()],{type:"application/msword;charset=utf-8"}),a=document.createElement("a"),safe=(assessmentDraft.student+" - Avaliação").replace(/[\\/:*?"<>|]/g,"-");a.href=URL.createObjectURL(blob);a.download=safe+".doc";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function printAssessment(){if(!assessmentDraft.student.trim()){alert("Digite o nome do aluno.");return}let w=window.open("","_blank");w.document.write(generateAssessmentHTML());w.document.close();setTimeout(()=>w.print(),300)}
+function renderAssessment(){
+ if(typeof assessment==="undefined")return;let d=assessmentDraft,t=calcAssessmentTotal();
+ assessment.innerHTML=`<div class="card"><h2>📝 Gerador de Notas & Avaliações</h2><p class="muted">Os títulos do relatório permanecem fixos. Você informa notas, erros, pontos de atenção e direcionamento.</p></div>
+ <div class="card"><div class="grid2"><div><label>Aluno</label><input value="${esc(d.student)}" oninput="setAssessmentField('student',this.value)" placeholder="Nome do aluno"></div><div><label>Nível</label><select onchange="setAssessmentField('level',this.value)">${["A1","A2","B1","B2","C1","C2"].map(x=>`<option ${d.level===x?"selected":""}>${x}</option>`).join("")}</select></div><div><label>Título da avaliação</label><input value="${esc(d.assessmentTitle)}" oninput="setAssessmentField('assessmentTitle',this.value)"></div><div><label>Data</label><input type="date" value="${d.date}" oninput="setAssessmentField('date',this.value)"></div></div></div>
+ ${["a","b","c"].map((x,i)=>{let title=["Section A – Reading & Writing","Section B – Listening","Section C – Speaking"][i];return`<div class="card"><h3>${title}</h3><div class="grid2"><div><label>Nota</label><input type="number" value="${esc(d[x+"Score"])}" oninput="setAssessmentField('${x}Score',this.value)"></div><div><label>Máximo</label><input type="number" value="${esc(d[x+"Max"])}" oninput="setAssessmentField('${x}Max',this.value)"></div></div><label>Erros principais / desempenho</label><textarea rows="5" oninput="setAssessmentField('${x}Feedback',this.value)" placeholder="Descreva o desempenho, erros e o que eles indicam.">${esc(d[x+"Feedback"])}</textarea></div>`}).join("")}
+ <div class="card"><h3>Resultado e direcionamento</h3><p class="muted">Total: <b id="assessmentTotalPreview">${t.max?`${t.total}/${t.max} pontos`:""}</b></p><label>Observações Gerais</label><textarea rows="5" oninput="setAssessmentField('general',this.value)">${esc(d.general)}</textarea><label>1 SEUS PONTOS DE ATENÇÃO <span class="muted">(um por linha)</span></label><textarea rows="5" oninput="setAssessmentField('attention',this.value)" placeholder="Um ponto por linha...">${esc(d.attention)}</textarea></div>
+ <div class="card"><h3>2 PRATIQUE</h3><label>Título da prática</label><input value="${esc(d.practiceTitle)}" oninput="setAssessmentField('practiceTitle',this.value)" placeholder="AUDIO 3 — MEET OLIVIA"><label>BEFORE YOU LISTEN / instrução</label><textarea rows="3" oninput="setAssessmentField('practiceBefore',this.value)">${esc(d.practiceBefore)}</textarea><label>Questões / atividades (uma por linha)</label><textarea rows="5" oninput="setAssessmentField('practiceQuestions',this.value)">${esc(d.practiceQuestions)}</textarea></div>
+ <div class="card"><h3>Atividade de Casa — ${esc(d.student)||"Aluno"}</h3><label>Foco</label><textarea rows="3" oninput="setAssessmentField('homeworkAttention',this.value)">${esc(d.homeworkAttention)}</textarea><label>Instruções / atividade</label><textarea rows="5" oninput="setAssessmentField('homeworkInstructions',this.value)">${esc(d.homeworkInstructions)}</textarea></div>
+ <div class="card" style="position:sticky;bottom:12px;z-index:5"><button class="btn primary" onclick="downloadAssessmentDoc()">📄 Gerar Word (.doc)</button> <button class="btn" onclick="printAssessment()">🖨️ Visualizar / Imprimir</button> <button class="btn danger" onclick="clearAssessment()">Limpar</button><p class="muted small">O .doc abre no Word e pode ser importado para o Google Docs.</p></div>`
+}
+
+function openAddMakeup(){
+  const options=DB.students.map(s=>`<option value="${esc(s.name)}">${esc(s.name)} · ${esc(s.level)} · ${esc(s.day)} ${esc(s.time)}</option>`).join("");
+  showModal(`<div class="modalhead"><div><h2>Adicionar reposição</h2><div class="muted">Agende manualmente uma reposição e a aula correspondente.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+    <div class="formgrid">
+      <div><label>Data da reposição</label><input id="mDate" type="date" value="${todayISO()}"></div>
+      <div><label>Aluno / turma</label><select id="mStudent">${options}</select></div>
+      <div class="full"><label>Aula da reposição</label><input id="mLesson" placeholder="Ex.: 8C — What's Everyone Doing? / revisão de Simple Past"></div>
+      <div class="full"><label>Observações</label><textarea id="mNote" placeholder="Horário combinado, motivo, conteúdo ou outras informações..."></textarea></div>
+    </div>
+    <div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn primary" onclick="saveManualMakeup()">Salvar reposição</button></div>`);
+}
+function saveManualMakeup(){
+  const date=document.getElementById("mDate")?.value;
+  const student=document.getElementById("mStudent")?.value;
+  const lesson=document.getElementById("mLesson")?.value.trim();
+  const note=document.getElementById("mNote")?.value.trim();
+  if(!date||!student||!lesson){alert("Informe a data, o aluno/turma e a aula da reposição.");return;}
+  const st=DB.students.find(x=>x.name===student);
+  DB.records.unshift({
+    id:Date.now(),date,student,
+    schedule:st?`${st.name}|${st.day}|${st.time}`:student,
+    status:"🔄 Rep. Pendente",warmup:"",lesson,progress:100,stoppedAt:"",
+    homeworkDone:"❌ Não",note,manualMakeup:true,makeupDate:date
+  });
+  save();closeModal();renderAll();
+}
+function renderMakeups(){
+  const rec=(DB.records||[]).filter(r=>r.status.includes("Rep."));
+  makeups.innerHTML=`<div class="toolbar" style="margin-bottom:14px;justify-content:space-between"><div><h2 style="margin:0">Reposições</h2><div class="muted small">Agende reposições manualmente e registre qual aula será trabalhada.</div></div><button class="btn primary" onclick="openAddMakeup()">+ Adicionar reposição</button></div>
+  <div class="card tablewrap"><table class="table"><thead><tr><th>Data</th><th>Aluno</th><th>Status</th><th>Lição da reposição</th><th>Observação</th><th></th></tr></thead><tbody>
+  ${rec.map(r=>`<tr><td>${dateBR(r.makeupDate||r.date)}</td><td>${esc(r.student)}</td><td>${esc(r.status)}</td><td>${esc(r.lesson||"")}</td><td>${esc(r.note||"")}</td><td>${r.status==="🔄 Rep. Pendente"?`<button class="btn small" onclick="completeMakeup(${r.id})">Marcar rep. feita</button>`:""}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">Nenhuma reposição registrada.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function completeMakeup(id){
+  const r=(DB.records||[]).find(x=>x.id===id);
+  if(!r)return;
+  r.status="✔️ Rep. Feita";
+  r.makeupDate=todayISO();
+  save(); renderAll();
+}
+
+
+function renderMeetingNotes(){
+  if(!document.getElementById("meeting")) return;
+  const notes=[...(DB.meetingNotes||[])].sort((a,b)=>(b.week||b.date||"").localeCompare(a.week||a.date||""));
+  meeting.innerHTML=`<div class="card">
+    <h2>🎙️ Meeting Notes → Notion</h2>
+    <div class="muted">Transcreva ou cole suas anotações das aulas/meetings. Depois, copie o registro organizado e cole no Notion. Esses registros também poderão ser usados para sua análise semanal dos alunos.</div>
+    <div class="formgrid" style="margin-top:14px">
+      <div><label>Semana (início)</label><input id="mnWeek" type="date" value="${getMondayISO()}"></div>
+      <div><label>Aluno(s)/Turma</label><select id="mnStudent"><option value="">Individual — geral/meeting</option>${(DB.students||[]).map(s=>`<option>${esc(s.name)}</option>`).join("")}</select></div>
+      <div class="full"><label>Título / assunto da aula</label><input id="mnTitle" placeholder="Ex.: Conversation class — routines and goals"></div>
+      <div class="full"><label>Transcrição / anotações do meeting</label><textarea id="mnTranscript" rows="8" placeholder="Cole aqui a transcrição ou suas anotações..."></textarea></div>
+      <div class="full"><label>Observações da professora (opcional)</label><textarea id="mnTeacher" rows="3" placeholder="Participação, dificuldades percebidas, pontos para observar..."></textarea></div>
+    </div>
+    <button class="btn primary" style="margin-top:12px" onclick="saveMeetingNote()">Salvar Meeting Note</button>
+  </div>
+  <div class="card"><div class="toolbar" style="justify-content:space-between"><h2>Registros salvos</h2><span class="muted small">${notes.length} registro(s)</span></div>
+    ${notes.length?notes.map(n=>`<div class="row" style="align-items:flex-start;margin-top:10px"><div class="main"><b>${esc(n.student||"Meeting geral")}</b><div class="muted small">Semana: ${dateBR(n.week)} · ${esc(n.title||"Sem título")}</div><div style="white-space:pre-wrap;margin-top:7px">${esc(n.transcript||"")}</div>${n.teacherNotes?`<div class="meta" style="white-space:pre-wrap;margin-top:6px"><b>Notas da professora:</b> ${esc(n.teacherNotes)}</div>`:""}</div><div class="toolbar"><button class="btn small" onclick="copyMeetingNote(${n.id})">📋 Copiar para Notion</button><button class="btn small danger" onclick="deleteMeetingNote(${n.id})">Excluir</button></div></div>`).join(""):`<div class="muted">Nenhum registro salvo ainda.</div>`}
+  </div>`;
+}
+function saveMeetingNote(){
+  const transcript=document.getElementById("mnTranscript").value.trim();
+  if(!transcript){alert("Cole a transcrição ou as anotações antes de salvar.");return;}
+  DB.meetingNotes=DB.meetingNotes||[];
+  DB.meetingNotes.push({id:Date.now(),week:mnWeek.value,student:mnStudent.value,title:mnTitle.value.trim(),transcript,teacherNotes:mnTeacher.value.trim(),createdAt:todayISO()});
+  save();renderMeetingNotes();alert("Meeting Note salva.");
+}
+function copyMeetingNote(id){
+  const n=(DB.meetingNotes||[]).find(x=>x.id===id);if(!n)return;
+  const text=`# ${n.student||"Meeting geral"}\n**Semana:** ${dateBR(n.week)}\n**Meeting/Aula:** ${n.title||"Sem título"}\n\n## Transcrição / anotações\n${n.transcript||""}\n\n## Observações da professora\n${n.teacherNotes||"—"}`;
+  navigator.clipboard.writeText(text).then(()=>alert("Texto formatado copiado! Cole no Notion.")).catch(()=>prompt("Copie o texto abaixo:",text));
+}
+function deleteMeetingNote(id){if(!confirm("Excluir este registro?"))return;DB.meetingNotes=(DB.meetingNotes||[]).filter(x=>x.id!==id);save();renderMeetingNotes();}
+
+function renderHistory(){
+  const names=[...new Set(DB.students.flatMap(s=>groupMembers(s)))].sort((a,b)=>a.localeCompare(b));
+  const selected=document.getElementById("historyStudentFilter")?.value||"";
+  const rows=[...(DB.records||[])].filter(r=>{
+    if(!selected) return true;
+    return (r.student===selected) || (Array.isArray(r.attendance) && r.attendance.some(a=>a.name===selected));
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  history.innerHTML=`
+  <div class="card" style="margin-bottom:12px">
+    <div class="toolbar">
+      <div style="flex:1;min-width:240px"><label>Filtrar histórico por aluno</label>
+        <select id="historyStudentFilter" onchange="renderHistory()">
+          <option value="">Todos os alunos</option>
+          ${names.map(n=>`<option value="${esc(n)}" ${selected===n?"selected":""}>${esc(n)}</option>`).join("")}
+        </select>
+      </div>
+      ${selected?`<button class="btn primary" onclick='openIndividualHistory(${JSON.stringify(selected)})'>Abrir histórico completo de ${esc(selected)}</button>`:""}
+    </div>
+  </div>
+  <div class="card tablewrap"><table class="table"><thead><tr><th>Data</th><th>Aluno / turma</th><th>Status individual</th><th>Warm-up</th><th>Lição</th><th>Progresso</th><th>Onde parou</th></tr></thead><tbody>
+    ${rows.map(r=>{
+      const st=selected?memberStatus(r,selected):r.status;
+      const attendanceText=Array.isArray(r.attendance)&&r.attendance.length>1
+        ? r.attendance.map(a=>`${esc(a.name)}: ${esc(a.status)}`).join("<br>")
+        : esc(st);
+      return `<tr><td>${dateBR(r.date)}</td><td>${esc(r.student)}</td><td>${attendanceText}</td><td>${esc(r.warmup||"")}</td><td>${esc(r.lesson||"")}</td><td>${esc(r.progress||0)}%</td><td>${esc(r.stoppedAt||"")}</td></tr>`;
+    }).join("") || `<tr><td colspan="7" class="muted">Nenhum registro encontrado.</td></tr>`}
+  </tbody></table></div>`;
+}
+function openIndividualHistory(name){
+  const hist=individualHistory(name);
+  const total=hist.length;
+  const present=hist.filter(r=>["✅ Presente","✔️ Rep. Feita"].includes(memberStatus(r,name))).length;
+  const absent=hist.filter(r=>["❌ Falta","⚠️ Rep. c/ Falta"].includes(memberStatus(r,name))).length;
+  const pending=hist.filter(r=>memberStatus(r,name)==="🔄 Rep. Pendente").length;
+  const rate=total?Math.round((present/total)*100):0;
+  const last=hist[0];
+  showModal(`<div class="modalhead">
+    <div><h2>${esc(name)}</h2><div class="muted">Histórico individual</div></div>
+    <button class="btn" onclick="closeModal()">Fechar</button>
+  </div>
+  <div class="grid" style="margin-bottom:14px">
+    <div class="card span3"><div class="muted small">Aulas registradas</div><div class="kpi">${total}</div></div>
+    <div class="card span3"><div class="muted small">Frequência</div><div class="kpi">${rate}%</div></div>
+    <div class="card span3"><div class="muted small">Faltas</div><div class="kpi">${absent}</div></div>
+    <div class="card span3"><div class="muted small">Rep. pendentes</div><div class="kpi">${pending}</div></div>
+  </div>
+  ${last?`<div class="notice ${Number(last.progress)<100?'':'blue'}" style="margin-bottom:14px">
+    <b>Última aula:</b> ${esc(last.lesson||"Aula sem título")} · ${esc(last.progress??0)}%
+    <br><span class="small"><b>Presença:</b> ${esc(memberStatus(last,name))}</span>
+    ${last.stoppedAt?`<br><span class="small"><b>Onde parou:</b> ${esc(last.stoppedAt)}</span>`:""}
+  </div>`:""}
+  <div class="card tablewrap"><table class="table"><thead><tr><th>Data</th><th>Turma</th><th>Presença</th><th>Warm-up</th><th>Lição</th><th>Progresso</th><th>Homework / Obs.</th></tr></thead><tbody>
+    ${hist.map(r=>`<tr>
+      <td>${dateBR(r.date)}</td><td>${esc(r.student)}</td><td><b>${esc(memberStatus(r,name))}</b></td>
+      <td>${esc(r.warmup||"—")}</td><td><b>${esc(r.lesson||"—")}</b></td><td>${esc(r.progress??0)}%</td>
+      <td>${esc([r.homeworkDone||"",r.note||""].filter(Boolean).join(" · ")||"—")}</td>
+    </tr>`).join("")||`<tr><td colspan="8">Sem registros.</td></tr>`}
+  </tbody></table></div>
+  <div class="toolbar" style="margin-top:14px"><button class="btn primary" onclick="closeModal()">Fechar histórico</button></div>`);
+}
+
+
+function openDeactivateStudent(index){
+  const s=DB.students[index]; if(!s)return;
+  showModal(`
+    <div class="modalhead"><div><h2>Inativar aluno/turma</h2><div class="muted">${esc(s.name)}</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+    <div class="notice blue">O cadastro sairá da agenda e da lista de alunos ativos, mas o histórico de aulas, notas e registros será preservado.</div>
+    <div style="margin-top:16px"><label>Motivo da inativação (opcional)</label><textarea id="inactiveReason" placeholder="Ex.: encerrou as aulas, pausa temporária..."></textarea></div>
+    <div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="confirmDeactivateStudent(${index})">Inativar cadastro</button></div>
+  `);
+}
+function confirmDeactivateStudent(index){
+  const s=DB.students[index]; if(!s)return;
+  const reason=(document.getElementById("inactiveReason")?.value||"").trim();
+  const archived={...s,active:false,inactivatedAt:todayISO(),reason};
+  if(!DB.inactiveStudents)DB.inactiveStudents=[];
+  DB.inactiveStudents.unshift(archived);
+  DB.students.splice(index,1);
+  save();closeModal();renderAll();
+}
+function reactivateStudent(index){
+  const s=(DB.inactiveStudents||[])[index]; if(!s)return;
+  const restored={...s};
+  delete restored.active;delete restored.inactivatedAt;delete restored.reason;
+  DB.students.push(restored);
+  DB.inactiveStudents.splice(index,1);
+  save();renderAll();
+}
+function renderAdmin(){
+  const activeRows=DB.students.map((s,i)=>`
+    <div class="row admin-student-row">
+      <div class="admin-student-main"><b>${esc(s.name)}</b><div class="meta">${esc(s.level)} · ${esc(s.day)} · ${esc(s.time)} · ${esc(s.group||"Individual")}</div></div>
+      <button class="btn danger small" onclick="openDeactivateStudent(${i})">Inativar</button>
+    </div>`).join("") || `<div class="muted">Nenhum aluno ativo cadastrado.</div>`;
+  const inactiveRows=(DB.inactiveStudents||[]).map((s,i)=>`
+    <div class="row admin-student-row">
+      <div class="admin-student-main"><b>${esc(s.name)}</b><div class="meta">${esc(s.level||"")} · ${esc(s.reason||"Sem motivo informado")} ${s.inactivatedAt?`· Inativado em ${dateBR(s.inactivatedAt)}`:""}</div></div>
+      <button class="btn primary small" onclick="reactivateStudent(${i})">Reativar</button>
+    </div>`).join("") || `<div class="muted">Nenhum aluno inativo.</div>`;
+  admin.innerHTML=`
+  <div class="grid">
+    <div class="card span4"><h2>Cadastros</h2>
+      <div class="list">
+        <button class="btn" onclick="openAddStudent()">+ Adicionar aluno</button>
+        <button class="btn" onclick="openAddLesson()">+ Adicionar lição</button>
+        <button class="btn" onclick="openAddWarmup()">+ Adicionar warm-up</button>
+      </div>
+    </div>
+    <div class="card span4"><h2>Dados</h2>
+      <div class="list">
+        <button class="btn" onclick="exportBackup()">⬇️ Exportar backup JSON</button>
+        <label class="btn" style="cursor:pointer">⬆️ Importar backup<input type="file" accept=".json" onchange="importBackup(this.files[0])" style="display:none"></label>
+      </div>
+    </div>
+    <div class="card span4"><h2>Segurança</h2>
+      <div class="notice">Os dados ficam no <b>localStorage</b> deste navegador. Faça backups periódicos, especialmente antes de limpar dados do navegador ou trocar de computador.</div>
+      <button class="btn danger" style="margin-top:12px" onclick="resetData()">Restaurar base inicial</button>
+    </div>
+    <div class="card span12">
+      <div class="admin-section-head"><div><h2>Alunos ativos</h2><div class="muted small">Inative um cadastro para removê-lo da agenda sem apagar seu histórico.</div></div><span class="pill-count">${DB.students.length}</span></div>
+      <div class="admin-student-list">${activeRows}</div>
+    </div>
+    <div class="card span12">
+      <div class="admin-section-head"><div><h2>Alunos inativos</h2><div class="muted small">Os cadastros podem ser reativados a qualquer momento.</div></div><span class="pill-count">${(DB.inactiveStudents||[]).length}</span></div>
+      <div class="admin-student-list">${inactiveRows}</div>
+    </div>
+  </div>`;
+}
+
+function openRegister(key){
+  const s=DB.students.find(x=>studentKey(x)===key); if(!s)return;
+  const hist=studentHistory(s.name), last=hist[0];
+  const lastLesson=last?.lesson || s.last || "";
+  const lastProg=last?.progress ?? s.progress ?? 0;
+  const suggestions=suggestWarmups(s.name);
+  const lvLessons=allLessons().filter(l=>l.level===s.level || l.level==="CONV");
+  showModal(`
+    <div class="modalhead"><div><h2>${esc(s.name)}</h2><div class="muted">${esc(s.day)} · ${esc(s.time)} · ${esc(s.level)}</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+    ${lastLesson?`<div class="notice ${lastProg<100?'':'blue'}"><b>Última aula:</b> ${esc(lastLesson)} · ${lastProg}% ${lastProg<100?"— continuar mesma aula":""}</div>`:""}
+    <div class="hr"></div>
+    <div class="formgrid">
+      <div><label>Data</label><input id="rDate" type="date" value="${todayISO()}"></div>
+      <div><label>Warm-up</label><select id="rWarm"><option value="">Sem warm-up</option>${suggestions.map(w=>`<option>${esc(w)}</option>`).join("")}</select><div class="small muted warm-suggestion">Sugestões ordenadas para evitar repetição.</div></div>
+      <div class="full"><label>Lição</label><input id="rLessonSearch" placeholder="Digite para procurar..." oninput="fillLessonOptions(${JSON.stringify(s.level)})"><select id="rLesson" size="6" onchange="updateLessonPreview()">${lvLessons.map(l=>`<option value="${esc(l.level+"||"+l.code)}">${esc(l.level+" · "+l.code+" — "+l.title)}</option>`).join("")}</select><div id="rPreview" class="lesson-detail muted">Selecione uma lição ou digite um título personalizado abaixo.</div></div>
+      <div class="full"><label>Ou aula personalizada</label><input id="rCustom" placeholder="Ex.: Projeto de pós-doutorado / Conversation about life"></div>
+      <div class="full"><label>Frequência</label>
+        ${groupMembers(s).length>1 ? `
+          <div class="notice blue small" style="margin-bottom:10px">Marque a presença de <b>cada aluno separadamente</b>. Isso alimenta o histórico individual de cada pessoa.</div>
+          <div class="member-attendance">
+            ${groupMembers(s).map((name,idx)=>`<div class="member-attendance-row">
+              <div><b>${esc(name)}</b></div>
+              <div class="statuses member-statuses" data-member="${esc(name)}">
+                ${["✅ Presente","❌ Falta","🔄 Rep. Pendente","✔️ Rep. Feita","⚠️ Rep. c/ Falta"].map((x,i)=>`<button class="status ${i===0?'selected':''}" data-status="${x}" onclick="selectMemberStatus(this)">${x}</button>`).join("")}
+              </div>
+            </div>`).join("")}
+          </div>
+          <input type="hidden" id="statusGroup" value="group">
+        ` : `
+          <div class="statuses" id="statusGroup">
+            ${["✅ Presente","❌ Falta","🔄 Rep. Pendente","✔️ Rep. Feita","⚠️ Rep. c/ Falta"].map((x,i)=>`<button class="status ${i===0?'selected':''}" data-status="${x}" onclick="selectStatus(this)">${x}</button>`).join("")}
+          </div>
+        `}
+      </div>
+      <div class="full"><label>Progresso</label><div class="progress" id="progGroup">
+        ${[25,50,75,100].map(p=>`<button class="status ${p===100?'selected':''}" data-prog="${p}" onclick="selectProg(this)">${p}%</button>`).join("")}
+      </div></div>
+      <div><label>Onde paramos?</label><input id="rStop" placeholder="Ex.: Listening 2 / atividade 4"></div>
+      <div><label>Homework enviado?</label><select id="rHwDone"><option>✅ Sim</option><option>❌ Não</option></select></div>
+      <div class="full"><label>Homework / observação</label><textarea id="rNote" placeholder="Opcional"></textarea></div>
+    </div>
+    <div class="toolbar" style="margin-top:14px"><button class="btn primary" onclick='saveRecord(${JSON.stringify(key)})'>Salvar aula</button></div>
+  `);
+  if(lastLesson && lastProg<100){
+    let match = last?.lessonCode ? lvLessons.find(l=>l.level===last.lessonLevel && l.code===last.lessonCode) : null;
+    if(!match) match=lvLessons.find(l=>lastLesson.toLowerCase().includes(l.title.toLowerCase())||lastLesson.toLowerCase().includes(l.code.toLowerCase()));
+    if(match){rLesson.value=match.level+"||"+match.code; updateLessonPreview()}
+    if(last?.stoppedAt) rStop.value=last.stoppedAt;
+  }
+}
+function selectStatus(el){document.querySelectorAll("#statusGroup .status").forEach(x=>x.classList.remove("selected"));el.classList.add("selected")}
+function selectMemberStatus(el){
+  const box=el.closest(".member-statuses");
+  if(!box)return;
+  box.querySelectorAll(".status").forEach(x=>x.classList.remove("selected"));
+  el.classList.add("selected");
+}
+function selectProg(el){document.querySelectorAll("#progGroup .status").forEach(x=>x.classList.remove("selected"));el.classList.add("selected")}
+function fillLessonOptions(level){
+  const q=(rLessonSearch.value||"").toLowerCase();
+  const arr=allLessons().filter(l=>(l.level===level||l.level==="CONV") && JSON.stringify(l).toLowerCase().includes(q));
+  rLesson.innerHTML=arr.map(l=>`<option value="${esc(l.level+"||"+l.code)}">${esc(l.level+" · "+l.code+" — "+l.title)}</option>`).join("");
+}
+function updateLessonPreview(){
+  const [level,code]=(rLesson.value||"||").split("||");
+  const l=allLessons().find(x=>x.level===level&&x.code===code);
+  rPreview.innerHTML=l?`<b>${esc(l.code)} — ${esc(l.title)}</b><br><b>Grammar:</b> ${esc(l.grammar||"—")}<br><b>Vocabulary:</b> ${esc(l.vocab||"—")}<br><b>Homework:</b> ${esc(l.homework||"—")}`:"Selecione uma lição.";
+}
+function saveRecord(key){
+  const s=DB.students.find(x=>studentKey(x)===key); if(!s)return;
+  const prog=Number(document.querySelector("#progGroup .selected")?.dataset.prog||100);
+  let lesson="";
+  const custom=(rCustom.value||"").trim();
+  if(custom) lesson=custom;
+  else {
+    const [level,code]=(rLesson.value||"||").split("||");
+    const l=allLessons().find(x=>x.level===level&&x.code===code);
+    lesson=l?`${l.code} — ${l.title}`:"";
+  }
+  const [selectedLevel,selectedCode]=(rLesson.value||"||").split("||");
+  const members=groupMembers(s);
+  let attendance=[];
+  if(members.length>1){
+    attendance=members.map(name=>{
+      const box=[...document.querySelectorAll(".member-statuses")].find(x=>x.dataset.member===name);
+      return {name,status:box?.querySelector(".selected")?.dataset.status||"✅ Presente"};
+    });
+  }else{
+    const st=document.querySelector("#statusGroup .selected")?.dataset.status||"✅ Presente";
+    attendance=[{name:members[0]||s.name,status:st}];
+  }
+  const st=attendance.every(a=>a.status===attendance[0].status) ? attendance[0].status : "👥 Presenças individuais";
+  const rec={id:Date.now(),date:rDate.value,student:s.name,schedule:key,status:st,attendance,warmup:rWarm.value,lesson,lessonCode:selectedCode||"",lessonLevel:selectedLevel||"",progress:prog,stoppedAt:rStop.value,homeworkDone:rHwDone.value,note:rNote.value};
+  DB.records.push(rec);
+  if(rWarm.value) DB.warmupUsage.push({date:rDate.value,student:s.name,warmup:rWarm.value,recordId:rec.id});
+  s.last=lesson||s.last; s.progress=prog;
+  save(); closeModal(); renderAll();
+}
+function suggestWarmups(name){
+  const hist=warmHistory(name);
+  const lastMap={}; hist.forEach((x,i)=>{if(lastMap[x.warmup]===undefined)lastMap[x.warmup]=x.date});
+  return [...DB.warmups].sort((a,b)=>{
+    const ad=lastMap[a],bd=lastMap[b];
+    if(!ad&&!bd)return a.localeCompare(b);
+    if(!ad)return -1;if(!bd)return 1;
+    return ad.localeCompare(bd);
+  });
+}
+
+function openStudent(i){
+  const s=DB.students[i], hist=studentHistory(s.name);
+  const total=hist.length;
+  const present=hist.filter(r=>r.status==="✅ Presente"||r.status==="✔️ Rep. Feita").length;
+  const absent=hist.filter(r=>r.status==="❌ Falta"||r.status==="⚠️ Rep. c/ Falta").length;
+  const pending=hist.filter(r=>r.status==="🔄 Rep. Pendente").length;
+  const rate=total?Math.round((present/total)*100):0;
+  const last=hist[0];
+  showModal(`<div class="modalhead">
+    <div><h2>${esc(s.name)}</h2><div class="muted">${esc(s.level)} · ${esc(s.day)} · ${esc(s.time)} · ${esc(s.group)}</div></div>
+    <button class="btn" onclick="closeModal()">Fechar</button>
+  </div>
+  <div class="grid" style="margin-bottom:14px">
+    <div class="card span3"><div class="muted small">Aulas registradas</div><div class="kpi">${total}</div></div>
+    <div class="card span3"><div class="muted small">Frequência</div><div class="kpi">${rate}%</div></div>
+    <div class="card span3"><div class="muted small">Faltas</div><div class="kpi">${absent}</div></div>
+    <div class="card span3"><div class="muted small">Rep. pendentes</div><div class="kpi">${pending}</div></div>
+  </div>
+  ${last?`<div class="notice ${Number(last.progress)<100?'':'blue'}" style="margin-bottom:14px">
+    <b>Continuidade:</b> ${esc(last.lesson||"Aula sem título")} · ${esc(last.progress)}%
+    ${last.stoppedAt?`<br><span class="small"><b>Onde parou:</b> ${esc(last.stoppedAt)}</span>`:""}
+  </div>`:""}
+  <div class="card tablewrap"><table class="table"><thead><tr>
+    <th>Data</th><th>Status</th><th>Presenças individuais</th><th>Warm-up</th><th>Lição</th><th>Progresso</th><th>Onde parou</th><th>Homework / Obs.</th>
+  </tr></thead><tbody>
+    ${hist.map(r=>`<tr>
+      <td>${dateBR(r.date)}</td><td>${esc(r.status)}</td>
+      <td>${Array.isArray(r.attendance)?r.attendance.map(a=>`${esc(a.name)}: ${esc(a.status)}`).join("<br>"):"—"}</td>
+      <td>${esc(r.warmup||"—")}</td><td><b>${esc(r.lesson||"—")}</b></td><td>${esc(r.progress??0)}%</td>
+      <td>${esc(r.stoppedAt||"—")}</td>
+      <td>${esc([r.homeworkDone||"",r.note||""].filter(Boolean).join(" · ")||"—")}</td>
+    </tr>`).join("")||`<tr><td colspan="7">Sem registros.</td></tr>`}
+  </tbody></table></div>
+  <div class="toolbar" style="margin-top:14px">
+    <button class="btn primary" onclick='closeModal();openRegister(${JSON.stringify(studentKey(s))})'>Registrar nova aula</button>
+  </div>`);
+}
+function showModal(body){modal.innerHTML=body;modalBack.classList.add("show")}
+function closeModal(){modalBack.classList.remove("show")}
+modalBack.addEventListener("click",e=>{if(e.target===modalBack)closeModal()})
+
+
+function updateMemberFields(){
+  const type=document.getElementById("aGroup")?.value || "Individual";
+  const box=document.getElementById("memberFields");
+  if(!box)return;
+  let count=type==="Individual"?1:type==="Dupla"?2:type==="Trio"?3:4;
+  const old=[...box.querySelectorAll("input")].map(x=>x.value);
+  box.innerHTML=Array.from({length:count},(_,i)=>`
+    <div class="member-field">
+      <label>${type==="Individual"?"Nome do aluno":`Aluna ${i+1}`}</label>
+      <input class="aMember" placeholder="${type==="Individual"?"Ex.: Maria Isabella":"Nome completo"} value="${esc(old[i]||"")}">
+    </div>`).join("");
+  const hint=document.getElementById("groupHint");
+  if(hint){
+    hint.innerHTML=type==="Individual"
+      ? "Aluno individual. O nome será usado no histórico individual."
+      : `<b>${count} alunas</b> serão registradas individualmente dentro desta turma. A frequência poderá ser marcada separadamente para cada uma.`;
+  }
+}
+function openAddStudent(){
+  showModal(`<div class="modalhead"><div><h2>Novo aluno / nova turma</h2><div class="muted">Cadastre uma pessoa ou uma turma com os nomes individuais de cada aluno.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div><label>Nível</label><select id="aLevel"><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select></div>
+    <div><label>Tipo de aula</label><select id="aGroup" onchange="updateMemberFields()"><option>Individual</option><option>Dupla</option><option selected>Trio</option><option>Grupo</option></select></div>
+    <div class="full"><div id="groupHint" class="notice blue small"></div></div>
+    <div class="full"><label>Alunos da turma</label><div id="memberFields" class="member-fields"></div></div>
+    <div><label>Dia</label><select id="aDay">${["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"].map(d=>`<option>${d}</option>`).join("")}</select></div>
+    <div><label>Horário</label><input id="aTime" placeholder="Ex.: 18:00–19:00"></div>
+    <div class="full"><label>Última aula (opcional)</label><input id="aLast" placeholder="Ex.: 2A — Talk about jobs"></div>
+    <div class="full"><label>Observação da turma (opcional)</label><textarea id="aNotes" placeholder="Ex.: turma nova / aula personalizada / observações gerais"></textarea></div>
+  </div>
+  <button class="btn primary" style="margin-top:14px" onclick="addStudent()">Salvar turma</button>`);
+  updateMemberFields();
+}
+function addStudent(){
+  const type=document.getElementById("aGroup").value;
+  const members=[...document.querySelectorAll(".aMember")].map(x=>x.value.trim()).filter(Boolean);
+  const required=type==="Individual"?1:type==="Dupla"?2:type==="Trio"?3:2;
+  if(members.length<required){
+    alert(`Adicione ${required} nome(s) para cadastrar esta ${type.toLowerCase()}.`);
+    return;
+  }
+  const name=members.join(" + ");
+  const exists=DB.students.some(s=>s.name===name && s.day===aDay.value && s.time===aTime.value.trim());
+  if(exists){alert("Essa turma já está cadastrada nesse dia e horário.");return;}
+  DB.students.push({
+    name,
+    members,
+    level:aLevel.value,
+    day:aDay.value,
+    time:aTime.value.trim(),
+    group:type,
+    last:aLast.value.trim(),
+    progress:0,
+    notes:aNotes.value.trim()
+  });
+  save();closeModal();renderAll();
+}
+
+function openEditStudent(index){
+  const s=DB.students[index];
+  if(!s)return;
+  showModal(`<div class="modalhead"><div><h2>Editar aluno / turma</h2><div class="muted">${esc(s.name)}</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div><label>Dia da semana</label><select id="eDay">${["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"].map(d=>`<option ${s.day===d?"selected":""}>${d}</option>`).join("")}</select></div>
+    <div><label>Horário</label><input id="eTime" value="${esc(s.time||"")}" placeholder="Ex.: 18:00–19:00"></div>
+    <div><label>Nível</label><select id="eLevel">${["A1","A2","B1","B2"].map(l=>`<option ${s.level===l?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label>Tipo</label><input value="${esc(s.group||"Individual")}" disabled></div>
+    <div class="full"><label>Última aula</label><input id="eLast" value="${esc(s.last||"")}" placeholder="Última aula realizada"></div>
+    <div class="full"><label>Observações</label><textarea id="eNotes">${esc(s.notes||"")}</textarea></div>
+  </div>
+  <button class="btn primary" style="margin-top:14px" onclick="saveEditedStudent(${index})">Salvar alterações</button>`);
+}
+function saveEditedStudent(index){
+  const s=DB.students[index];
+  if(!s)return;
+  s.day=document.getElementById("eDay").value;
+  s.time=document.getElementById("eTime").value.trim();
+  s.level=document.getElementById("eLevel").value;
+  s.last=document.getElementById("eLast").value.trim();
+  s.notes=document.getElementById("eNotes").value.trim();
+  save(); closeModal(); renderAll();
+}
+
+function openAddWarmup(){
+  showModal(`<div class="modalhead"><h2>Novo warm-up</h2><button class="btn" onclick="closeModal()">Fechar</button></div><label>Nome</label><input id="wName"><button class="btn primary" style="margin-top:12px" onclick="addWarmup()">Salvar</button>`);
+}
+function addWarmup(){const v=wName.value.trim();if(v&&!DB.warmups.includes(v))DB.warmups.push(v);save();closeModal();renderAll()}
+function openAddLesson(){
+  showModal(`<div class="modalhead"><h2>Nova lição</h2><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div><label>Nível</label><select id="lLevel"><option>A1</option><option>A2</option><option>B1</option><option>CONV</option><option>B2</option></select></div>
+    <div><label>Código</label><input id="lCode" placeholder="Ex.: 7A"></div>
+    <div class="full"><label>Título</label><input id="lTitle"></div>
+    <div class="full"><label>Target Goal</label><textarea id="lGoal"></textarea></div>
+    <div><label>Grammar</label><input id="lGrammar"></div><div><label>Vocabulary</label><input id="lVocab"></div>
+    <div><label>Páginas</label><input id="lPages"></div><div><label>Homework</label><input id="lHw"></div>
+  </div><button class="btn primary" style="margin-top:14px" onclick="addLesson()">Salvar lição</button>`);
+}
+function addLesson(){
+  DB.customLessons.push({level:lLevel.value,code:lCode.value.trim(),title:lTitle.value.trim(),goal:lGoal.value.trim(),grammar:lGrammar.value.trim(),vocab:lVocab.value.trim(),pages:lPages.value.trim(),homework:lHw.value.trim()});
+  save();closeModal();renderAll();
+}
+
+function renderIdeas(){
+  const pillars=["📚 Inglês & aprendizagem","🌍 Cultura & curiosidades","🗣️ Conversation","🎓 Método & aulas","👩‍🎓 Alunos & resultados","💼 Negócio"];
+  const objectives=["Atrair","Engajar","Converter","Fidelizar"];
+  const formats=["Reels","Carrossel","Stories","Post","Live"];
+  const stages=["Ideia","Roteiro","Produção","Agendado","Postado"];
+  const counts=Object.fromEntries(objectives.map(o=>[o,DB.ideas.filter(i=>i.objective===o&&i.stage!=="Postado").length]));
+  const posted=DB.ideas.filter(i=>i.stage==="Postado").length;
+  const filterObj=document.getElementById('ideaObjectiveFilter')?.value||"";
+  const filtered=DB.ideas.filter(i=>!filterObj||i.objective===filterObj);
+  document.getElementById('ideas').innerHTML=`<div class="toolbar" style="justify-content:space-between"><div><h2 style="font-family:Georgia,serif;font-size:34px;margin:0">Ideias · Inglês</h2><div class="muted">Banco de ideias para o Instagram da English with Denise — 100% focado no negócio.</div></div><button class="btn primary" onclick="openIdeaModal()">+ Nova ideia</button></div>
+  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0">${objectives.map(o=>`<div class="card" style="cursor:pointer" onclick="ideaFilter('${o}')"><div class="muted"><b>${o}</b></div><div style="font:36px Georgia;color:#71568b;margin:8px 0">${counts[o]}</div><div class="muted small">${o==='Atrair'?'novos seguidores / alcance':o==='Engajar'?'comentários, salvamentos, enquetes':o==='Converter'?'gerar contato / matrícula':'alunos e quem já segue'}</div></div>`).join('')}<div class="card"><div class="muted"><b>Postados no mês</b></div><div style="font:36px Georgia;color:#71568b;margin:8px 0">${posted}</div><div class="muted small">conteúdos da empresa</div></div></div>
+  <div class="card" style="margin-bottom:16px"><b>💡 Equilíbrio sugerido por semana:</b> 2 posts para <b>atrair</b>, 1 para <b>engajar</b>, 1 para <b>converter</b>. Clique nos números para filtrar.</div>
+  <div class="toolbar" style="flex-wrap:wrap"><input id="ideaSearch" placeholder="🔎 Buscar ideia..." oninput="filterIdeaList()" style="max-width:240px"><select id="ideaPillarFilter" onchange="filterIdeaList()"><option value="">Todos os pilares</option>${pillars.map(p=>`<option>${p}</option>`).join('')}</select><select id="ideaObjectiveFilter" onchange="renderIdeas()"><option value="">Todos os objetivos</option>${objectives.map(o=>`<option ${filterObj===o?'selected':''}>${o}</option>`).join('')}</select><select id="ideaFormatFilter" onchange="filterIdeaList()"><option value="">Todos os formatos</option>${formats.map(f=>`<option>${f}</option>`).join('')}</select></div>
+  <div class="card" style="margin-top:14px;overflow:auto"><table style="width:100%;min-width:700px"><thead><tr><th>IDEIA</th><th>PILAR</th><th>FORMATO</th><th>OBJETIVO</th><th>NÍVEL</th><th>ETAPA</th><th>DATA</th><th></th></tr></thead><tbody id="ideasRows">${filtered.map((i,idx)=>`<tr><td><b>${esc(i.title)}</b>${i.notes?`<div class="muted small">${esc(i.notes)}</div>`:''}</td><td>${esc(i.pillar)}</td><td>${esc(i.format)}</td><td>${esc(i.objective)}</td><td>${esc(i.level||'Todos')}</td><td>${esc(i.stage)}</td><td>${esc(i.date||'—')}</td><td><button class="btn small" onclick="editIdea('${i.id}')">Editar</button> <button class="btn small" onclick="deleteIdea('${i.id}')">×</button></td></tr>`).join('')}</tbody></table></div>`;
+  filterIdeaList();
+}
+function ideaFilter(o){const sel=document.getElementById('ideaObjectiveFilter');if(sel)sel.value=o;renderIdeas()}
+function filterIdeaList(){const q=(document.getElementById('ideaSearch')?.value||'').toLowerCase(),p=document.getElementById('ideaPillarFilter')?.value||'',f=document.getElementById('ideaFormatFilter')?.value||'';document.querySelectorAll('#ideasRows tr').forEach(row=>{const t=row.innerText.toLowerCase();row.style.display=(!q||t.includes(q))&&(!p||t.includes(p.toLowerCase()))&&(!f||t.includes(f.toLowerCase()))?'':'none'})}
+function openIdeaModal(id=null){const i=id?DB.ideas.find(x=>x.id===id):{};const opts=(arr,val)=>arr.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('');showModal(`<div class="modalhead"><h2>${id?'Editar ideia':'Nova ideia'}</h2><button class="btn" onclick="closeModal()">Fechar</button></div><div class="formgrid"><div class="full"><label>Ideia / título</label><input id="ideaTitle" value="${esc(i.title||'')}"></div><div><label>Pilar</label><select id="ideaPillar">${opts(["📚 Inglês & aprendizagem","🌍 Cultura & curiosidades","🗣️ Conversation","🎓 Método & aulas","👩‍🎓 Alunos & resultados","💼 Negócio"],i.pillar||'📚 Inglês & aprendizagem')}</select></div><div><label>Formato</label><select id="ideaFormat">${opts(["Reels","Carrossel","Stories","Post","Live"],i.format||'Reels')}</select></div><div><label>Objetivo</label><select id="ideaObjective">${opts(["Atrair","Engajar","Converter","Fidelizar"],i.objective||'Atrair')}</select></div><div><label>Nível</label><select id="ideaLevel">${opts(["Todos","A1","A2","B1","B2","C1"],i.level||'Todos')}</select></div><div><label>Etapa</label><select id="ideaStage">${opts(["Ideia","Roteiro","Produção","Agendado","Postado"],i.stage||'Ideia')}</select></div><div><label>Data</label><input id="ideaDate" type="date" value="${i.date||''}"></div><div class="full"><label>Notas / roteiro / CTA</label><textarea id="ideaNotes">${esc(i.notes||'')}</textarea></div></div><button class="btn primary" style="margin-top:14px" onclick="saveIdea('${id||''}')">Salvar</button>`)}
+function saveIdea(id){const item={id:id||('idea_'+Date.now()),title:ideaTitle.value.trim(),pillar:ideaPillar.value,format:ideaFormat.value,objective:ideaObjective.value,level:ideaLevel.value,stage:ideaStage.value,date:ideaDate.value,notes:ideaNotes.value.trim()};if(!item.title){alert('Digite um título para a ideia.');return}if(id){const idx=DB.ideas.findIndex(x=>x.id===id);if(idx>=0)DB.ideas[idx]=item}else DB.ideas.unshift(item);save();closeModal();renderIdeas()}
+function editIdea(id){openIdeaModal(id)}
+function deleteIdea(id){if(confirm('Excluir esta ideia?')){DB.ideas=DB.ideas.filter(i=>i.id!==id);save();renderIdeas()}}
+
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`EWD_backup_${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
+}
+async function importBackup(file){
+  if(!file)return;
+  try{const txt=await file.text();const obj=JSON.parse(txt);DB=obj;if(!DB.weeklyPlanning)DB.weeklyPlanning={};save();renderAll();alert("Backup importado com sucesso.");}
+  catch(e){alert("Não foi possível importar este arquivo.");}
+}
+document.getElementById("importFile").addEventListener("change",e=>importBackup(e.target.files[0]));
+function resetData(){
+  if(!confirm("Restaurar a base inicial? Isso apaga os registros locais atuais."))return;
+  localStorage.removeItem(STORAGE_KEY);DB=load();renderAll();
+}
+renderAll();
+</script>
+</body>
+</html>
