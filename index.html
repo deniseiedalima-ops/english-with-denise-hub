@@ -239,6 +239,84 @@ textarea{min-height:100px}
 #makeups table{min-width:760px;width:100%}
 #makeups .toolbar{gap:12px;flex-wrap:wrap}
 </style>
+<style id="ewd-cloud-recorder">
+.cloud-chip{white-space:nowrap}
+.cloud-chip.ok{background:#edf4ed;border-color:#cfe3cf;color:#4f6d4f}
+.cloud-chip.busy{background:#f0eaf7;border-color:#d9cbe8;color:#634d7e}
+.cloud-chip.err{background:#fff3f2;border-color:#f0cfcf;color:#a2525b}
+.rec-panel{border:1px solid #e6dcef;background:linear-gradient(145deg,#fffefa,#f6f0fa)}
+.rec-live{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+.rec-dot{width:12px;height:12px;border-radius:50%;background:#c9c2cf;flex:0 0 auto}
+.rec-dot.on{background:#d0505e;animation:recPulse 1.4s infinite}
+@keyframes recPulse{0%{box-shadow:0 0 0 0 #d0505e66}70%{box-shadow:0 0 0 10px #d0505e00}100%{box-shadow:0 0 0 0 #d0505e00}}
+.rec-timer{font-family:Georgia,serif;font-size:26px;color:#5f4b79;min-width:90px}
+.rec-steps{margin:8px 0 0;padding-left:18px;font-size:12px;color:#71667d;line-height:1.6}
+#recTranscript{min-height:220px;font-size:13px;line-height:1.55}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.meet-btn{background:#e9f4ee!important;border-color:#cfe6d8!important;color:#3f7356!important}
+.note-card details{margin-top:8px}
+.note-card summary{cursor:pointer;font-size:12px;color:#796294;font-weight:700}
+.note-card .transcript{white-space:pre-wrap;font-size:12px;color:#5d5368;max-height:320px;overflow:auto;background:#faf7fb;border-radius:10px;padding:10px;margin-top:6px}
+.today-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.stack{display:flex;flex-direction:column;gap:12px}
+@media(max-width:600px){.today-actions{width:100%}.today-actions .btn{flex:1}}
+
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;padding:6px;background:#f3eef6;border-radius:999px;width:max-content;max-width:100%}
+.subtabs .pill{border:0;background:transparent}
+.subtabs .pill.on{background:#fffefa;box-shadow:0 3px 10px #6a547a1a}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid #e6dfeb;background:#fffefa;color:#655879;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:650;cursor:pointer;transition:all .15s}
+.pill:hover{border-color:#cbbbdc}
+.pill.on{background:#f0eaf7;border-color:#b9a5cf;color:#4f3d68;box-shadow:inset 0 0 0 1px #cbbbdc}
+.kanban{display:grid;grid-template-columns:repeat(5,minmax(210px,1fr));gap:14px;overflow-x:auto;padding-bottom:6px}
+.kcol{border-radius:20px;padding:16px 14px;min-height:340px;transition:outline .15s}
+.kcol.over{outline:2px dashed #a58cbd}
+.kcol-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.kcol-head h3{font-family:Georgia,serif;font-weight:500;font-size:21px;margin:0;color:#41364f}
+.kcount{background:#fffefa;border-radius:999px;min-width:28px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#6b5684;padding:0 8px}
+.kcard{background:#fffefa;border-radius:15px;padding:13px 14px;margin-bottom:10px;box-shadow:0 4px 14px #3a2b4812;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.kcard:hover{transform:translateY(-2px);box-shadow:0 8px 20px #3a2b481c}
+.ktitle{font-weight:750;font-size:14px;color:#3b3347;margin-bottom:8px;line-height:1.3}
+.kmeta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:12px;color:#7c7388}
+.kproj{margin-top:8px;font-size:11px;color:#6b5684;background:#f3eef8;border-radius:8px;padding:4px 7px;display:inline-block}
+.kadd{display:block;width:100%;border:0;background:transparent;color:#8d83a0;font-size:14px;padding:10px;cursor:pointer;border-radius:12px}
+.kadd:hover{background:#ffffff80}
+.fmt{display:inline-flex;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#eee7f5;color:#6b5684}
+.fmt-Story{background:#e8eee6;color:#58705a}.fmt-Carrossel{background:#e8f0f3;color:#557483}.fmt-Foto{background:#f4efe6;color:#7f6a45}
+.fmt-Live{background:#f8e7e8;color:#9a4e57}.fmt-TikTok{background:#ececef;color:#4d4d58}.fmt-YouTube{background:#fbeadf;color:#9a5a31}
+.cal-wrap{display:flex;gap:14px;align-items:flex-start}
+.cal-side{width:270px;flex:0 0 270px;display:flex;flex-direction:column;gap:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cwd{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8d83a0;font-weight:700;text-align:center;padding:4px 0}
+.cday{min-height:104px;background:#fcfafb;border:1px solid #f0eaf0;border-radius:12px;padding:6px;cursor:pointer;overflow:hidden}
+.cday:hover{border-color:#d8cbe3}
+.cday.empty{background:transparent;border:0;cursor:default}
+.cday.today{border-color:#9d85b7;box-shadow:inset 0 0 0 1px #cbbbdc}
+.cday.over{outline:2px dashed #a58cbd}
+.dnum{display:block;font-size:12px;font-weight:700;color:#7c7388;margin-bottom:4px}
+.cchip{font-size:11px;line-height:1.3;padding:4px 7px;border-radius:8px;margin-bottom:4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid #b9a5cf;background:#f1edf7;color:#4a3f58}
+.cchip.st-Roteiro{background:#f6eef0;border-color:#d7a7b2}.cchip.st-Gravado{background:#f6f2ea;border-color:#d6bf8f}
+.cchip.st-Editado{background:#edf2f6;border-color:#93b2c6}.cchip.st-Postado{background:#edf3ee;border-color:#8fba98}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#7c7388}
+.cal-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#b9a5cf}
+.cal-legend i.st-Roteiro{background:#d7a7b2}.cal-legend i.st-Gravado{background:#d6bf8f}.cal-legend i.st-Editado{background:#93b2c6}.cal-legend i.st-Postado{background:#8fba98}
+.bal{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0ebe7;font-size:13px}
+.metrics-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.proj-card{cursor:pointer}
+.tag{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#eee7f5;color:#634d7e}
+.tag.soft{background:#f4f1ec;color:#7a6d5d}
+.ring{--p:0;width:54px;height:54px;border-radius:50%;flex:0 0 54px;background:conic-gradient(#8068a8 calc(var(--p)*1%),#eee7f5 0);display:flex;align-items:center;justify-content:center}
+.ring span{width:42px;height:42px;border-radius:50%;background:#fffefa;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#5f4b79}
+.proj-foot{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid #f0ebe7;font-size:12px;color:#7c7388}
+.modalhead>div:first-child{flex:1;min-width:0}
+.title-input{width:100%;font-family:Georgia,serif;font-size:24px;border:0!important;background:transparent!important;padding:2px 0!important;box-shadow:none!important;color:#3b3347}
+.step{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #eee8e3}
+.guest{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;padding:8px;background:#faf7fb;border-radius:12px}
+.guest>button{justify-self:end;align-self:center}
+.guest input,.guest select{padding:8px 10px;font-size:13px}
+@media(max-width:1100px){.cal-wrap{flex-direction:column}.cal-side{width:100%;flex:auto}}
+@media(max-width:760px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.guest{grid-template-columns:1fr 1fr}.cday{min-height:70px}.cchip{font-size:10px}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -253,6 +331,7 @@ textarea{min-height:100px}
     <button data-view="planning">🗓️ Planning Class</button>
     <button data-view="meeting">🎙️ Meeting Notes → Notion</button>
     <button data-view="ideas">💡 Posts & Ideias</button>
+    <button data-view="projects">🚀 Projetos 2027</button>
     <button data-view="assessment">📝 Notas & Avaliações</button>
     <button data-view="makeups">🔄 Reposições</button>
     <button data-view="history">📋 Histórico</button>
@@ -264,6 +343,7 @@ textarea{min-height:100px}
   <div class="topbar">
     <div><h1 id="pageTitle">Hoje</h1><div id="todayLabel" class="muted small"></div></div>
     <div class="toolbar">
+      <button id="cloudChip" class="btn cloud-chip" onclick="openCloudSettings()">☁️ Notion: configurar</button>
       <button class="btn" onclick="exportBackup()">⬇️ Backup</button>
       <label class="btn" style="margin:0;cursor:pointer">⬆️ Importar<input id="importFile" type="file" accept=".json" style="display:none"></label>
     </div>
@@ -276,6 +356,7 @@ textarea{min-height:100px}
   <section id="planning" class="section"></section>
   <section id="meeting" class="section"></section>
   <section id="ideas" class="section"></section>
+  <section id="projects" class="section"></section>
   <section id="assessment" class="section"></section>
   <section id="makeups" class="section"></section>
   <section id="history" class="section"></section>
@@ -338,18 +419,30 @@ function load(){
   if(saved){
     try{
       const data = applyCurriculum(ensureGroupData(JSON.parse(saved)));
-      save(data);
+      save(data,{touch:false});
       return data;
     }catch(e){}
   }
   const data = applyCurriculum(ensureGroupData(deepClone(INITIAL)));
-  save(data); return data;
+  data.updatedAt = 0; data._fromInitial = true; // base inicial: o Notion sempre tem prioridade sobre ela
+  save(data,{touch:false}); return data;
 }
 let DB = load();
 if(!DB.weeklyPlanning) DB.weeklyPlanning = {};
 if(!DB.meetingNotes) DB.meetingNotes = [];
 if(!DB.ideas) DB.ideas = [];
-function save(data=DB){ensureGroupData(data);localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+function save(data=DB,opts={}){
+  ensureGroupData(data);
+  const touch = opts.touch!==false;
+  if(touch){ data.updatedAt = Date.now(); delete data._fromInitial; }
+  try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }
+  catch(e){
+    // Navegador sem espaço: encurta transcrições antigas que já estão salvas no Notion.
+    (data.meetingNotes||[]).forEach(n=>{ if(n.notionUrl && (n.transcript||"").length>1500) n.transcript=n.transcript.slice(0,1500)+"\n… (transcrição completa no Notion)"; });
+    try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }catch(e2){ console.warn("localStorage cheio",e2); }
+  }
+  if(touch && typeof Cloud!=="undefined") Cloud.schedulePush();
+}
 function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function badge(level){return `<span class="badge ${level.toLowerCase()}">${esc(level)}</span>`}
 function allLessons(){return [...DB.lessons,...(DB.customLessons||[])]}
@@ -381,7 +474,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view}"]`).classList.add("active");
-  const titles={today:"Hoje",students:"Alunos",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={today:"Hoje",students:"Alunos",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
 }
@@ -389,7 +482,7 @@ document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.v
 todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
 
 function renderAll(){
-  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
 }
 
 function homeworkKey(name){
@@ -447,7 +540,11 @@ function renderToday(){
         </div>
         <div class="meta">Último: <b>${esc(shown)}</b></div>
       </div>
-      <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar aula</button>
+      <div class="today-actions">
+        ${s.meet?`<a class="btn small meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Abrir Meet</a>`:`<button class="btn small" onclick='openEditStudent(${DB.students.indexOf(s)})' title="Adicionar link do Meet">＋ Link Meet</button>`}
+        <button class="btn small" onclick='startClassRecording(${JSON.stringify(studentKey(s))})'>🎙️ Gravar & transcrever</button>
+        <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar aula</button>
+      </div>
     </div>`
   }).join("") || `<div class="muted">Nenhuma aula cadastrada para ${day}.</div>`;
 
@@ -511,6 +608,7 @@ function studentCard(s,i){
       <h3>${esc(s.name)}</h3>${badge(s.level)}
     </div>
     <div class="muted small">${esc(s.day)} · ${esc(s.time)} · ${esc(s.group)}</div>
+    ${s.meet?`<div class="small" style="margin-top:6px"><a href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 ${esc(s.meet.replace(/^https?:\/\//,""))}</a></div>`:""}
     ${members.length>1?`<div class="notice blue small" style="margin-top:10px">Esta turma tem ${members.length} alunos. A presença pode ser registrada individualmente.</div>`:""}
     <div class="hr"></div>
     <div class="small"><b>Última aula:</b> ${esc(last?.lesson || s.last || "Sem registro")}</div>
@@ -868,13 +966,15 @@ function saveManualMakeup(){
   const note=document.getElementById("mNote")?.value.trim();
   if(!date||!student||!lesson){alert("Informe a data, o aluno/turma e a aula da reposição.");return;}
   const st=DB.students.find(x=>x.name===student);
-  DB.records.unshift({
+  const rec={
     id:Date.now(),date,student,
     schedule:st?`${st.name}|${st.day}|${st.time}`:student,
     status:"🔄 Rep. Pendente",warmup:"",lesson,progress:100,stoppedAt:"",
     homeworkDone:"❌ Não",note,manualMakeup:true,makeupDate:date
-  });
+  };
+  DB.records.unshift(rec);
   save();closeModal();renderAll();
+  Cloud.enqueue("upsertRecord",{record:rec});
 }
 function renderMakeups(){
   const rec=(DB.records||[]).filter(r=>r.status.includes("Rep."));
@@ -889,42 +989,444 @@ function completeMakeup(id){
   if(!r)return;
   r.status="✔️ Rep. Feita";
   r.makeupDate=todayISO();
+  if(Array.isArray(r.attendance)) r.attendance.forEach(a=>{if(a.status==="🔄 Rep. Pendente")a.status="✔️ Rep. Feita"});
   save(); renderAll();
+  Cloud.enqueue("upsertRecord",{record:r});
 }
 
+
+/* ================= Meeting Notes + gravação/transcrição de aulas do Google Meet ================= */
+const SEG_MS = 90*1000; // cada trecho de áudio enviado para transcrição (~90 s, bem abaixo do limite da Vercel)
+var REC = {key:"",title:"",week:"",date:"",transcript:"",summary:"",teacher:"",recording:false,startedAt:0,elapsed:0,
+  segments:0,queue:[],failed:[],busy:false,status:"",mime:"",ctx:null,dest:null,recorder:null,streams:[],segTimer:null,tick:null,durationMin:0,summarizing:false,saving:false};
+
+function normalizeMeet(v){
+  v=String(v||"").trim();
+  if(!v) return "";
+  if(/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/i.test(v)) return "https://meet.google.com/"+v.toLowerCase();
+  if(!/^https?:\/\//i.test(v)) v="https://"+v;
+  try{ const u=new URL(v); return u.protocol.startsWith("http")?u.href:null; }catch(e){ return null; }
+}
+function recStudent(){ return DB.students.find(s=>studentKey(s)===REC.key) || null; }
+function mmss(sec){ sec=Math.max(0,Math.round(sec)); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; return (h?h+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); }
+function recElapsed(){ return REC.recording ? REC.elapsed + (Date.now()-REC.startedAt)/1000 : REC.elapsed; }
+function recSet(field,value){ REC[field]=value; }
+function recDefaults(){
+  if(!REC.week) REC.week=getMondayISO();
+  if(!REC.date) REC.date=todayISO();
+}
+function startClassRecording(key){
+  if(REC.recording && REC.key!==key){ alert("Já existe uma gravação em andamento. Encerre-a antes de iniciar outra."); go("meeting"); return; }
+  if(!REC.recording && REC.key!==key && (REC.transcript||REC.summary||REC.teacher)){
+    if(!confirm("Há um rascunho de transcrição não salvo. Descartar e começar outra aula?")){ go("meeting"); return; }
+    recReset();
+  }
+  REC.key=key;
+  const s=recStudent();
+  if(s && !REC.title){
+    const plan=DB.weeklyPlanning?.[planningKey(getMondayISO(),s)]?.lesson;
+    REC.title=(plan||"").trim() || `Aula — ${s.name}`;
+  }
+  go("meeting");
+  setTimeout(()=>document.getElementById("recPanel")?.scrollIntoView({behavior:"smooth",block:"start"}),60);
+}
+function recReset(){
+  Object.assign(REC,{title:"",week:"",date:"",transcript:"",summary:"",teacher:"",elapsed:0,segments:0,queue:[],failed:[],status:"",durationMin:0});
+}
+
+async function recStart(){
+  if(REC.recording) return;
+  if(!Cloud.enabled()){ alert("Conecte o painel ao Notion primeiro (botão ☁️ no topo). A transcrição usa as funções seguras da Vercel."); openCloudSettings(); return; }
+  if(!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder==="undefined"){
+    alert("A gravação funciona no Google Chrome (ou Edge) no computador. Abra o painel por lá."); return;
+  }
+  let display;
+  try{
+    display = await navigator.mediaDevices.getDisplayMedia({
+      video:true,
+      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},
+      systemAudio:"include", selfBrowserSurface:"exclude", surfaceSwitching:"include", preferCurrentTab:false
+    });
+  }catch(e){ REC.status="Compartilhamento cancelado."; recUpdateLive(); return; }
+  const tabAudio = display.getAudioTracks();
+  if(!tabAudio.length){
+    if(!confirm("Nenhum áudio da guia foi compartilhado — a voz dos alunos não será captada.\n\nPara corrigir: clique em Cancelar, inicie de novo, escolha a guia do Google Meet e deixe marcado “Compartilhar áudio da guia”.\n\nContinuar só com o seu microfone?")){
+      display.getTracks().forEach(t=>t.stop()); return;
+    }
+  }
+  let mic=null;
+  try{ mic = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}); }
+  catch(e){ if(!tabAudio.length){ display.getTracks().forEach(t=>t.stop()); alert("Sem microfone e sem áudio da guia — não há o que gravar."); return; } }
+
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const dest = ctx.createMediaStreamDestination();
+  if(tabAudio.length) ctx.createMediaStreamSource(new MediaStream(tabAudio)).connect(dest);
+  if(mic) ctx.createMediaStreamSource(mic).connect(dest);
+  REC.ctx=ctx; REC.dest=dest; REC.streams=[display,mic].filter(Boolean);
+  display.getVideoTracks().forEach(t=>t.addEventListener("ended",()=>{ if(REC.recording) recStop(); }));
+  tabAudio.forEach(t=>t.addEventListener("ended",()=>{ if(REC.recording) recStop(); }));
+
+  REC.mime = ["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"].find(m=>MediaRecorder.isTypeSupported(m)) || "";
+  recDefaults();
+  REC.recording=true; REC.startedAt=Date.now(); REC.status=tabAudio.length?"Gravando a guia do Meet + seu microfone.":"Gravando só o seu microfone.";
+  recStartSegment();
+  REC.segTimer=setInterval(()=>{ if(REC.recorder && REC.recorder.state==="recording") REC.recorder.stop(); }, SEG_MS);
+  REC.tick=setInterval(recUpdateLive,1000);
+  window.onbeforeunload=()=> "A aula ainda está sendo gravada.";
+  renderMeetingNotes();
+}
+function recStartSegment(){
+  const opts = REC.mime ? {mimeType:REC.mime,audioBitsPerSecond:32000} : {audioBitsPerSecond:32000};
+  const r = new MediaRecorder(REC.dest.stream, opts);
+  const chunks=[]; const offset=recElapsed();
+  r.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  r.onstop=()=>{
+    if(chunks.length) recEnqueue({blob:new Blob(chunks,{type:r.mimeType||REC.mime||"audio/webm"}),offset});
+    if(REC.recording) recStartSegment();
+  };
+  r.start();
+  REC.recorder=r;
+}
+function recStop(){
+  if(!REC.recording) return;
+  REC.elapsed=recElapsed(); REC.recording=false;
+  REC.durationMin=Math.max(1,Math.round(REC.elapsed/60));
+  clearInterval(REC.segTimer); clearInterval(REC.tick);
+  try{ if(REC.recorder && REC.recorder.state!=="inactive") REC.recorder.stop(); }catch(e){}
+  REC.streams.forEach(s=>s.getTracks().forEach(t=>t.stop()));
+  setTimeout(()=>{ try{REC.ctx && REC.ctx.close()}catch(e){} },1500);
+  window.onbeforeunload=null;
+  REC.status="Gravação encerrada. Aguarde a transcrição dos últimos trechos.";
+  renderMeetingNotes();
+}
+function recEnqueue(item){ REC.queue.push(item); recPump(); }
+async function recPump(){
+  if(REC.busy) return;
+  REC.busy=true; recUpdateLive();
+  while(REC.queue.length){
+    const item=REC.queue.shift();
+    try{
+      const text=await Cloud.transcribe(item.blob);
+      REC.segments++;
+      if(text) recAppend(`[${mmss(item.offset)}] ${text}`);
+      if(!REC.recording) REC.status="Transcrição pronta. Revise, gere o resumo e salve no Notion.";
+    }catch(e){
+      REC.failed.push(item);
+      REC.status="Falha ao transcrever um trecho: "+e.message;
+    }
+    recUpdateLive();
+  }
+  REC.busy=false; recUpdateLive();
+}
+function recRetry(){ REC.queue.push(...REC.failed.splice(0)); REC.queue.sort((a,b)=>a.offset-b.offset); recPump(); }
+function recAppend(line){
+  REC.transcript = (REC.transcript ? REC.transcript.replace(/\s+$/,"")+"\n" : "") + line;
+  const ta=document.getElementById("recTranscript");
+  if(ta){ const atEnd = ta.scrollTop+ta.clientHeight >= ta.scrollHeight-30; ta.value=REC.transcript; if(atEnd) ta.scrollTop=ta.scrollHeight; }
+}
+function recUpdateLive(){
+  const t=document.getElementById("recTimer"); if(t) t.textContent=mmss(recElapsed());
+  const d=document.getElementById("recDot"); if(d) d.classList.toggle("on",REC.recording);
+  const st=document.getElementById("recStatus");
+  if(st){
+    const pend=REC.queue.length+(REC.busy?1:0);
+    st.innerHTML=`${esc(REC.status||"Pronto para gravar.")}<br><span class="muted small">${REC.segments} trecho(s) transcrito(s)${pend?` · ${pend} na fila`:""}${REC.failed.length?` · <b>${REC.failed.length} com erro</b> <button class="btn small" onclick="recRetry()">Tentar de novo</button>`:""}</span>`;
+  }
+}
+async function recSummarize(){
+  const transcript=(document.getElementById("recTranscript")?.value||REC.transcript||"").trim();
+  if(transcript.length<40){ alert("A transcrição ainda está curta demais para resumir."); return; }
+  if(!Cloud.enabled()){ openCloudSettings(); return; }
+  const s=recStudent();
+  REC.summarizing=true; renderMeetingNotes();
+  try{
+    const r=await Cloud.call("summarize",{transcript,student:s?.name||"",level:s?.level||"",lesson:REC.title});
+    REC.summary=r.summary||"";
+  }catch(e){ alert("Não foi possível gerar o resumo: "+e.message); }
+  REC.summarizing=false; renderMeetingNotes();
+}
+function recSave(){
+  if(REC.recording){ alert("Encerre a gravação antes de salvar."); return; }
+  const pend=REC.queue.length+(REC.busy?1:0);
+  if(pend && !confirm(`Ainda há ${pend} trecho(s) sendo transcrito(s). Salvar mesmo assim (sem eles)?`)) return;
+  if(REC.failed.length && !confirm(`${REC.failed.length} trecho(s) falharam na transcrição e ficarão de fora. Salvar mesmo assim?`)) return;
+  const transcript=(REC.transcript||"").trim(), summary=(REC.summary||"").trim(), teacher=(REC.teacher||"").trim();
+  if(!transcript && !summary && !teacher){ alert("Grave a aula ou cole uma transcrição/anotação antes de salvar."); return; }
+  recDefaults();
+  const s=recStudent();
+  const note={
+    id:Date.now(), week:REC.week, date:REC.date, createdAt:todayISO(),
+    student:s?.name||"", studentKey:s?studentKey(s):"",
+    title:(REC.title||"").trim() || (s?`Aula — ${s.name}`:"Meeting"),
+    transcript, summary, teacherNotes:teacher,
+    durationMin:REC.durationMin||null, meetLink:s?.meet||"",
+    source:REC.segments>0?"recorded":"manual"
+  };
+  DB.meetingNotes=DB.meetingNotes||[];
+  DB.meetingNotes.push(note);
+  save();
+  Cloud.enqueue("saveMeeting",{meeting:note});
+  recReset(); REC.key=s?studentKey(s):"";
+  renderMeetingNotes();
+  if(!Cloud.enabled()) alert("Meeting Note salva neste navegador. Conecte o Notion (☁️ no topo) para enviá-la ao Notion.");
+}
+function recDiscard(){
+  if(REC.recording){ alert("Encerre a gravação primeiro."); return; }
+  if((REC.transcript||REC.summary||REC.teacher) && !confirm("Descartar este rascunho?")) return;
+  recReset(); renderMeetingNotes();
+}
 
 function renderMeetingNotes(){
   if(!document.getElementById("meeting")) return;
-  const notes=[...(DB.meetingNotes||[])].sort((a,b)=>(b.week||b.date||"").localeCompare(a.week||a.date||""));
-  meeting.innerHTML=`<div class="card">
-    <h2>🎙️ Meeting Notes → Notion</h2>
-    <div class="muted">Transcreva ou cole suas anotações das aulas/meetings. Depois, copie o registro organizado e cole no Notion. Esses registros também poderão ser usados para sua análise semanal dos alunos.</div>
-    <div class="formgrid" style="margin-top:14px">
-      <div><label>Semana (início)</label><input id="mnWeek" type="date" value="${getMondayISO()}"></div>
-      <div><label>Aluno(s)/Turma</label><select id="mnStudent"><option value="">Individual — geral/meeting</option>${(DB.students||[]).map(s=>`<option>${esc(s.name)}</option>`).join("")}</select></div>
-      <div class="full"><label>Título / assunto da aula</label><input id="mnTitle" placeholder="Ex.: Conversation class — routines and goals"></div>
-      <div class="full"><label>Transcrição / anotações do meeting</label><textarea id="mnTranscript" rows="8" placeholder="Cole aqui a transcrição ou suas anotações..."></textarea></div>
-      <div class="full"><label>Observações da professora (opcional)</label><textarea id="mnTeacher" rows="3" placeholder="Participação, dificuldades percebidas, pontos para observar..."></textarea></div>
+  recDefaults();
+  const notes=[...(DB.meetingNotes||[])].sort((a,b)=>(b.date||b.week||"").localeCompare(a.date||a.week||"") || (b.id-a.id));
+  const s=recStudent();
+  const options=DB.students.map(x=>`<option value="${esc(studentKey(x))}" ${studentKey(x)===REC.key?"selected":""}>${esc(x.day)} ${esc(x.time)} · ${esc(x.name)}</option>`).join("");
+  const pend=REC.queue.length+(REC.busy?1:0);
+  meeting.innerHTML=`
+  <div class="stack">
+  <div id="recPanel" class="card rec-panel">
+    <div class="toolbar" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin:0 0 4px">🎙️ Gravar & transcrever aula do Google Meet</h2>
+      <div class="muted small">O painel grava o áudio da guia do Meet + seu microfone, transcreve a cada ~90 s e salva tudo no Notion.</div></div>
+      <span class="pill-count" title="Status do Notion">${Cloud.enabled()?"☁️":"⚠️"}</span>
     </div>
-    <button class="btn primary" style="margin-top:12px" onclick="saveMeetingNote()">Salvar Meeting Note</button>
+    <div class="formgrid" style="margin-top:14px">
+      <div><label>Aluno(s) / turma</label><select id="recKey" ${REC.recording?"disabled":""} onchange="REC.key=this.value;renderMeetingNotes()"><option value="">Meeting geral (sem turma)</option>${options}</select></div>
+      <div><label>Título / aula</label><input value="${esc(REC.title)}" oninput="recSet('title',this.value)" placeholder="Ex.: 2B — Describe travel problems"></div>
+      <div><label>Data da aula</label><input type="date" value="${esc(REC.date)}" onchange="recSet('date',this.value)"></div>
+      <div><label>Semana (início)</label><input type="date" value="${esc(REC.week)}" onchange="recSet('week',this.value)"></div>
+    </div>
+    <div class="rec-live">
+      <span id="recDot" class="rec-dot ${REC.recording?"on":""}"></span>
+      <span id="recTimer" class="rec-timer">${mmss(recElapsed())}</span>
+      ${s?.meet?`<a class="btn meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Abrir Meet de ${esc(s.name.split(" + ")[0])}</a>`:(s?`<button class="btn" onclick="openEditStudent(${DB.students.indexOf(s)})">＋ Adicionar link do Meet</button>`:"")}
+      ${REC.recording
+        ? `<button class="btn danger" onclick="recStop()">⏹️ Encerrar gravação</button>`
+        : `<button class="btn primary" onclick="recStart()">⏺️ Iniciar gravação</button>`}
+      <div id="recStatus" style="flex:1;min-width:220px;font-size:13px"></div>
+    </div>
+    <ol class="rec-steps">
+      <li>Abra a chamada no Google Meet (botão verde) <b>no Chrome do computador</b>.</li>
+      <li>Volte aqui e clique em <b>Iniciar gravação</b> → escolha a guia <b>do Meet</b> → deixe ligado <b>“Compartilhar áudio da guia”</b>.</li>
+      <li>Dê a aula normalmente. A transcrição aparece abaixo enquanto vocês falam. Ao terminar, clique em <b>Encerrar</b>.</li>
+      <li>Revise, gere o <b>resumo com IA</b> e clique em <b>Salvar no Notion</b>. Avise os alunos de que a aula é gravada/transcrita.</li>
+    </ol>
+    <div class="hr"></div>
+    <label>Transcrição ${REC.recording?"(ao vivo — você pode editar)":"(grave a aula ou cole aqui uma transcrição)"}</label>
+    <textarea id="recTranscript" oninput="recSet('transcript',this.value)" placeholder="A transcrição aparece aqui…">${esc(REC.transcript)}</textarea>
+    <div class="formgrid" style="margin-top:12px">
+      <div class="full"><div class="toolbar" style="justify-content:space-between;align-items:center"><label style="margin:0">✨ Resumo da aula</label>
+        <button class="btn small" ${REC.summarizing?"disabled":""} onclick="recSummarize()">${REC.summarizing?"Gerando resumo…":"✨ Gerar resumo com IA"}</button></div>
+        <textarea id="recSummary" style="margin-top:8px" oninput="recSet('summary',this.value)" placeholder="Resumo, vocabulário, erros dos alunos e próximos passos.">${esc(REC.summary)}</textarea></div>
+      <div class="full"><label>📝 Notas da professora (opcional)</label><textarea oninput="recSet('teacher',this.value)" rows="3" placeholder="Participação, dificuldades percebidas, pontos para observar...">${esc(REC.teacher)}</textarea></div>
+    </div>
+    <div class="toolbar" style="justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="recDiscard()">Descartar</button>
+      <button class="btn primary" ${REC.recording?"disabled":""} onclick="recSave()">💾 Salvar no Notion${pend?` (aguardando ${pend})`:""}</button>
+    </div>
   </div>
-  <div class="card"><div class="toolbar" style="justify-content:space-between"><h2>Registros salvos</h2><span class="muted small">${notes.length} registro(s)</span></div>
-    ${notes.length?notes.map(n=>`<div class="row" style="align-items:flex-start;margin-top:10px"><div class="main"><b>${esc(n.student||"Meeting geral")}</b><div class="muted small">Semana: ${dateBR(n.week)} · ${esc(n.title||"Sem título")}</div><div style="white-space:pre-wrap;margin-top:7px">${esc(n.transcript||"")}</div>${n.teacherNotes?`<div class="meta" style="white-space:pre-wrap;margin-top:6px"><b>Notas da professora:</b> ${esc(n.teacherNotes)}</div>`:""}</div><div class="toolbar"><button class="btn small" onclick="copyMeetingNote(${n.id})">📋 Copiar para Notion</button><button class="btn small danger" onclick="deleteMeetingNote(${n.id})">Excluir</button></div></div>`).join(""):`<div class="muted">Nenhum registro salvo ainda.</div>`}
+
+  <div class="card"><div class="toolbar" style="justify-content:space-between"><h2 style="margin:0">Registros salvos</h2><span class="muted small">${notes.length} registro(s)</span></div>
+    ${notes.length?notes.map(n=>`<div class="row note-card" style="align-items:flex-start;margin-top:10px"><div class="main">
+        <b>${esc(n.student||"Meeting geral")}</b> ${n.source==="recorded"?'<span class="badge conv">🎙️ gravada</span>':""}
+        <div class="muted small">${n.date?dateBR(n.date):"Semana "+dateBR(n.week)} · ${esc(n.title||"Sem título")}${n.durationMin?` · ${n.durationMin} min`:""}
+          · ${n.notionUrl?`<a href="${esc(n.notionUrl)}" target="_blank" rel="noopener">abrir no Notion ↗</a>`:(Cloud.enabled()?"enviando ao Notion…":"só neste navegador")}</div>
+        ${n.summary?`<div style="white-space:pre-wrap;margin-top:8px;font-size:13px">${esc(n.summary)}</div>`:""}
+        ${n.teacherNotes?`<div class="meta" style="white-space:pre-wrap;margin-top:6px"><b>Notas da professora:</b> ${esc(n.teacherNotes)}</div>`:""}
+        ${n.transcript?`<details><summary>Ver transcrição</summary><div class="transcript">${esc(n.transcript)}</div></details>`:(n.transcriptInNotion?`<div class="meta" style="margin-top:6px">Transcrição completa no Notion.</div>`:"")}
+      </div><div class="toolbar" style="flex-direction:column;align-items:stretch">
+        <button class="btn small" onclick="copyMeetingNote(${n.id})">📋 Copiar</button>
+        ${Cloud.enabled()&&!n.notionUrl?`<button class="btn small" onclick="resendMeeting(${n.id})">☁️ Reenviar</button>`:""}
+        <button class="btn small danger" onclick="deleteMeetingNote(${n.id})">Excluir</button></div></div>`).join(""):`<div class="muted" style="margin-top:10px">Nenhum registro salvo ainda.</div>`}
+  </div>
   </div>`;
+  recUpdateLive();
 }
-function saveMeetingNote(){
-  const transcript=document.getElementById("mnTranscript").value.trim();
-  if(!transcript){alert("Cole a transcrição ou as anotações antes de salvar.");return;}
-  DB.meetingNotes=DB.meetingNotes||[];
-  DB.meetingNotes.push({id:Date.now(),week:mnWeek.value,student:mnStudent.value,title:mnTitle.value.trim(),transcript,teacherNotes:mnTeacher.value.trim(),createdAt:todayISO()});
-  save();renderMeetingNotes();alert("Meeting Note salva.");
+function resendMeeting(id){
+  const n=(DB.meetingNotes||[]).find(x=>x.id===id); if(!n) return;
+  if(!n.transcript && n.transcriptInNotion){ alert("Esta nota já está no Notion."); return; }
+  Cloud.enqueue("saveMeeting",{meeting:n});
 }
 function copyMeetingNote(id){
   const n=(DB.meetingNotes||[]).find(x=>x.id===id);if(!n)return;
-  const text=`# ${n.student||"Meeting geral"}\n**Semana:** ${dateBR(n.week)}\n**Meeting/Aula:** ${n.title||"Sem título"}\n\n## Transcrição / anotações\n${n.transcript||""}\n\n## Observações da professora\n${n.teacherNotes||"—"}`;
-  navigator.clipboard.writeText(text).then(()=>alert("Texto formatado copiado! Cole no Notion.")).catch(()=>prompt("Copie o texto abaixo:",text));
+  const text=`# ${n.student||"Meeting geral"}\n**Data:** ${dateBR(n.date||n.week)}\n**Aula:** ${n.title||"Sem título"}\n\n## Resumo\n${n.summary||"—"}\n\n## Transcrição\n${n.transcript||"(no Notion)"}\n\n## Observações da professora\n${n.teacherNotes||"—"}`;
+  navigator.clipboard.writeText(text).then(()=>alert("Texto copiado!")).catch(()=>prompt("Copie o texto abaixo:",text));
 }
-function deleteMeetingNote(id){if(!confirm("Excluir este registro?"))return;DB.meetingNotes=(DB.meetingNotes||[]).filter(x=>x.id!==id);save();renderMeetingNotes();}
+function deleteMeetingNote(id){
+  if(!confirm("Excluir este registro? Ele também será arquivado no Notion."))return;
+  DB.meetingNotes=(DB.meetingNotes||[]).filter(x=>x.id!==id);save();renderMeetingNotes();
+  Cloud.enqueue("deleteMeeting",{id});
+}
+
+/* ================= Sincronização com o Notion (via funções seguras da Vercel) ================= */
+var Cloud = {
+  pw: localStorage.getItem("ewd_cloud_pw")||"",
+  state:"off", msg:"", lastPing:null,
+  queue: (()=>{ try{return JSON.parse(localStorage.getItem("ewd_cloud_queue")||"[]")}catch(e){return []} })(),
+  dropped: [],
+  pushTimer:null, pushing:false, pushAgain:false, processing:false,
+  enabled(){ return !!this.pw; },
+  async call(path, body){
+    let r;
+    try{
+      r = await fetch("/api/"+path,{method:"POST",headers:{"Content-Type":"application/json","x-ewd-password":this.pw},body:JSON.stringify(body)});
+    }catch(e){ throw new Error("Sem conexão com a internet."); }
+    let data=null; try{ data=await r.json(); }catch(e){}
+    if(!data){
+      if(r.status===404) throw new Error("Funções da Vercel não encontradas. Publique a pasta “api” junto com o index.html.");
+      if(r.status===413) throw new Error("Arquivo grande demais para a Vercel.");
+      throw new Error("Resposta inválida do servidor ("+r.status+").");
+    }
+    if(!r.ok) throw new Error(data.error||("Erro "+r.status));
+    return data;
+  },
+  notion(action,payload={}){ return this.call("notion",{action,...payload}); },
+  async transcribe(blob){
+    const b64 = await new Promise((ok,fail)=>{ const fr=new FileReader(); fr.onload=()=>ok(String(fr.result).split(",")[1]||""); fr.onerror=fail; fr.readAsDataURL(blob); });
+    const r = await this.call("transcribe",{audio:b64,mimeType:blob.type});
+    return r.text||"";
+  },
+  setState(state,msg){
+    this.state=state; this.msg=msg||"";
+    const c=document.getElementById("cloudChip"); if(!c) return;
+    c.classList.remove("ok","busy","err");
+    if(state!=="off") c.classList.add(state);
+    const label = state==="ok"?"☁️ Notion ✓":state==="busy"?"☁️ Salvando…":state==="err"?"⚠️ Notion: erro":"☁️ Notion: configurar";
+    c.textContent=label; c.title=this.msg;
+  },
+  snapshot(){
+    const d=deepClone(DB);
+    (d.meetingNotes||[]).forEach(n=>{ if(n.notionUrl && n.transcript){ n.transcript=""; n.transcriptInNotion=true; } });
+    return d;
+  },
+  schedulePush(){
+    if(!this.enabled()) return;
+    clearTimeout(this.pushTimer);
+    this.setState("busy","Alterações pendentes…");
+    this.pushTimer=setTimeout(()=>this.push(),2500);
+  },
+  async push(){
+    if(!this.enabled()) return;
+    if(this.pushing){ this.pushAgain=true; return; }
+    this.pushing=true; this.setState("busy","Salvando no Notion…");
+    try{
+      await this.notion("save",{data:this.snapshot()});
+      this.setState(this.queue.length?"busy":"ok","Salvo no Notion às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}));
+    }catch(e){ this.setState("err",e.message); }
+    this.pushing=false;
+    if(this.pushAgain){ this.pushAgain=false; this.push(); }
+  },
+  async pull(force){
+    const r=await this.notion("load");
+    if(!r.data) return "empty";
+    const remoteTs=Number(r.data.updatedAt||0), localTs=Number(DB.updatedAt||0);
+    if(!force && remoteTs<=localTs) return remoteTs<localTs?"local-newer":"same";
+    const localNotes=new Map((DB.meetingNotes||[]).map(n=>[n.id,n]));
+    (r.data.meetingNotes||[]).forEach(n=>{ const l=localNotes.get(n.id); if(l && !n.transcript && l.transcript) n.transcript=l.transcript; });
+    const data=applyCurriculum(ensureGroupData(r.data));
+    data.weeklyPlanning=data.weeklyPlanning||{}; data.meetingNotes=data.meetingNotes||[]; data.ideas=data.ideas||[];
+    data.updatedAt=remoteTs;
+    DB=data; save(DB,{touch:false}); renderAll();
+    return "pulled";
+  },
+  async init(){
+    if(!this.enabled()){ this.setState("off","Clique para conectar ao Notion"); return; }
+    this.setState("busy","Conectando ao Notion…");
+    try{
+      const res=await this.pull(false);
+      if(res==="empty" && DB._fromInitial){ this.setState("err","O Notion ainda está vazio e este navegador só tem a base inicial. Importe seu backup JSON (⬆️ Importar)."); this.processQueue(); return; }
+      if(res==="empty"||res==="local-newer") await this.push();
+      else this.setState("ok", res==="pulled"?"Dados atualizados a partir do Notion":"Sincronizado com o Notion");
+      this.processQueue();
+    }catch(e){ this.setState("err",e.message); }
+  },
+  enqueue(action,payload){
+    if(!this.enabled()) return;
+    this.queue.push({action,payload:deepClone(payload),tries:0});
+    this.persistQueue(); this.processQueue();
+  },
+  persistQueue(){ try{ localStorage.setItem("ewd_cloud_queue",JSON.stringify(this.queue)); }catch(e){} },
+  async processQueue(){
+    if(this.processing||!this.enabled()||!this.queue.length) return;
+    this.processing=true;
+    while(this.queue.length){
+      const item=this.queue[0];
+      this.setState("busy",`Enviando ao Notion (${this.queue.length} pendente(s))…`);
+      try{
+        const out=await this.notion(item.action,item.payload);
+        this.queue.shift(); this.persistQueue();
+        this.afterAction(item,out);
+      }catch(e){
+        item.tries=(item.tries||0)+1;
+        if(item.tries>=5 || /desconhecida|sem ID|sem dados/i.test(e.message)){ this.dropped.push({...item,error:e.message}); this.queue.shift(); }
+        this.persistQueue(); this.setState("err","Fila do Notion: "+e.message);
+        break;
+      }
+    }
+    this.processing=false;
+    if(!this.queue.length && this.state!=="err" && !this.pushing) this.setState("ok","Tudo salvo no Notion");
+  },
+  afterAction(item,out){
+    if(item.action==="saveMeeting" && out?.url){
+      const n=(DB.meetingNotes||[]).find(x=>x.id===item.payload.meeting.id);
+      if(n){ n.notionUrl=out.url; save(); if(document.getElementById("meeting")?.classList.contains("active")) renderMeetingNotes(); }
+    }
+  },
+  syncAll(){
+    if(!this.enabled()){ openCloudSettings(); return; }
+    DB.students.forEach(s=>this.queue.push({action:"upsertStudent",payload:deepClone({student:s,key:studentKey(s)}),tries:0}));
+    (DB.inactiveStudents||[]).forEach(s=>this.queue.push({action:"upsertStudent",payload:deepClone({student:s,key:s.day?studentKey(s):`${s.name}||`,active:false}),tries:0}));
+    (DB.records||[]).forEach(r=>this.queue.push({action:"upsertRecord",payload:deepClone({record:r}),tries:0}));
+    (DB.meetingNotes||[]).filter(n=>!n.notionUrl).forEach(n=>this.queue.push({action:"saveMeeting",payload:deepClone({meeting:n}),tries:0}));
+    (DB.projects||[]).forEach(p=>this.queue.push({action:"upsertProject",payload:deepClone({project:p}),tries:0}));
+    (DB.ideas||[]).forEach(i=>this.queue.push({action:"upsertPost",payload:deepClone({post:i}),tries:0}));
+    this.persistQueue(); this.push(); this.processQueue();
+    alert(`${this.queue.length} item(ns) na fila para o Notion. Pode continuar usando o painel enquanto envia.`);
+  }
+};
+setInterval(()=>Cloud.processQueue(),60*1000);
+
+function openCloudSettings(){
+  showModal(`<div class="modalhead"><div><h2>☁️ Conexão com o Notion</h2><div class="muted">Tudo o que você registra no painel é salvo no Notion: turmas, aulas, reposições, planning e meeting notes com transcrição.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+    <div class="notice ${Cloud.state==="ok"?"ok":Cloud.state==="err"?"":"blue"}" style="margin-bottom:14px"><b>Status:</b> ${esc(Cloud.enabled()?(Cloud.msg||Cloud.state):"não conectado neste navegador")}
+      ${Cloud.queue.length?`<br><span class="small">${Cloud.queue.length} item(ns) aguardando envio.</span>`:""}
+      ${Cloud.dropped.length?`<br><span class="small">${Cloud.dropped.length} item(ns) não puderam ser enviados: ${esc(Cloud.dropped[Cloud.dropped.length-1].error)}</span>`:""}</div>
+    <label>Senha do painel <span class="muted">(a mesma da variável EWD_PASSWORD na Vercel)</span></label>
+    <input id="cloudPw" type="password" value="${esc(Cloud.pw)}" placeholder="Digite a senha do painel" autocomplete="current-password">
+    <div class="toolbar" style="margin-top:12px">
+      <button class="btn primary" onclick="cloudConnect()">Conectar e testar</button>
+      ${Cloud.enabled()?`<button class="btn" onclick="cloudPullNow()">⬇️ Puxar dados do Notion</button>
+      <button class="btn" onclick="Cloud.syncAll()">⬆️ Enviar tudo para o Notion</button>
+      <button class="btn danger" onclick="cloudDisconnect()">Desconectar este navegador</button>`:""}
+    </div>
+    <div id="cloudTest" class="small muted" style="margin-top:12px"></div>`);
+}
+async function cloudConnect(){
+  const pw=document.getElementById("cloudPw").value.trim();
+  const out=document.getElementById("cloudTest");
+  if(!pw){ out.textContent="Digite a senha."; return; }
+  Cloud.pw=pw; out.textContent="Testando…";
+  try{
+    const r=await Cloud.notion("ping");
+    localStorage.setItem("ewd_cloud_pw",pw);
+    out.innerHTML=`✅ Conectado ao Notion. ${r.transcription?"Transcrição de aulas ativa.":"⚠️ Falta a variável OPENAI_API_KEY na Vercel para transcrever."}`;
+    await Cloud.init();
+  }catch(e){
+    out.innerHTML="❌ "+esc(e.message);
+    Cloud.pw=localStorage.getItem("ewd_cloud_pw")||"";
+  }
+}
+async function cloudPullNow(){
+  if(!confirm("Substituir os dados deste navegador pela cópia salva no Notion?")) return;
+  try{ const r=await Cloud.pull(true); alert(r==="empty"?"Ainda não há cópia no Notion.":"Dados carregados do Notion."); Cloud.setState("ok","Dados carregados do Notion"); closeModal(); }
+  catch(e){ alert("Erro: "+e.message); }
+}
+function cloudDisconnect(){
+  if(!confirm("Desconectar este navegador do Notion? Os dados continuam salvos no Notion.")) return;
+  localStorage.removeItem("ewd_cloud_pw"); Cloud.pw=""; Cloud.setState("off"); closeModal();
+}
+
 
 function renderHistory(){
   const names=[...new Set(DB.students.flatMap(s=>groupMembers(s)))].sort((a,b)=>a.localeCompare(b));
@@ -1006,6 +1508,7 @@ function confirmDeactivateStudent(index){
   DB.inactiveStudents.unshift(archived);
   DB.students.splice(index,1);
   save();closeModal();renderAll();
+  Cloud.enqueue("upsertStudent",{student:archived,key:studentKey(s),active:false});
 }
 function reactivateStudent(index){
   const s=(DB.inactiveStudents||[])[index]; if(!s)return;
@@ -1014,6 +1517,7 @@ function reactivateStudent(index){
   DB.students.push(restored);
   DB.inactiveStudents.splice(index,1);
   save();renderAll();
+  if(restored.day) Cloud.enqueue("upsertStudent",{student:restored,key:studentKey(restored),active:true});
 }
 function renderAdmin(){
   const activeRows=DB.students.map((s,i)=>`
@@ -1042,7 +1546,8 @@ function renderAdmin(){
       </div>
     </div>
     <div class="card span4"><h2>Segurança</h2>
-      <div class="notice">Os dados ficam no <b>localStorage</b> deste navegador. Faça backups periódicos, especialmente antes de limpar dados do navegador ou trocar de computador.</div>
+      <div class="notice">Os dados ficam neste navegador <b>e no Notion</b> (quando conectado pelo botão ☁️). Em outro computador, basta conectar com a mesma senha para recuperar tudo. O backup JSON continua disponível como cópia extra.</div>
+      <button class="btn" style="margin-top:12px" onclick="openCloudSettings()">☁️ Conexão com o Notion</button>
       <button class="btn danger" style="margin-top:12px" onclick="resetData()">Restaurar base inicial</button>
     </div>
     <div class="card span12">
@@ -1153,6 +1658,8 @@ function saveRecord(key){
   if(rWarm.value) DB.warmupUsage.push({date:rDate.value,student:s.name,warmup:rWarm.value,recordId:rec.id});
   s.last=lesson||s.last; s.progress=prog;
   save(); closeModal(); renderAll();
+  Cloud.enqueue("upsertRecord",{record:rec});
+  Cloud.enqueue("upsertStudent",{student:s,key:studentKey(s)});
 }
 function suggestWarmups(name){
   const hist=warmHistory(name);
@@ -1203,7 +1710,7 @@ function openStudent(i){
   </div>`);
 }
 function showModal(body){modal.innerHTML=body;modalBack.classList.add("show")}
-function closeModal(){modalBack.classList.remove("show")}
+function closeModal(){modalBack.classList.remove("show"); if(window.__onModalClose){const f=window.__onModalClose; window.__onModalClose=null; f();}}
 modalBack.addEventListener("click",e=>{if(e.target===modalBack)closeModal()})
 
 
@@ -1234,6 +1741,7 @@ function openAddStudent(){
     <div class="full"><label>Alunos da turma</label><div id="memberFields" class="member-fields"></div></div>
     <div><label>Dia</label><select id="aDay">${["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"].map(d=>`<option>${d}</option>`).join("")}</select></div>
     <div><label>Horário</label><input id="aTime" placeholder="Ex.: 18:00–19:00"></div>
+    <div class="full"><label>Link do Google Meet (opcional)</label><input id="aMeet" placeholder="https://meet.google.com/abc-defg-hij"></div>
     <div class="full"><label>Última aula (opcional)</label><input id="aLast" placeholder="Ex.: 2A — Talk about jobs"></div>
     <div class="full"><label>Observação da turma (opcional)</label><textarea id="aNotes" placeholder="Ex.: turma nova / aula personalizada / observações gerais"></textarea></div>
   </div>
@@ -1251,7 +1759,9 @@ function addStudent(){
   const name=members.join(" + ");
   const exists=DB.students.some(s=>s.name===name && s.day===aDay.value && s.time===aTime.value.trim());
   if(exists){alert("Essa turma já está cadastrada nesse dia e horário.");return;}
-  DB.students.push({
+  const meet=normalizeMeet(document.getElementById("aMeet").value);
+  if(meet===null){alert("O link do Meet parece inválido. Use o formato https://meet.google.com/abc-defg-hij");return;}
+  const ns={
     name,
     members,
     level:aLevel.value,
@@ -1260,9 +1770,12 @@ function addStudent(){
     group:type,
     last:aLast.value.trim(),
     progress:0,
-    notes:aNotes.value.trim()
-  });
+    notes:aNotes.value.trim(),
+    meet
+  };
+  DB.students.push(ns);
   save();closeModal();renderAll();
+  Cloud.enqueue("upsertStudent",{student:ns,key:studentKey(ns)});
 }
 
 function openEditStudent(index){
@@ -1274,6 +1787,7 @@ function openEditStudent(index){
     <div><label>Horário</label><input id="eTime" value="${esc(s.time||"")}" placeholder="Ex.: 18:00–19:00"></div>
     <div><label>Nível</label><select id="eLevel">${["A1","A2","B1","B2"].map(l=>`<option ${s.level===l?"selected":""}>${l}</option>`).join("")}</select></div>
     <div><label>Tipo</label><input value="${esc(s.group||"Individual")}" disabled></div>
+    <div class="full"><label>Link do Google Meet</label><input id="eMeet" value="${esc(s.meet||"")}" placeholder="https://meet.google.com/abc-defg-hij"></div>
     <div class="full"><label>Última aula</label><input id="eLast" value="${esc(s.last||"")}" placeholder="Última aula realizada"></div>
     <div class="full"><label>Observações</label><textarea id="eNotes">${esc(s.notes||"")}</textarea></div>
   </div>
@@ -1282,12 +1796,17 @@ function openEditStudent(index){
 function saveEditedStudent(index){
   const s=DB.students[index];
   if(!s)return;
+  const meet=normalizeMeet(document.getElementById("eMeet").value);
+  if(meet===null){alert("O link do Meet parece inválido. Use o formato https://meet.google.com/abc-defg-hij");return;}
+  const oldKey=studentKey(s);
+  s.meet=meet;
   s.day=document.getElementById("eDay").value;
   s.time=document.getElementById("eTime").value.trim();
   s.level=document.getElementById("eLevel").value;
   s.last=document.getElementById("eLast").value.trim();
   s.notes=document.getElementById("eNotes").value.trim();
   save(); closeModal(); renderAll();
+  Cloud.enqueue("upsertStudent",{student:s,key:studentKey(s),oldKey});
 }
 
 function openAddWarmup(){
@@ -1310,28 +1829,346 @@ function addLesson(){
   save();closeModal();renderAll();
 }
 
-function renderIdeas(){
-  const pillars=["📚 Inglês & aprendizagem","🌍 Cultura & curiosidades","🗣️ Conversation","🎓 Método & aulas","👩‍🎓 Alunos & resultados","💼 Negócio"];
-  const objectives=["Atrair","Engajar","Converter","Fidelizar"];
-  const formats=["Reels","Carrossel","Stories","Post","Live"];
-  const stages=["Ideia","Roteiro","Produção","Agendado","Postado"];
-  const counts=Object.fromEntries(objectives.map(o=>[o,DB.ideas.filter(i=>i.objective===o&&i.stage!=="Postado").length]));
-  const posted=DB.ideas.filter(i=>i.stage==="Postado").length;
-  const filterObj=document.getElementById('ideaObjectiveFilter')?.value||"";
-  const filtered=DB.ideas.filter(i=>!filterObj||i.objective===filterObj);
-  document.getElementById('ideas').innerHTML=`<div class="toolbar" style="justify-content:space-between"><div><h2 style="font-family:Georgia,serif;font-size:34px;margin:0">Ideias · Inglês</h2><div class="muted">Banco de ideias para o Instagram da English with Denise — 100% focado no negócio.</div></div><button class="btn primary" onclick="openIdeaModal()">+ Nova ideia</button></div>
-  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0">${objectives.map(o=>`<div class="card" style="cursor:pointer" onclick="ideaFilter('${o}')"><div class="muted"><b>${o}</b></div><div style="font:36px Georgia;color:#71568b;margin:8px 0">${counts[o]}</div><div class="muted small">${o==='Atrair'?'novos seguidores / alcance':o==='Engajar'?'comentários, salvamentos, enquetes':o==='Converter'?'gerar contato / matrícula':'alunos e quem já segue'}</div></div>`).join('')}<div class="card"><div class="muted"><b>Postados no mês</b></div><div style="font:36px Georgia;color:#71568b;margin:8px 0">${posted}</div><div class="muted small">conteúdos da empresa</div></div></div>
-  <div class="card" style="margin-bottom:16px"><b>💡 Equilíbrio sugerido por semana:</b> 2 posts para <b>atrair</b>, 1 para <b>engajar</b>, 1 para <b>converter</b>. Clique nos números para filtrar.</div>
-  <div class="toolbar" style="flex-wrap:wrap"><input id="ideaSearch" placeholder="🔎 Buscar ideia..." oninput="filterIdeaList()" style="max-width:240px"><select id="ideaPillarFilter" onchange="filterIdeaList()"><option value="">Todos os pilares</option>${pillars.map(p=>`<option>${p}</option>`).join('')}</select><select id="ideaObjectiveFilter" onchange="renderIdeas()"><option value="">Todos os objetivos</option>${objectives.map(o=>`<option ${filterObj===o?'selected':''}>${o}</option>`).join('')}</select><select id="ideaFormatFilter" onchange="filterIdeaList()"><option value="">Todos os formatos</option>${formats.map(f=>`<option>${f}</option>`).join('')}</select></div>
-  <div class="card" style="margin-top:14px;overflow:auto"><table style="width:100%;min-width:700px"><thead><tr><th>IDEIA</th><th>PILAR</th><th>FORMATO</th><th>OBJETIVO</th><th>NÍVEL</th><th>ETAPA</th><th>DATA</th><th></th></tr></thead><tbody id="ideasRows">${filtered.map((i,idx)=>`<tr><td><b>${esc(i.title)}</b>${i.notes?`<div class="muted small">${esc(i.notes)}</div>`:''}</td><td>${esc(i.pillar)}</td><td>${esc(i.format)}</td><td>${esc(i.objective)}</td><td>${esc(i.level||'Todos')}</td><td>${esc(i.stage)}</td><td>${esc(i.date||'—')}</td><td><button class="btn small" onclick="editIdea('${i.id}')">Editar</button> <button class="btn small" onclick="deleteIdea('${i.id}')">×</button></td></tr>`).join('')}</tbody></table></div>`;
-  filterIdeaList();
+/* ================= Posts & Ideias: Banco de ideias · Instagram · Calendário (mesmos dados) ================= */
+const POST_STAGES=["Ideia","Roteiro","Gravado","Editado","Postado"];
+const POST_FORMATS=["Reels","Carrossel","Foto","Story","Live","TikTok","YouTube"];
+const POST_PILLARS=["📚 Inglês & aprendizagem","🌍 Cultura & curiosidades","🗣️ Conversation","🎓 Método & aulas","👩‍🎓 Alunos & resultados","💼 Negócio"];
+const POST_OBJECTIVES=["Atrair","Engajar","Converter","Fidelizar"];
+const STAGE_COLORS={Ideia:"#f1edf7",Roteiro:"#f6eef0",Gravado:"#f6f2ea",Editado:"#edf2f6",Postado:"#edf3ee"};
+const MONTHS_PT=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var IDEAS_UI={view:(()=>{try{return localStorage.getItem("ewd_ideas_view")||"instagram"}catch(e){return "instagram"}})(),format:"",month:todayISO().slice(0,7),objective:""};
+
+function normalizePost(i){
+  const stageMap={"Produção":"Gravado","Agendado":"Editado"};
+  const fmtMap={"Stories":"Story","Post":"Foto"};
+  i.stage=stageMap[i.stage]||i.stage||"Ideia"; if(!POST_STAGES.includes(i.stage)) i.stage="Ideia";
+  i.format=fmtMap[i.format]||i.format||"Reels";
+  i.metrics=i.metrics||{};
+  return i;
 }
-function ideaFilter(o){const sel=document.getElementById('ideaObjectiveFilter');if(sel)sel.value=o;renderIdeas()}
-function filterIdeaList(){const q=(document.getElementById('ideaSearch')?.value||'').toLowerCase(),p=document.getElementById('ideaPillarFilter')?.value||'',f=document.getElementById('ideaFormatFilter')?.value||'';document.querySelectorAll('#ideasRows tr').forEach(row=>{const t=row.innerText.toLowerCase();row.style.display=(!q||t.includes(q))&&(!p||t.includes(p.toLowerCase()))&&(!f||t.includes(f.toLowerCase()))?'':'none'})}
-function openIdeaModal(id=null){const i=id?DB.ideas.find(x=>x.id===id):{};const opts=(arr,val)=>arr.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('');showModal(`<div class="modalhead"><h2>${id?'Editar ideia':'Nova ideia'}</h2><button class="btn" onclick="closeModal()">Fechar</button></div><div class="formgrid"><div class="full"><label>Ideia / título</label><input id="ideaTitle" value="${esc(i.title||'')}"></div><div><label>Pilar</label><select id="ideaPillar">${opts(["📚 Inglês & aprendizagem","🌍 Cultura & curiosidades","🗣️ Conversation","🎓 Método & aulas","👩‍🎓 Alunos & resultados","💼 Negócio"],i.pillar||'📚 Inglês & aprendizagem')}</select></div><div><label>Formato</label><select id="ideaFormat">${opts(["Reels","Carrossel","Stories","Post","Live"],i.format||'Reels')}</select></div><div><label>Objetivo</label><select id="ideaObjective">${opts(["Atrair","Engajar","Converter","Fidelizar"],i.objective||'Atrair')}</select></div><div><label>Nível</label><select id="ideaLevel">${opts(["Todos","A1","A2","B1","B2","C1"],i.level||'Todos')}</select></div><div><label>Etapa</label><select id="ideaStage">${opts(["Ideia","Roteiro","Produção","Agendado","Postado"],i.stage||'Ideia')}</select></div><div><label>Data</label><input id="ideaDate" type="date" value="${i.date||''}"></div><div class="full"><label>Notas / roteiro / CTA</label><textarea id="ideaNotes">${esc(i.notes||'')}</textarea></div></div><button class="btn primary" style="margin-top:14px" onclick="saveIdea('${id||''}')">Salvar</button>`)}
-function saveIdea(id){const item={id:id||('idea_'+Date.now()),title:ideaTitle.value.trim(),pillar:ideaPillar.value,format:ideaFormat.value,objective:ideaObjective.value,level:ideaLevel.value,stage:ideaStage.value,date:ideaDate.value,notes:ideaNotes.value.trim()};if(!item.title){alert('Digite um título para a ideia.');return}if(id){const idx=DB.ideas.findIndex(x=>x.id===id);if(idx>=0)DB.ideas[idx]=item}else DB.ideas.unshift(item);save();closeModal();renderIdeas()}
+function postEngagement(i){
+  const m=i.metrics||{}, reach=Number(m.reach)||0;
+  if(!reach) return null;
+  const inter=["likes","comments","saves","shares"].reduce((a,k)=>a+(Number(m[k])||0),0);
+  return inter/reach*100;
+}
+function fmtDateShort(iso){ if(!iso) return ""; const d=new Date(iso+"T12:00:00"); return d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".",""); }
+function projectById(id){ return (DB.projects||[]).find(p=>p.id===id); }
+function setIdeasView(v){ IDEAS_UI.view=v; try{localStorage.setItem("ewd_ideas_view",v)}catch(e){} renderIdeas(); }
+function syncPost(i){ Cloud.enqueue("upsertPost",{post:i}); }
+
+function renderIdeas(){
+  const box=document.getElementById("ideas"); if(!box) return;
+  DB.ideas=(DB.ideas||[]).map(normalizePost);
+  const tabs=[["ideias","💡 Banco de ideias"],["instagram","📸 Instagram"],["calendario","🗓️ Calendário"]];
+  let body="";
+  if(IDEAS_UI.view==="ideias") body=ideasBankHTML();
+  else if(IDEAS_UI.view==="calendario") body=ideasCalendarHTML();
+  else body=ideasInstagramHTML();
+  box.innerHTML=`
+    <div class="toolbar" style="justify-content:space-between;align-items:flex-end;margin-bottom:16px">
+      <div><div class="muted">Do insight ao post publicado — tudo conectado: o que muda no Instagram aparece no Calendário e no Banco de ideias.</div></div>
+      <button class="btn primary" onclick="openIdeaModal()">+ Novo post / ideia</button>
+    </div>
+    <div class="subtabs">${tabs.map(([k,l])=>`<button class="pill ${IDEAS_UI.view===k?"on":""}" onclick="setIdeasView('${k}')">${l}</button>`).join("")}</div>
+    ${body}`;
+  if(IDEAS_UI.view==="ideias") filterIdeaList();
+}
+
+/* ---------- Instagram (kanban) ---------- */
+function ideasInstagramHTML(){
+  const list=DB.ideas.filter(i=>!IDEAS_UI.format||i.format===IDEAS_UI.format);
+  const cols=POST_STAGES.map(st=>{
+    const items=list.filter(i=>i.stage===st).sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"));
+    return `<div class="kcol" style="background:${STAGE_COLORS[st]}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropPostStage(event,'${st}');this.classList.remove('over')">
+      <div class="kcol-head"><h3>${st}</h3><span class="kcount">${items.length}</span></div>
+      ${items.map(postCardHTML).join("")}
+      ${st==="Ideia"?`<button class="kadd" onclick="openIdeaModal(null,{stage:'Ideia'})">+ nova ideia</button>`:""}
+    </div>`;
+  }).join("");
+  const top=DB.ideas.filter(i=>Number(i.metrics?.reach)>0).sort((a,b)=>Number(b.metrics.reach)-Number(a.metrics.reach)).slice(0,10);
+  return `
+    <div class="pills" style="margin:14px 0">
+      ${["",...POST_FORMATS].map(f=>`<button class="pill ${IDEAS_UI.format===f?"on":""}" onclick="IDEAS_UI.format='${f}';renderIdeas()">${f||"Todos"}</button>`).join("")}
+    </div>
+    <div class="kanban">${cols}</div>
+    <div class="card" style="margin-top:18px">
+      <h2>🏆 Posts com maior alcance</h2>
+      ${top.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Post</th><th>Data</th><th style="text-align:right">Alcance</th><th style="text-align:right">Curtidas</th><th style="text-align:right">Coment.</th><th style="text-align:right">Salvos</th><th style="text-align:right">Compart.</th><th style="text-align:right">Engaj.</th></tr></thead><tbody>
+        ${top.map(i=>{const m=i.metrics,e=postEngagement(i);return `<tr style="cursor:pointer" onclick="openIdeaModal('${i.id}')"><td><b>${esc(i.title)}</b> <span class="fmt fmt-${esc(i.format)}">${esc(i.format)}</span></td><td>${fmtDateShort(i.date)}</td><td style="text-align:right">${esc(m.reach||0)}</td><td style="text-align:right">${esc(m.likes||0)}</td><td style="text-align:right">${esc(m.comments||0)}</td><td style="text-align:right">${esc(m.saves||0)}</td><td style="text-align:right">${esc(m.shares||0)}</td><td style="text-align:right">${e===null?"—":e.toFixed(1)+"%"}</td></tr>`}).join("")}
+      </tbody></table></div>`:`<div class="muted">Quando um post estiver em <b>Postado</b>, abra o card e anote alcance, curtidas, comentários, salvos e compartilhamentos — o ranking aparece aqui.</div>`}
+    </div>`;
+}
+function postCardHTML(i){
+  const pr=i.projectId?projectById(i.projectId):null;
+  return `<div class="kcard" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${i.id}')" onclick="openIdeaModal('${i.id}')">
+    <div class="ktitle">${esc(i.title)}</div>
+    <div class="kmeta"><span class="fmt fmt-${esc(i.format)}">${esc(i.format)}</span>${i.date?`<span>📅 ${fmtDateShort(i.date)}${i.time?" "+esc(i.time):""}</span>`:""}${Number(i.metrics?.reach)?`<span>👁️ ${esc(i.metrics.reach)}</span>`:""}</div>
+    ${pr?`<div class="kproj">🚀 ${esc(pr.name)}</div>`:""}
+  </div>`;
+}
+function dropPostStage(ev,stage){
+  ev.preventDefault();
+  const id=ev.dataTransfer.getData("text/plain"); const i=DB.ideas.find(x=>x.id===id); if(!i||i.stage===stage) return;
+  i.stage=stage; save(); renderIdeas(); syncPost(i);
+  if(stage==="Postado" && !Number(i.metrics?.reach)) setTimeout(()=>openIdeaModal(i.id,{focusMetrics:true}),50);
+}
+
+/* ---------- Calendário ---------- */
+function ideasCalendarHTML(){
+  const [y,m]=IDEAS_UI.month.split("-").map(Number);
+  const first=new Date(y,m-1,1), days=new Date(y,m,0).getDate();
+  const lead=(first.getDay()+6)%7; // semana começa na segunda
+  const today=todayISO();
+  const byDate={}; DB.ideas.forEach(i=>{ if(i.date) (byDate[i.date]=byDate[i.date]||[]).push(i); });
+  let cells="";
+  for(let k=0;k<lead;k++) cells+=`<div class="cday empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const items=(byDate[iso]||[]).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+    cells+=`<div class="cday ${iso===today?"today":""}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropPostDate(event,'${iso}');this.classList.remove('over')" onclick="if(event.target===this||event.target.classList.contains('dnum'))openIdeaModal(null,{date:'${iso}'})">
+      <span class="dnum">${d}</span>
+      ${items.map(i=>`<div class="cchip st-${esc(i.stage)}" draggable="true" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${i.id}')" onclick="event.stopPropagation();openIdeaModal('${i.id}')" title="${esc(i.stage)} · ${esc(i.format)}">${i.stage==="Postado"?"✓ ":""}${esc(i.format)} · ${esc(i.title)}</div>`).join("")}
+    </div>`;
+  }
+  const monthItems=DB.ideas.filter(i=>(i.date||"").startsWith(IDEAS_UI.month));
+  const byObj=Object.fromEntries(POST_OBJECTIVES.map(o=>[o,monthItems.filter(i=>i.objective===o).length]));
+  const unscheduled=DB.ideas.filter(i=>!i.date && i.stage!=="Postado");
+  return `
+    <div class="cal-wrap">
+      <div class="card" style="flex:1;min-width:0">
+        <div class="toolbar" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="toolbar" style="align-items:center">
+            <button class="btn small" onclick="calMove(-1)">‹</button>
+            <h2 style="margin:0;min-width:190px;text-align:center">${MONTHS_PT[m-1]} ${y}</h2>
+            <button class="btn small" onclick="calMove(1)">›</button>
+            <button class="btn small" onclick="IDEAS_UI.month=todayISO().slice(0,7);renderIdeas()">Hoje</button>
+          </div>
+          <div class="muted small">Clique num dia para agendar · arraste os posts para mudar a data</div>
+        </div>
+        <div class="cal-grid">${["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map(d=>`<div class="cwd">${d}</div>`).join("")}${cells}</div>
+        <div class="cal-legend">${POST_STAGES.map(s=>`<span><i class="st-${s}"></i>${s}</span>`).join("")}</div>
+      </div>
+      <div class="cal-side">
+        <div class="card"><h3>Equilíbrio do mês</h3>
+          ${POST_OBJECTIVES.map(o=>`<div class="bal"><span>${o}</span><b>${byObj[o]}</b></div>`).join("")}
+          <div class="muted small" style="margin-top:8px">Sugestão por semana: 2 atrair · 1 engajar · 1 converter.</div>
+        </div>
+        <div class="card" ondragover="event.preventDefault()" ondrop="dropPostDate(event,'')"><h3>Sem data (${unscheduled.length})</h3>
+          <div class="muted small" style="margin-bottom:8px">Arraste para um dia do calendário.</div>
+          ${unscheduled.map(i=>`<div class="cchip st-${esc(i.stage)}" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${i.id}')" onclick="openIdeaModal('${i.id}')">${esc(i.format)} · ${esc(i.title)}</div>`).join("")||`<div class="muted small">Tudo agendado ✨</div>`}
+        </div>
+      </div>
+    </div>`;
+}
+function calMove(delta){ const [y,m]=IDEAS_UI.month.split("-").map(Number); const d=new Date(y,m-1+delta,1); IDEAS_UI.month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; renderIdeas(); }
+function dropPostDate(ev,iso){
+  ev.preventDefault(); ev.stopPropagation();
+  const id=ev.dataTransfer.getData("text/plain"); const i=DB.ideas.find(x=>x.id===id); if(!i||i.date===iso) return;
+  i.date=iso; save(); renderIdeas(); syncPost(i);
+}
+
+/* ---------- Banco de ideias (lista) ---------- */
+function ideasBankHTML(){
+  const counts=Object.fromEntries(POST_OBJECTIVES.map(o=>[o,DB.ideas.filter(i=>i.objective===o&&i.stage!=="Postado").length]));
+  const ym=todayISO().slice(0,7);
+  const postedMonth=DB.ideas.filter(i=>i.stage==="Postado"&&(i.date||"").startsWith(ym)).length;
+  const f=IDEAS_UI.objective;
+  const rows=DB.ideas.filter(i=>!f||i.objective===f);
+  return `
+  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0">
+    ${POST_OBJECTIVES.map(o=>`<div class="card" style="cursor:pointer;${f===o?"outline:2px solid #cbbbdc":""}" onclick="IDEAS_UI.objective=IDEAS_UI.objective==='${o}'?'':'${o}';renderIdeas()"><div class="muted"><b>${o}</b></div><div class="kpi">${counts[o]}</div><div class="muted small">${o==='Atrair'?'novos seguidores / alcance':o==='Engajar'?'comentários, salvamentos, enquetes':o==='Converter'?'gerar contato / matrícula':'alunos e quem já segue'}</div></div>`).join('')}
+    <div class="card"><div class="muted"><b>Postados no mês</b></div><div class="kpi">${postedMonth}</div><div class="muted small">conteúdos publicados</div></div>
+  </div>
+  <div class="toolbar" style="flex-wrap:wrap;margin-bottom:12px"><input id="ideaSearch" placeholder="🔎 Buscar ideia..." oninput="filterIdeaList()" style="max-width:240px">
+    <select id="ideaPillarFilter" onchange="filterIdeaList()" style="max-width:240px"><option value="">Todos os pilares</option>${POST_PILLARS.map(p=>`<option>${p}</option>`).join('')}</select>
+    <select id="ideaFormatFilter" onchange="filterIdeaList()" style="max-width:200px"><option value="">Todos os formatos</option>${POST_FORMATS.map(x=>`<option>${x}</option>`).join('')}</select>
+    ${f?`<button class="btn small" onclick="IDEAS_UI.objective='';renderIdeas()">Objetivo: ${f} ✕</button>`:""}</div>
+  <div class="card tablewrap"><table class="table"><thead><tr><th>Ideia</th><th>Pilar</th><th>Formato</th><th>Objetivo</th><th>Nível</th><th>Etapa</th><th>Data</th><th>Projeto</th></tr></thead><tbody id="ideasRows">
+    ${rows.map(i=>`<tr style="cursor:pointer" onclick="openIdeaModal('${i.id}')" data-pillar="${esc(i.pillar||"")}" data-format="${esc(i.format)}"><td><b>${esc(i.title)}</b>${i.notes?`<div class="muted small">${esc(i.notes.slice(0,120))}</div>`:''}</td><td>${esc(i.pillar||"")}</td><td>${esc(i.format)}</td><td>${esc(i.objective||"")}</td><td>${esc(i.level||'Todos')}</td><td>${esc(i.stage)}</td><td>${i.date?fmtDateShort(i.date):'—'}</td><td>${i.projectId&&projectById(i.projectId)?esc(projectById(i.projectId).name):'—'}</td></tr>`).join('')||`<tr><td colspan="8" class="muted">Nenhuma ideia ainda. Clique em “+ Novo post / ideia”.</td></tr>`}
+  </tbody></table></div>`;
+}
+function filterIdeaList(){
+  const q=(document.getElementById('ideaSearch')?.value||'').toLowerCase(),p=document.getElementById('ideaPillarFilter')?.value||'',f=document.getElementById('ideaFormatFilter')?.value||'';
+  document.querySelectorAll('#ideasRows tr[data-format]').forEach(row=>{const t=row.innerText.toLowerCase();row.style.display=(!q||t.includes(q))&&(!p||row.dataset.pillar===p)&&(!f||row.dataset.format===f)?'':'none'});
+}
+function ideaFilter(o){ IDEAS_UI.view="ideias"; IDEAS_UI.objective=o; renderIdeas(); }
+
+/* ---------- Modal do post (usado pelas 3 visões e pelos Projetos) ---------- */
+function openIdeaModal(id=null,preset={}){
+  const i=id?DB.ideas.find(x=>x.id===id):{stage:"Ideia",format:"Reels",pillar:POST_PILLARS[0],objective:"Atrair",level:"Todos",metrics:{},...preset};
+  if(!i) return;
+  const m=i.metrics||{};
+  const opts=(arr,val)=>arr.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('');
+  const projOpts=`<option value="">— nenhum —</option>`+(DB.projects||[]).map(p=>`<option value="${esc(p.id)}" ${p.id===i.projectId?"selected":""}>${esc(p.name)}</option>`).join("");
+  showModal(`<div class="modalhead"><div><h2>${id?'Editar post / ideia':'Novo post / ideia'}</h2><div class="muted small">Aparece no Instagram, no Calendário e no Banco de ideias.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div class="full"><label>Ideia / título</label><input id="ideaTitle" value="${esc(i.title||'')}" placeholder="Ex.: 5 erros comuns no Simple Past"></div>
+    <div><label>Etapa</label><select id="ideaStage">${opts(POST_STAGES,i.stage)}</select></div>
+    <div><label>Formato</label><select id="ideaFormat">${opts(POST_FORMATS,i.format)}</select></div>
+    <div><label>Data de postagem</label><input id="ideaDate" type="date" value="${esc(i.date||'')}"></div>
+    <div><label>Horário</label><input id="ideaTime" type="time" value="${esc(i.time||'')}"></div>
+    <div><label>Pilar</label><select id="ideaPillar">${opts(POST_PILLARS,i.pillar)}</select></div>
+    <div><label>Objetivo</label><select id="ideaObjective">${opts(POST_OBJECTIVES,i.objective)}</select></div>
+    <div><label>Nível</label><select id="ideaLevel">${opts(["Todos","A1","A2","B1","B2","C1"],i.level||'Todos')}</select></div>
+    <div><label>Projeto ligado</label><select id="ideaProject">${projOpts}</select></div>
+    <div class="full"><label>Notas / roteiro / CTA</label><textarea id="ideaNotes">${esc(i.notes||'')}</textarea></div>
+    <div class="full" id="metricsBox"><label>📊 Métricas (depois de postar)</label>
+      <div class="metrics-grid">
+        ${[["reach","Alcance"],["likes","Curtidas"],["comments","Comentários"],["saves","Salvos"],["shares","Compart."]].map(([k,l])=>`<div><span class="muted small">${l}</span><input type="number" min="0" id="m_${k}" value="${esc(m[k]??'')}"></div>`).join("")}
+      </div></div>
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin-top:14px">
+    ${id?`<button class="btn danger" onclick="deleteIdea('${id}')">Excluir</button>`:"<span></span>"}
+    <button class="btn primary" onclick="saveIdea('${id||''}')">Salvar</button>
+  </div>`);
+  if(preset.focusMetrics) setTimeout(()=>{document.getElementById("metricsBox")?.scrollIntoView({block:"center"});document.getElementById("m_reach")?.focus()},50);
+}
+function saveIdea(id){
+  const val=x=>document.getElementById(x).value;
+  const prev=id?DB.ideas.find(x=>x.id===id):null;
+  const metrics={}; ["reach","likes","comments","saves","shares"].forEach(k=>{const v=val("m_"+k); if(v!=="") metrics[k]=Number(v);});
+  const item={...(prev||{}),id:id||('idea_'+Date.now()),title:val("ideaTitle").trim(),stage:val("ideaStage"),format:val("ideaFormat"),date:val("ideaDate"),time:val("ideaTime"),pillar:val("ideaPillar"),objective:val("ideaObjective"),level:val("ideaLevel"),projectId:val("ideaProject"),notes:val("ideaNotes").trim(),metrics};
+  if(!item.title){alert('Digite um título para a ideia.');return}
+  if(prev) Object.assign(prev,item); else DB.ideas.unshift(item);
+  save(); closeModal(); renderIdeas(); renderProjects(); syncPost(prev||item);
+}
 function editIdea(id){openIdeaModal(id)}
-function deleteIdea(id){if(confirm('Excluir esta ideia?')){DB.ideas=DB.ideas.filter(i=>i.id!==id);save();renderIdeas()}}
+function deleteIdea(id){
+  if(!confirm('Excluir este post/ideia?')) return;
+  DB.ideas=DB.ideas.filter(i=>i.id!==id); save(); closeModal(); renderIdeas(); renderProjects();
+  Cloud.enqueue("deleteItem",{kind:"post",id});
+}
+
+/* ================= Projetos 2027 ================= */
+const PROJ_TYPES=["🎬 Clube cultural","🎤 Palestra / convidados","📚 Curso","🛍️ Produto","📅 Evento","✨ Outro"];
+const PROJ_STATUS=["💡 Ideia","🗺️ Planejando","🚧 Em andamento","🚀 Lançado","⏸️ Pausado"];
+const PROJ_QUARTERS=["Sem data","Q1 2027","Q2 2027","Q3 2027","Q4 2027"];
+const GUEST_STATUS=["A convidar","Convidado","Confirmado","Realizado","Não pode"];
+var PROJ_UI={status:""};
+
+function ensureProjects(){
+  if(Array.isArray(DB.projects)) return;
+  DB.projects=[
+    {id:"proj_clube_cultural",name:"Clube Cultural",type:"🎬 Clube cultural",status:"💡 Ideia",quarter:"Sem data",targetDate:"",
+     description:"Encontros culturais em inglês (filmes, jogos e conversas) para alunos e comunidade do English with Denise.",goal:"",notes:"",
+     steps:["Definir formato e frequência dos encontros","Escolher os primeiros temas/filmes/jogos","Definir quem conduz os encontros (roteiro pronto da Denise)","Definir preço ou se é benefício para alunos","Planejar divulgação no Instagram"].map((t,k)=>({id:"s"+k,text:t,done:false})),guests:[]},
+    {id:"proj_palestras",name:"Palestras com convidados do mundo do inglês",type:"🎤 Palestra / convidados",status:"💡 Ideia",quarter:"Sem data",targetDate:"",
+     description:"Palestras com pessoas que estão no mundo do inglês e querem passar conhecimento.",goal:"",notes:"",
+     steps:["Listar possíveis convidados","Definir formato (live, Meet, presencial) e duração","Escolher temas das primeiras palestras","Fazer convite padrão para os convidados","Planejar divulgação no Instagram"].map((t,k)=>({id:"s"+k,text:t,done:false})),guests:[]}
+  ];
+  save(DB,{touch:false});
+}
+function projProgress(p){ const s=p.steps||[]; return s.length?Math.round(s.filter(x=>x.done).length/s.length*100):0; }
+function projPosts(p){ return (DB.ideas||[]).filter(i=>i.projectId===p.id); }
+
+function renderProjects(){
+  const box=document.getElementById("projects"); if(!box) return;
+  ensureProjects();
+  const all=DB.projects;
+  const list=all.filter(p=>!PROJ_UI.status||p.status===PROJ_UI.status);
+  const guestsOk=all.reduce((a,p)=>a+(p.guests||[]).filter(g=>g.status==="Confirmado"||g.status==="Realizado").length,0);
+  const postsCount=all.reduce((a,p)=>a+projPosts(p).length,0);
+  const byQ=PROJ_QUARTERS.map(q=>[q,list.filter(p=>(p.quarter||"Sem data")===q)]).filter(([,arr])=>arr.length);
+  box.innerHTML=`
+  <div class="toolbar" style="justify-content:space-between;align-items:flex-end;margin-bottom:16px">
+    <div class="muted">Ideias e projetos para 2027 — do rascunho ao lançamento, com convidados e posts de divulgação ligados ao Instagram.</div>
+    <button class="btn primary" onclick="newProject()">+ Novo projeto</button>
+  </div>
+  <div class="grid" style="margin-bottom:14px">
+    <div class="card span3"><div class="muted small">Projetos</div><div class="kpi">${all.length}</div></div>
+    <div class="card span3"><div class="muted small">Em andamento</div><div class="kpi">${all.filter(p=>p.status==="🚧 Em andamento").length}</div></div>
+    <div class="card span3"><div class="muted small">Convidados confirmados</div><div class="kpi">${guestsOk}</div></div>
+    <div class="card span3"><div class="muted small">Posts de divulgação</div><div class="kpi">${postsCount}</div></div>
+  </div>
+  <div class="pills" style="margin-bottom:14px">${["",...PROJ_STATUS].map(s=>`<button class="pill ${PROJ_UI.status===s?"on":""}" onclick="PROJ_UI.status='${s}';renderProjects()">${s||"Todos"}</button>`).join("")}</div>
+  ${byQ.length?byQ.map(([q,arr])=>`<h3 style="margin:18px 0 10px">${q==="Sem data"?"📌 Sem data definida":"🗓️ "+q}</h3><div class="grid">${arr.map(projCardHTML).join("")}</div>`).join(""):`<div class="card muted">Nenhum projeto ${PROJ_UI.status?"com esse status":"ainda"}.</div>`}`;
+}
+function projCardHTML(p){
+  const prog=projProgress(p), posts=projPosts(p), guests=p.guests||[];
+  const next=(p.steps||[]).filter(s=>!s.done).slice(0,3);
+  return `<div class="card span6 proj-card" onclick="openProject('${p.id}')">
+    <div class="toolbar" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap">
+      <div><h3 style="margin:0 0 6px;font-size:17px">${esc(p.name)}</h3><span class="tag">${esc(p.type)}</span> <span class="tag soft">${esc(p.status)}</span></div>
+      <div class="ring" style="--p:${prog}"><span>${prog}%</span></div>
+    </div>
+    ${p.description?`<div class="muted small" style="margin-top:10px;line-height:1.5">${esc(p.description)}</div>`:""}
+    ${next.length?`<div class="small" style="margin-top:10px"><b>Próximos passos</b>${next.map(s=>`<div class="muted">☐ ${esc(s.text)}</div>`).join("")}</div>`:""}
+    <div class="proj-foot"><span>🎤 ${guests.length} convidado(s)</span><span>📸 ${posts.length} post(s)</span>${p.targetDate?`<span>🎯 ${dateBR(p.targetDate)}</span>`:""}</div>
+  </div>`;
+}
+function newProject(){
+  ensureProjects();
+  const p={id:"proj_"+Date.now(),name:"Novo projeto",type:"✨ Outro",status:"💡 Ideia",quarter:"Sem data",targetDate:"",description:"",goal:"",notes:"",steps:[],guests:[]};
+  DB.projects.unshift(p); save(); renderProjects(); openProject(p.id,true);
+}
+var PROJ_OPEN=null;
+function openProject(id,isNew){
+  const p=projectById(id); if(!p) return;
+  PROJ_OPEN=id;
+  const opts=(arr,val)=>arr.map(x=>`<option ${x===val?'selected':''}>${x}</option>`).join('');
+  const posts=projPosts(p);
+  showModal(`<div class="modalhead"><div><input class="title-input" value="${esc(p.name)}" oninput="projSet('name',this.value)" ${isNew?"autofocus":""}><div class="muted small">${projProgress(p)}% concluído · salva automaticamente</div></div><button class="btn" onclick="closeModal()">Concluir</button></div>
+  <div class="formgrid">
+    <div><label>Tipo</label><select onchange="projSet('type',this.value)">${opts(PROJ_TYPES,p.type)}</select></div>
+    <div><label>Status</label><select onchange="projSet('status',this.value)">${opts(PROJ_STATUS,p.status)}</select></div>
+    <div><label>Quando (2027)</label><select onchange="projSet('quarter',this.value)">${opts(PROJ_QUARTERS,p.quarter||"Sem data")}</select></div>
+    <div><label>Data alvo</label><input type="date" value="${esc(p.targetDate||"")}" onchange="projSet('targetDate',this.value)"></div>
+    <div class="full"><label>Descrição / ideia</label><textarea rows="3" oninput="projSet('description',this.value)" placeholder="O que é, como funciona...">${esc(p.description||"")}</textarea></div>
+    <div class="full"><label>Público e objetivo</label><textarea rows="2" oninput="projSet('goal',this.value)" placeholder="Para quem é? O que você quer alcançar (alunos novos, renda extra, comunidade...)?">${esc(p.goal||"")}</textarea></div>
+  </div>
+  <div class="hr"></div>
+  <h3>✅ Próximos passos</h3>
+  <div class="steps">${(p.steps||[]).map(s=>`<div class="step"><label class="homework-check" style="font-size:13px"><input type="checkbox" ${s.done?"checked":""} onchange="projStep('${s.id}','toggle')"><span style="${s.done?"text-decoration:line-through;opacity:.6":""}">${esc(s.text)}</span></label><button class="btn small" onclick="projStep('${s.id}','del')" title="Remover">✕</button></div>`).join("")||`<div class="muted small">Nenhum passo ainda.</div>`}</div>
+  <div class="toolbar" style="margin-top:8px;flex-wrap:nowrap"><input id="newStep" placeholder="Novo passo... (Enter para adicionar)" onkeydown="if(event.key==='Enter')projStep(null,'add')"><button class="btn small" onclick="projStep(null,'add')">Adicionar</button></div>
+  <div class="hr"></div>
+  <h3>🎤 Convidados / palestrantes / parceiros</h3>
+  <div class="guests">${(p.guests||[]).map(g=>`<div class="guest">
+      <input value="${esc(g.name||"")}" placeholder="Nome" oninput="projGuest('${g.id}','name',this.value)">
+      <input value="${esc(g.topic||"")}" placeholder="Área / tema" oninput="projGuest('${g.id}','topic',this.value)">
+      <input value="${esc(g.contact||"")}" placeholder="@ / contato" oninput="projGuest('${g.id}','contact',this.value)">
+      <input type="date" value="${esc(g.date||"")}" onchange="projGuest('${g.id}','date',this.value)">
+      <select onchange="projGuest('${g.id}','status',this.value)">${opts(GUEST_STATUS,g.status||"A convidar")}</select>
+      <button class="btn small" onclick="projGuest('${g.id}','del')">✕</button></div>`).join("")||`<div class="muted small">Adicione as pessoas do mundo do inglês que você quer convidar.</div>`}</div>
+  <button class="btn small" style="margin-top:8px" onclick="projGuest(null,'add')">+ Convidado</button>
+  <div class="hr"></div>
+  <div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">📸 Posts de divulgação</h3><button class="btn small primary" onclick="projNewPost('${p.id}')">+ Post de divulgação</button></div>
+  <div style="margin-top:8px">${posts.map(i=>`<div class="row" style="margin-top:6px;cursor:pointer" onclick="closeModal();openIdeaModal('${i.id}')"><div class="main"><b>${esc(i.title)}</b><div class="meta">${esc(i.format)} · ${esc(i.stage)}${i.date?" · "+fmtDateShort(i.date):""}</div></div></div>`).join("")||`<div class="muted small">Nenhum post ligado. Os posts criados aqui aparecem no Instagram e no Calendário.</div>`}</div>
+  <div class="hr"></div>
+  <label>📝 Anotações livres</label><textarea rows="3" oninput="projSet('notes',this.value)">${esc(p.notes||"")}</textarea>
+  <div class="toolbar" style="justify-content:space-between;margin-top:14px"><button class="btn danger" onclick="deleteProject('${p.id}')">Excluir projeto</button><button class="btn primary" onclick="closeModal()">Concluir</button></div>`);
+  window.__onModalClose=()=>{ const pr=projectById(id); if(pr){ renderProjects(); Cloud.enqueue("upsertProject",{project:pr}); } PROJ_OPEN=null; };
+}
+function projSet(field,value){ const p=projectById(PROJ_OPEN); if(!p) return; p[field]=value; save(); }
+function projStep(sid,action){
+  const p=projectById(PROJ_OPEN); if(!p) return; p.steps=p.steps||[];
+  if(action==="add"){ const v=(document.getElementById("newStep")?.value||"").trim(); if(!v) return; p.steps.push({id:"s"+Date.now(),text:v,done:false}); }
+  if(action==="toggle"){ const s=p.steps.find(x=>x.id===sid); if(s) s.done=!s.done; }
+  if(action==="del"){ p.steps=p.steps.filter(x=>x.id!==sid); }
+  save(); reopenProject();
+  if(action==="add") setTimeout(()=>document.getElementById("newStep")?.focus(),30);
+}
+function projGuest(gid,field,value){
+  const p=projectById(PROJ_OPEN); if(!p) return; p.guests=p.guests||[];
+  if(field==="add"){ p.guests.push({id:"g"+Date.now(),name:"",topic:"",contact:"",date:"",status:"A convidar"}); save(); reopenProject(); return; }
+  if(field==="del"){ p.guests=p.guests.filter(g=>g.id!==gid); save(); reopenProject(); return; }
+  const g=p.guests.find(x=>x.id===gid); if(g){ g[field]=value; save(); }
+}
+function reopenProject(){ const id=PROJ_OPEN; const sc=document.getElementById("modal")?.scrollTop||0; window.__onModalClose=null; openProject(id); const md=document.getElementById("modal"); if(md) md.scrollTop=sc; }
+function projNewPost(pid){
+  const p=projectById(pid); if(!p) return;
+  closeModal();
+  openIdeaModal(null,{projectId:pid,title:`Divulgação: ${p.name}`,objective:"Converter",pillar:"💼 Negócio",stage:"Ideia"});
+}
+function deleteProject(id){
+  if(!confirm("Excluir este projeto? Os posts ligados continuam no Instagram, sem o vínculo.")) return;
+  window.__onModalClose=null;
+  DB.projects=DB.projects.filter(p=>p.id!==id);
+  DB.ideas.forEach(i=>{ if(i.projectId===id){ i.projectId=""; syncPost(i); } });
+  save(); closeModal(); renderProjects(); renderIdeas();
+  Cloud.enqueue("deleteItem",{kind:"project",id});
+}
+
 
 function exportBackup(){
   const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
@@ -1339,15 +2176,23 @@ function exportBackup(){
 }
 async function importBackup(file){
   if(!file)return;
-  try{const txt=await file.text();const obj=JSON.parse(txt);DB=obj;if(!DB.weeklyPlanning)DB.weeklyPlanning={};save();renderAll();alert("Backup importado com sucesso.");}
-  catch(e){alert("Não foi possível importar este arquivo.");}
+  let obj;
+  try{obj=JSON.parse(await file.text());}catch(e){alert("Não foi possível importar este arquivo.");return;}
+  DB=applyCurriculum(ensureGroupData(obj));
+  if(!DB.weeklyPlanning)DB.weeklyPlanning={};
+  if(!DB.meetingNotes)DB.meetingNotes=[];
+  if(!DB.ideas)DB.ideas=[];
+  save();renderAll();
+  if(Cloud.enabled() && confirm("Backup importado. Enviar também todos os alunos, aulas e meeting notes para as bases do Notion?")) Cloud.syncAll();
+  else alert("Backup importado com sucesso.");
 }
 document.getElementById("importFile").addEventListener("change",e=>importBackup(e.target.files[0]));
 function resetData(){
-  if(!confirm("Restaurar a base inicial? Isso apaga os registros locais atuais."))return;
-  localStorage.removeItem(STORAGE_KEY);DB=load();renderAll();
+  if(!confirm("Restaurar a base inicial? Isso apaga os registros locais atuais."+(Cloud.enabled()?"\n\nAtenção: a base inicial também substituirá a cópia salva no Notion.":"")))return;
+  localStorage.removeItem(STORAGE_KEY);DB=load();save();renderAll();
 }
 renderAll();
+Cloud.init();
 </script>
 </body>
 </html>

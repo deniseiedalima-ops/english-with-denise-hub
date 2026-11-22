@@ -1,0 +1,68 @@
+EWD STUDIO — PAINEL + NOTION + TRANSCRIÇÃO DE AULAS
+=====================================================
+
+O que mudou
+-----------
+• Tudo o que você registra no painel é salvo no Notion (página "EWD Studio — Dashboard (Base de Dados)",
+  dentro de ENGLISH WITH DENISE): Turmas & Alunos, Registros de Aula, Meeting Notes & Transcrições
+  e uma cópia completa do painel (planning, lições, warm-ups, ideias...).
+• Em outro computador/celular: abra o painel, clique em ☁️ e digite a senha — os dados vêm do Notion.
+• Cada turma tem um campo "Link do Google Meet" e um botão 🎥 Abrir Meet na tela Hoje.
+• Botão 🎙️ Gravar & transcrever: grava o áudio da guia do Meet + seu microfone, transcreve a cada
+  ~90 segundos, gera um resumo com IA (vocabulário, erros dos alunos, próximos passos) e salva no Notion.
+
+• Posts & Ideias agora tem 3 subabas conectadas: 💡 Banco de ideias, 📸 Instagram (quadro Ideia → Roteiro →
+  Gravado → Editado → Postado, com métricas e ranking de alcance) e 🗓️ Calendário (arraste para mudar a data).
+• Nova aba 🚀 Projetos 2027 (Clube Cultural, Palestras com convidados...): passos, convidados e posts de divulgação
+  que aparecem automaticamente no Instagram e no Calendário. No Notion: bases "Projetos 2027" e "Instagram — Posts & Ideias".
+
+Arquivos
+--------
+index.html            o painel
+api/notion.js         salva/lê no Notion (o token fica escondido na Vercel)
+api/transcribe.js     transcrição do áudio (OpenAI)
+api/summarize.js      resumo da aula (OpenAI)
+api/_lib.js           funções auxiliares
+vercel.json, package.json
+
+PASSO 1 — Notion (1 minuto)
+---------------------------
+Abra no Notion a página "EWD Studio — Dashboard (Base de Dados)" → ••• (canto superior direito)
+→ Conexões → adicione a mesma integração que o app English With Denise já usa.
+(Sem isso o site não tem permissão para gravar.)
+
+PASSO 2 — Variáveis na Vercel
+-----------------------------
+Projeto do painel na Vercel → Settings → Environment Variables. Adicione:
+  NOTION_TOKEN     = o token da sua integração do Notion (o mesmo do app English With Denise)
+  OPENAI_API_KEY   = sua chave da OpenAI (a mesma do app, com saldo)
+  EWD_PASSWORD     = uma senha que você escolher para o painel (protege os dados dos alunos)
+
+PASSO 3 — Publicar
+------------------
+Como agora existe a pasta "api", publique pelo GitHub (igual ao app English With Denise):
+  1. GitHub → repositório do painel (ou crie um novo, ex.: ewd-studio) → Add file → Upload files
+     → arraste index.html, vercel.json, package.json, LEIA-ME.txt e a pasta api inteira → Commit.
+  2. Se for um repositório novo: Vercel → Add New → Project → importe o repositório → Deploy.
+  3. Depois de mudar variáveis, faça Redeploy (Deployments → ••• → Redeploy).
+Dica: mantenha o MESMO projeto/endereço da Vercel para o navegador não "perder" os dados locais.
+
+PASSO 4 — Conectar
+------------------
+Abra o painel no navegador que já tem seus dados → clique em "☁️ Notion: configurar" no topo
+→ digite a senha (EWD_PASSWORD) → Conectar e testar.
+Na primeira vez, clique também em "⬆️ Enviar tudo para o Notion".
+Se o painel abrir vazio (endereço novo): ⬆️ Importar → escolha seu backup JSON.
+
+Como gravar uma aula
+--------------------
+1. Use o Google Chrome no computador. Fones de ouvido melhoram a transcrição.
+2. Hoje → 🎥 Abrir Meet (entra na chamada) → volte ao painel → 🎙️ Gravar & transcrever.
+3. ⏺️ Iniciar gravação → escolha a guia do Google Meet → deixe ligado "Compartilhar áudio da guia".
+4. A transcrição aparece enquanto vocês falam. Ao final: ⏹️ Encerrar → ✨ Gerar resumo → 💾 Salvar no Notion.
+Avise os alunos de que a aula é gravada/transcrita.
+
+Custos aproximados (OpenAI)
+---------------------------
+Transcrição: cerca de US$ 0,0045 por minuto (≈ US$ 0,27 por aula de 1 h). Resumo: centavos por aula.
+Notion e Vercel (plano gratuito) não cobram nada extra por isso.
