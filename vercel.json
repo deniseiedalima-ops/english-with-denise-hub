@@ -1,7 +1,28 @@
 {
   "functions": {
-    "api/notion.js": { "maxDuration": 60 },
-    "api/transcribe.js": { "maxDuration": 60 },
-    "api/summarize.js": { "maxDuration": 60 }
-  }
+    "api/notion.js": {
+      "maxDuration": 60
+    },
+    "api/transcribe.js": {
+      "maxDuration": 60
+    },
+    "api/summarize.js": {
+      "maxDuration": 60
+    },
+    "api/site.js": {
+      "maxDuration": 30
+    }
+  },
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
 }

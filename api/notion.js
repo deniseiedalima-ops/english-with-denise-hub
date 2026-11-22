@@ -236,3 +236,4 @@ module.exports = async (req, res) => {
     L.send(res, e.status && e.status < 500 ? e.status : 500, { error: e.message || String(e) });
   }
 };
+module.exports.loadSnapshot = loadSnapshot;

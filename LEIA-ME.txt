@@ -16,9 +16,14 @@ O que mudou
 • Nova aba 🚀 Projetos 2027 (Clube Cultural, Palestras com convidados...): passos, convidados e posts de divulgação
   que aparecem automaticamente no Instagram e no Calendário. No Notion: bases "Projetos 2027" e "Instagram — Posts & Ideias".
 
+• Página de links pública em  seu-site.vercel.app/links  (perfil, botões de contato, produtos em mini slides com
+  estrela cadente e depoimentos do YouTube). Edite tudo na aba 🌐 Página de links do Studio — publica sozinho.
+
 Arquivos
 --------
-index.html            o painel
+index.html            o painel (Studio)
+links.html            a página pública de links
+api/site.js           entrega o conteúdo da página de links (só ele é público)
 api/notion.js         salva/lê no Notion (o token fica escondido na Vercel)
 api/transcribe.js     transcrição do áudio (OpenAI)
 api/summarize.js      resumo da aula (OpenAI)

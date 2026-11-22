@@ -316,6 +316,27 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .guest input,.guest select{padding:8px 10px;font-size:13px}
 @media(max-width:1100px){.cal-wrap{flex-direction:column}.cal-side{width:100%;flex:auto}}
 @media(max-width:760px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.guest{grid-template-columns:1fr 1fr}.cday{min-height:70px}.cchip{font-size:10px}}
+.site-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.site-url{font-family:Georgia,serif;font-size:20px;color:#5f4b79;word-break:break-all}
+.site-layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;align-items:start}
+.site-editor{display:flex;flex-direction:column;gap:14px}
+.site-preview{position:sticky;top:18px}
+.phone{width:100%;height:760px;border-radius:38px;border:10px solid #2c2535;background:#fff;overflow:hidden;box-shadow:0 25px 60px #30243b33}
+.phone iframe{width:100%;height:100%;border:0}
+.site-photo{display:flex;align-items:center;gap:14px}
+.site-photo img,.site-photo .ph{width:74px;height:74px;border-radius:50%;object-fit:cover;background:#f0eaf7;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:30px;color:#7a5fa6}
+.site-item{background:#faf7fb;border:1px solid #f0eaf0;border-radius:13px;padding:10px;margin-bottom:8px}
+.site-item-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.site-item-row:last-child{margin-bottom:0}
+.mini-actions{display:flex;gap:4px;flex:0 0 auto}
+.mini-actions .btn{padding:6px 9px}
+.prod-row{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #eee8e4;border-radius:14px;margin-bottom:8px;background:#fffefa;cursor:pointer}
+.prod-row.off{opacity:.5}
+.prod-thumb{width:42px;height:42px;border-radius:12px;flex:0 0 42px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #e3dcea;cursor:pointer}
+.sw.on{box-shadow:0 0 0 2px #4a3f58}
+@media(max-width:1200px){.site-layout{grid-template-columns:1fr}.site-preview{position:static;max-width:420px;margin:0 auto;width:100%}}
 </style>
 </head>
 <body>
@@ -332,6 +353,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
     <button data-view="meeting">🎙️ Meeting Notes → Notion</button>
     <button data-view="ideas">💡 Posts & Ideias</button>
     <button data-view="projects">🚀 Projetos 2027</button>
+    <button data-view="site">🌐 Página de links</button>
     <button data-view="assessment">📝 Notas & Avaliações</button>
     <button data-view="makeups">🔄 Reposições</button>
     <button data-view="history">📋 Histórico</button>
@@ -357,6 +379,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
   <section id="meeting" class="section"></section>
   <section id="ideas" class="section"></section>
   <section id="projects" class="section"></section>
+  <section id="site" class="section"></section>
   <section id="assessment" class="section"></section>
   <section id="makeups" class="section"></section>
   <section id="history" class="section"></section>
@@ -474,7 +497,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view}"]`).classList.add("active");
-  const titles={today:"Hoje",students:"Alunos",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={today:"Hoje",students:"Alunos",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
 }
@@ -482,7 +505,7 @@ document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.v
 todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
 
 function renderAll(){
-  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
 }
 
 function homeworkKey(name){
@@ -2038,6 +2061,194 @@ function deleteIdea(id){
   if(!confirm('Excluir este post/ideia?')) return;
   DB.ideas=DB.ideas.filter(i=>i.id!==id); save(); closeModal(); renderIdeas(); renderProjects();
   Cloud.enqueue("deleteItem",{kind:"post",id});
+}
+
+/* ================= 🌐 Página de links (editor + prévia) ================= */
+const SITE_LINK_TYPES=[["whatsapp","💬 WhatsApp"],["instagram","📸 Instagram"],["email","✉️ E-mail"],["telegram","✈️ Telegram"],["youtube","▶️ YouTube"],["agenda","📅 Agendar aula"],["site","🌐 Site"],["outro","🔗 Outro"]];
+const SITE_COLORS=[["rosa","#e8367f"],["azul","#3ec5ee"],["amarelo","#f2c230"],["lilas","#9b5de5"],["laranja","#f2832a"],["verde","#2fb486"],["vinho","#b5179e"]];
+var SITE_UI={previewReady:false};
+
+function ensureSite(){
+  if(DB.site) return;
+  const prod=(title,tag,emoji,color,desc)=>({id:"p_"+title.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,30),title,tag,color,desc,details:"",price:"",cta:"Quero participar",url:"",visible:true});
+  DB.site={
+    published:true, name:"English with Denise", kicker:"Teacher Denise", accent:"#7a5fa6", buttonColor:"#f2c94c", highlightFirst:true,
+    bio:"Aulas de inglês online, leves e personalizadas — do A1 ao B2.",
+    photo:"", footer:"English with Denise",
+    productsTitle:"Meus produtos", productsSub:"Escolha o caminho que combina com você.",
+    testimonialsTitle:"O que meus alunos dizem", testimonialsSub:"",
+    links:[
+      {id:"l_whats",type:"whatsapp",label:"Fale comigo no WhatsApp",url:"",visible:true},
+      {id:"l_insta",type:"instagram",label:"Instagram",url:"",visible:true},
+      {id:"l_mail",type:"email",label:"E-mail",url:"",visible:true}
+    ],
+    products:[
+      prod("Aulas particulares","Aulas ao vivo","🎓","lilas","Aulas individuais, em dupla ou trio, com material próprio e acompanhamento."),
+      prod("30-Day English Challenge","Desafio","🔥","rosa","30 dias de imersão diária em inglês, com atividades curtas para criar o hábito."),
+      prod("Guided Immersion in English","Imersão","🎧","azul",""),
+      prod("The Cozy English Club","Clube cultural","☕","amarelo","Encontros culturais em inglês: filmes, conversas e muito acolhimento."),
+      prod("Mentoria Cultural Individual","Mentoria","🎬","vinho",""),
+      prod("English Studies Hub","Plataforma","📚","verde",""),
+      prod("Manual de Como Aprender Inglês por Conta Própria","E-book","📖","laranja","")
+    ],
+    testimonials:[{id:"t1",url:"",name:"",quote:""},{id:"t2",url:"",name:"",quote:""},{id:"t3",url:"",name:"",quote:""}]
+  };
+  save(DB,{touch:false});
+}
+function siteChanged(rerender){ save(); sitePreview(); if(rerender) renderSite(); }
+function siteSet(field,value){ DB.site[field]=value; siteChanged(false); }
+function siteListSet(list,id,field,value){ const it=DB.site[list].find(x=>x.id===id); if(it){ it[field]=value; siteChanged(false); } }
+function siteMove(list,id,dir){ const a=DB.site[list]; const i=a.findIndex(x=>x.id===id), j=i+dir; if(i<0||j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; siteChanged(true); }
+function siteRemove(list,id){ if(!confirm("Remover este item?")) return; DB.site[list]=DB.site[list].filter(x=>x.id!==id); siteChanged(true); }
+function siteAddLink(){ DB.site.links.push({id:"l_"+Date.now(),type:"outro",label:"Novo link",url:"",visible:true}); siteChanged(true); }
+function siteAddVideo(){ DB.site.testimonials.push({id:"t_"+Date.now(),url:"",name:"",quote:""}); siteChanged(true); }
+function siteLinkUrl(l){
+  const v=String(l.url||"").trim();
+  if(l.type==="whatsapp" && /^[\d\s()+-]{8,}$/.test(v)){ let n=v.replace(/\D/g,""); if(n.length<=11) n="55"+n; return "https://wa.me/"+n+(l.message?"?text="+encodeURIComponent(l.message):""); }
+  if(l.type==="instagram" && /^@?[\w.]+$/.test(v) && !v.includes(".com")) return "https://instagram.com/"+v.replace(/^@/,"");
+  if(l.type==="email" && /^[\w.+-]+@[\w-]+\.[\w.]+$/.test(v)) return "mailto:"+v;
+  if(l.type==="telegram" && /^@?[\w]+$/.test(v)) return "https://t.me/"+v.replace(/^@/,"");
+  return v;
+}
+function sitePublicData(){
+  const s=deepClone(DB.site);
+  s.links=s.links.map(l=>({...l,url:siteLinkUrl(l)}));
+  return s;
+}
+function sitePreview(){
+  const f=document.getElementById("sitePreview");
+  if(f && f.contentWindow) f.contentWindow.postMessage({type:"ewd-site",site:sitePublicData()},"*");
+}
+window.addEventListener("message",e=>{ if(e.data&&e.data.type==="ewd-site-ready") sitePreview(); });
+function siteUrl(){ return location.origin.startsWith("http") ? location.origin+"/links" : "(publique na Vercel para ter o link)"; }
+function copySiteUrl(){ const u=siteUrl(); navigator.clipboard.writeText(u).then(()=>alert("Link copiado: "+u)).catch(()=>prompt("Copie o link:",u)); }
+async function sitePublishNow(){
+  if(!Cloud.enabled()){ alert("Conecte o Notion (☁️ no topo) para publicar a página."); openCloudSettings(); return; }
+  clearTimeout(Cloud.pushTimer); await Cloud.push();
+  alert(Cloud.state==="err" ? "Não foi possível publicar: "+Cloud.msg : "Publicado! A página atualiza em até 1 minuto.");
+}
+
+// Imagens: reduz no navegador para não pesar (capa 600px, foto 320px).
+function siteImage(input,target,id,maxW){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+      const scale=Math.min(1,maxW/img.width), c=document.createElement("canvas");
+      c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      const data=c.toDataURL("image/jpeg",.78);
+      if(target==="photo") siteSet("photo",data); else siteListSet("products",id,"image",data);
+      if(target==="photo") renderSite(); else openSiteProduct(id);
+    }; img.src=fr.result; };
+  fr.readAsDataURL(file);
+}
+
+function renderSite(){
+  const box=document.getElementById("site"); if(!box || !box.classList.contains("active")) return;
+  ensureSite();
+  const s=DB.site;
+  const typeOpts=v=>SITE_LINK_TYPES.map(([k,l])=>`<option value="${k}" ${k===v?"selected":""}>${l}</option>`).join("");
+  const ph={whatsapp:"Número com DDD, ex.: 85 99999-9999",instagram:"@seuusuario",email:"seu@email.com",telegram:"@usuario",youtube:"https://youtube.com/@canal",agenda:"Link do formulário/agenda",site:"https://...",outro:"https://..."};
+  box.innerHTML=`
+  <div class="site-top card">
+    <div><div class="muted small">Endereço público</div><div class="site-url">${esc(siteUrl())}</div></div>
+    <div class="toolbar">
+      <button class="btn" onclick="copySiteUrl()">📋 Copiar link</button>
+      ${location.origin.startsWith("http")?`<a class="btn" href="/links" target="_blank" rel="noopener">↗ Abrir página</a>`:""}
+      <label class="btn" style="margin:0"><input type="checkbox" ${s.published!==false?"checked":""} onchange="siteSet('published',this.checked);renderSite()" style="width:auto;margin-right:6px">Página no ar</label>
+      <button class="btn primary" onclick="sitePublishNow()">🚀 Publicar agora</button>
+    </div>
+  </div>
+  <div class="site-layout">
+    <div class="site-editor">
+      <div class="card"><h3>👤 Perfil</h3>
+        <div class="site-photo">
+          ${s.photo?`<img src="${esc(s.photo)}" alt="">`:`<div class="ph">${esc((s.name||"D").charAt(0))}</div>`}
+          <div class="toolbar"><label class="btn small" style="margin:0">📷 Trocar foto<input type="file" accept="image/*" style="display:none" onchange="siteImage(this,'photo','',320)"></label>${s.photo?`<button class="btn small" onclick="siteSet('photo','');renderSite()">Remover</button>`:""}</div>
+        </div>
+        <div class="formgrid" style="margin-top:12px">
+          <div><label>Nome / título</label><input value="${esc(s.name)}" oninput="siteSet('name',this.value)"></div>
+          <div><label>Linha de cima (pequena)</label><input value="${esc(s.kicker||"")}" oninput="siteSet('kicker',this.value)" placeholder="Teacher Denise"></div>
+          <div class="full"><label>Bio</label><textarea rows="3" oninput="siteSet('bio',this.value)">${esc(s.bio||"")}</textarea></div>
+          <div><label>Cor principal</label><input type="color" value="${esc(s.accent||"#7a5fa6")}" oninput="siteSet('accent',this.value)" style="height:44px;padding:4px"></div>
+          <div><label>Cor do botão “Saber mais”</label><input type="color" value="${esc(s.buttonColor||"#f2c94c")}" oninput="siteSet('buttonColor',this.value)" style="height:44px;padding:4px"></div>
+          <div><label>Rodapé</label><input value="${esc(s.footer||"")}" oninput="siteSet('footer',this.value)"></div>
+        </div>
+      </div>
+
+      <div class="card"><div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">🔗 Botões de contato</h3><button class="btn small" onclick="siteAddLink()">+ Botão</button></div>
+        <div class="muted small" style="margin:6px 0 10px">O primeiro botão fica em destaque. Para WhatsApp, basta o número.</div>
+        ${s.links.map((l,k)=>`<div class="site-item">
+          <div class="site-item-row">
+            <select onchange="siteListSet('links','${l.id}','type',this.value);renderSite()" style="max-width:170px">${typeOpts(l.type)}</select>
+            <input value="${esc(l.label||"")}" placeholder="Texto do botão" oninput="siteListSet('links','${l.id}','label',this.value)">
+          </div>
+          <div class="site-item-row">
+            <input value="${esc(l.url||"")}" placeholder="${esc(ph[l.type]||"https://...")}" oninput="siteListSet('links','${l.id}','url',this.value)">
+            <div class="mini-actions"><button class="btn small" title="Subir" onclick="siteMove('links','${l.id}',-1)" ${k?"":"disabled"}>↑</button><button class="btn small" title="Descer" onclick="siteMove('links','${l.id}',1)" ${k<s.links.length-1?"":"disabled"}>↓</button><button class="btn small" title="${l.visible===false?"Mostrar":"Ocultar"}" onclick="siteListSet('links','${l.id}','visible',${l.visible===false});renderSite()">${l.visible===false?"🙈":"👁️"}</button><button class="btn small danger" onclick="siteRemove('links','${l.id}')">✕</button></div>
+          </div>
+          ${l.type==="whatsapp"?`<input value="${esc(l.message||"")}" placeholder="Mensagem pronta (opcional): Oi Denise! Quero saber sobre as aulas" oninput="siteListSet('links','${l.id}','message',this.value)" style="margin-top:6px">`:""}
+        </div>`).join("")}
+      </div>
+
+      <div class="card"><div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">🛍️ Produtos (mini slides)</h3><button class="btn small" onclick="siteNewProduct()">+ Produto</button></div>
+        <div class="formgrid" style="margin:10px 0">
+          <div><label>Título da seção</label><input value="${esc(s.productsTitle||"")}" oninput="siteSet('productsTitle',this.value)"></div>
+          <div><label>Subtítulo</label><input value="${esc(s.productsSub||"")}" oninput="siteSet('productsSub',this.value)"></div>
+        </div>
+        ${s.products.map((p,k)=>{const col=(SITE_COLORS.find(c=>c[0]===p.color)||SITE_COLORS[0])[1];return `<div class="prod-row ${p.visible===false?"off":""}">
+          <div class="prod-thumb" style="background:${col}">★</div>
+          <div class="main" style="flex:1;min-width:0" onclick="openSiteProduct('${p.id}')"><b>${esc(p.title)}</b><div class="meta">${esc(p.tag||"")}${p.price?" · "+esc(p.price):""}${p.url?" · com link":" · <span style='color:#c0703a'>sem link no botão</span>"}</div></div>
+          <div class="mini-actions"><button class="btn small" onclick="siteMove('products','${p.id}',-1)" ${k?"":"disabled"}>↑</button><button class="btn small" onclick="siteMove('products','${p.id}',1)" ${k<s.products.length-1?"":"disabled"}>↓</button><button class="btn small" onclick="siteListSet('products','${p.id}','visible',${p.visible===false});renderSite()">${p.visible===false?"🙈":"👁️"}</button><button class="btn small" onclick="openSiteProduct('${p.id}')">Editar</button></div>
+        </div>`}).join("")}
+      </div>
+
+      <div class="card"><div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">🎥 Depoimentos (YouTube)</h3><button class="btn small" onclick="siteAddVideo()">+ Vídeo</button></div>
+        <div class="formgrid" style="margin:10px 0">
+          <div><label>Título da seção</label><input value="${esc(s.testimonialsTitle||"")}" oninput="siteSet('testimonialsTitle',this.value)"></div>
+          <div><label>Subtítulo</label><input value="${esc(s.testimonialsSub||"")}" oninput="siteSet('testimonialsSub',this.value)"></div>
+        </div>
+        ${s.testimonials.map((t,k)=>`<div class="site-item">
+          <div class="site-item-row"><b style="min-width:24px">${k+1}.</b><input value="${esc(t.url||"")}" placeholder="Link do YouTube (vídeo ou Shorts)" oninput="siteListSet('testimonials','${t.id}','url',this.value)"><button class="btn small danger" onclick="siteRemove('testimonials','${t.id}')">✕</button></div>
+          <div class="site-item-row"><input value="${esc(t.name||"")}" placeholder="Nome do aluno (opcional)" oninput="siteListSet('testimonials','${t.id}','name',this.value)"><input value="${esc(t.quote||"")}" placeholder="Frase curta (opcional)" oninput="siteListSet('testimonials','${t.id}','quote',this.value)"></div>
+          <label class="homework-check" style="margin-top:4px"><input type="checkbox" ${t.vertical?"checked":""} onchange="siteListSet('testimonials','${t.id}','vertical',this.checked)"><span>Vídeo em pé (formato celular)</span></label>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="site-preview"><div class="phone"><iframe id="sitePreview" src="links.html?preview=1" title="Prévia da página"></iframe></div><div class="muted small" style="text-align:center;margin-top:8px">Prévia ao vivo · as mudanças são salvas sozinhas</div></div>
+  </div>`;
+  const f=document.getElementById("sitePreview"); if(f) f.onload=()=>sitePreview();
+}
+function siteNewProduct(){
+  const p={id:"p_"+Date.now(),title:"Novo produto",tag:"",color:"lilas",desc:"",details:"",price:"",cta:"Quero participar",url:"",visible:true};
+  DB.site.products.push(p); siteChanged(true); openSiteProduct(p.id);
+}
+function openSiteProduct(id){
+  const p=DB.site.products.find(x=>x.id===id); if(!p) return;
+  const whats=(DB.site.links.find(l=>l.type==="whatsapp"&&l.url));
+  showModal(`<div class="modalhead"><div><h2>Produto</h2><div class="muted small">Cada produto vira um mini slide na página.</div></div><button class="btn" onclick="closeModal()">Concluir</button></div>
+  <div class="prod-editor">
+    <div class="formgrid">
+      <div class="full"><label>Nome</label><input value="${esc(p.title)}" oninput="siteListSet('products','${id}','title',this.value)"></div>
+      <div class="full"><label>Etiqueta (opcional, pequena acima do nome)</label><input value="${esc(p.tag||"")}" placeholder="Ex.: Mentoria, E-book, Clube" oninput="siteListSet('products','${id}','tag',this.value)"></div>
+      <div class="full"><label>Descrição curta (aparece no card)</label><textarea rows="2" oninput="siteListSet('products','${id}','desc',this.value)" placeholder="1 ou 2 frases: para quem é e o que a pessoa ganha.">${esc(p.desc||"")}</textarea></div>
+      <div class="full"><label>Detalhes (aparecem ao clicar em “Saber mais”)</label><textarea rows="4" oninput="siteListSet('products','${id}','details',this.value)" placeholder="Como funciona, duração, o que inclui...">${esc(p.details||"")}</textarea></div>
+      <div><label>Preço</label><input value="${esc(p.price||"")}" placeholder="Ex.: R$ 97 · ou deixe vazio" oninput="siteListSet('products','${id}','price',this.value)"></div>
+      <div><label>Texto do botão de compra</label><input value="${esc(p.cta||"")}" oninput="siteListSet('products','${id}','cta',this.value)"></div>
+      <div class="full"><label>Link do botão</label><input id="prodUrl" value="${esc(p.url||"")}" placeholder="Link de pagamento, formulário ou WhatsApp" oninput="siteListSet('products','${id}','url',this.value)">
+        ${whats?`<button class="btn small" style="margin-top:6px" onclick="siteProdWhats('${id}')">💬 Usar WhatsApp com mensagem sobre este produto</button>`:""}</div>
+      <div class="full"><label>Cor da estrela cadente</label>
+        <div class="swatches">${SITE_COLORS.map(([k,c])=>`<button class="sw ${p.color===k?"on":""}" style="background:${c}" title="${k}" onclick="siteListSet('products','${id}','color','${k}');openSiteProduct('${id}')"></button>`).join("")}</div></div>
+    </div>
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin-top:14px"><button class="btn danger" onclick="closeModal();siteRemove('products','${id}')">Excluir produto</button><button class="btn primary" onclick="closeModal()">Concluir</button></div>`);
+  window.__onModalClose=()=>renderSite();
+}
+function siteProdWhats(id){
+  const p=DB.site.products.find(x=>x.id===id), w=DB.site.links.find(l=>l.type==="whatsapp"&&l.url); if(!p||!w) return;
+  const base=siteLinkUrl({...w,message:""}).split("?")[0];
+  const url=base+"?text="+encodeURIComponent(`Oi Denise! Quero saber mais sobre: ${p.title}`);
+  siteListSet("products",id,"url",url); const el=document.getElementById("prodUrl"); if(el) el.value=url;
 }
 
 /* ================= Projetos 2027 ================= */
