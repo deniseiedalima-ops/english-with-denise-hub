@@ -340,6 +340,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .fp-aa{font-size:26px;line-height:1}
 .fp-name{font-size:12px;color:#7c7388;font-family:Inter,system-ui,sans-serif}
 .fp-sample{font-size:15px}
+.popup-editor{background:#faf7fb;border:1px solid #f0eaf0;border-radius:13px;padding:12px}
 .swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #e3dcea;cursor:pointer}
 .sw.on{box-shadow:0 0 0 2px #4a3f58}
@@ -618,12 +619,39 @@ function renderToday(){
   </div>`;
 }
 
+var STUDENTS_UI={view:"ativos"};
 function renderStudents(){
+  const inact=DB.inactiveStudents||[];
+  const isAct=STUDENTS_UI.view!=="inativos";
   students.innerHTML=`
-    <div class="searchbar"><input id="studentSearch" placeholder="Buscar aluno..." oninput="filterStudents()"><button class="btn primary" onclick="openAddStudent()">+ Novo aluno</button><span class="muted small" style="margin-left:8px">Use ✏️ Editar cadastro em cada cadastro para corrigir a agenda.</span></div>
+    <div class="searchbar"><input id="studentSearch" placeholder="Buscar aluno..." oninput="filterStudents()"><button class="btn primary" onclick="openAddStudent()">+ Novo aluno</button></div>
+    <div class="pills" style="margin:4px 0 14px">
+      <button class="pill ${isAct?"on":""}" onclick="STUDENTS_UI.view='ativos';renderStudents()">🟢 Ativos (${DB.students.length})</button>
+      <button class="pill ${!isAct?"on":""}" onclick="STUDENTS_UI.view='inativos';renderStudents()">⏸️ Inativos (${inact.length})</button>
+    </div>
+    ${isAct?"":`<div class="notice blue small" style="margin-bottom:12px">Alunos inativos saem da agenda, mas o histórico fica guardado. Quando voltarem, clique em <b>Reativar</b> e confirme o novo dia e horário.</div>`}
     <div id="studentList" class="grid">
-      ${DB.students.map((s,i)=>studentCard(s,i)).join("")}
+      ${isAct ? (DB.students.map((s,i)=>studentCard(s,i)).join("")||`<div class="muted">Nenhum aluno ativo.</div>`)
+              : (inact.map((s,i)=>inactiveCard(s,i)).join("")||`<div class="card span12 muted">Nenhum aluno inativo.</div>`)}
     </div>`;
+}
+function statusLog(s){
+  const log=s.statusLog||[];
+  return log.length?`<div class="small muted" style="margin-top:8px">${log.slice(-4).map(x=>`${x.action==="inativado"?"⏸️":"▶️"} ${x.action} em ${dateBR(x.date)}${x.reason?` — ${esc(x.reason)}`:""}`).join("<br>")}</div>`:"";
+}
+function inactiveCard(s,i){
+  const members=groupMembers(s), last=studentHistory(s.name)[0];
+  return `<div class="card span4 student-card" style="opacity:.92" data-name="${esc(String(s.name).toLowerCase()+" "+members.join(" ").toLowerCase())}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${esc(s.name)}</h3>${badge(s.level||"A1")}</div>
+    <div class="muted small">⏸️ Inativo${s.inactivatedAt?` desde ${dateBR(s.inactivatedAt)}`:""}${s.day?` · antes: ${esc(s.day)} ${esc(s.time||"")}`:""}</div>
+    ${s.reason?`<div class="small" style="margin-top:6px"><b>Motivo:</b> ${esc(s.reason)}</div>`:""}
+    <div class="small" style="margin-top:6px"><b>Última aula:</b> ${esc(last?.lesson || s.last || "Sem registro")}</div>
+    ${statusLog(s)}
+    <div class="toolbar" style="margin-top:12px;flex-wrap:wrap">
+      <button class="btn primary small" onclick="openReactivateStudent(${i})">▶️ Reativar</button>
+      ${members.map(n=>`<button class="btn small" onclick='openIndividualHistory(${JSON.stringify(n)})'>Histórico: ${esc(n)}</button>`).join("")}
+    </div>
+  </div>`;
 }
 function studentCard(s,i){
   const hist=studentHistory(s.name), last=hist[0];
@@ -645,10 +673,13 @@ function studentCard(s,i){
     <div class="small" style="margin-top:5px"><b>Progresso:</b> ${last?.progress ?? s.progress ?? 0}%</div>
     ${memberButtons}
     <div class="toolbar" style="margin-top:12px;flex-wrap:wrap">
+      <span class="tag" style="background:#e8f4ec;color:#3f7356">🟢 Ativo</span>
       <button class="btn small" onclick='openStudent(${i})'>Ver histórico da turma</button>
       <button class="btn small" onclick='openEditStudent(${i})'>✏️ Editar cadastro</button>
+      <button class="btn small" onclick='openDeactivateStudent(${i})'>⏸️ Inativar</button>
       <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar</button>
     </div>
+    ${statusLog(s)}
   </div>`;
 }
 function filterStudents(){
@@ -1526,7 +1557,7 @@ function openDeactivateStudent(index){
   const s=DB.students[index]; if(!s)return;
   showModal(`
     <div class="modalhead"><div><h2>Inativar aluno/turma</h2><div class="muted">${esc(s.name)}</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
-    <div class="notice blue">O cadastro sairá da agenda e da lista de alunos ativos, mas o histórico de aulas, notas e registros será preservado.</div>
+    <div class="notice blue">O cadastro sai da agenda, mas o histórico de aulas, notas e registros fica guardado. Quando o aluno voltar, é só reativar na aba Alunos → Inativos.</div>
     <div style="margin-top:16px"><label>Motivo da inativação (opcional)</label><textarea id="inactiveReason" placeholder="Ex.: encerrou as aulas, pausa temporária..."></textarea></div>
     <div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="confirmDeactivateStudent(${index})">Inativar cadastro</button></div>
   `);
@@ -1534,21 +1565,39 @@ function openDeactivateStudent(index){
 function confirmDeactivateStudent(index){
   const s=DB.students[index]; if(!s)return;
   const reason=(document.getElementById("inactiveReason")?.value||"").trim();
-  const archived={...s,active:false,inactivatedAt:todayISO(),reason};
+  const archived={...s,active:false,inactivatedAt:todayISO(),reason,statusLog:[...(s.statusLog||[]),{action:"inativado",date:todayISO(),reason}]};
   if(!DB.inactiveStudents)DB.inactiveStudents=[];
   DB.inactiveStudents.unshift(archived);
   DB.students.splice(index,1);
   save();closeModal();renderAll();
   Cloud.enqueue("upsertStudent",{student:archived,key:studentKey(s),active:false});
 }
+function openReactivateStudent(index){
+  const s=(DB.inactiveStudents||[])[index]; if(!s)return;
+  const days=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+  showModal(`<div class="modalhead"><div><h2>Reativar ${esc(s.name)}</h2><div class="muted">Confirme o dia e o horário das aulas agora.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div><label>Dia</label><select id="raDay">${days.map(d=>`<option ${s.day===d?"selected":""}>${d}</option>`).join("")}</select></div>
+    <div><label>Horário</label><input id="raTime" value="${esc(s.time||"")}" placeholder="Ex.: 18:00–19:00"></div>
+    <div><label>Nível</label><select id="raLevel">${["A1","A2","B1","B2"].map(l=>`<option ${s.level===l?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label>Observação (opcional)</label><input id="raNote" placeholder="Ex.: voltou depois das férias"></div>
+  </div>
+  <div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="reactivateStudent(${index})">▶️ Reativar aluno</button></div>`);
+}
 function reactivateStudent(index){
   const s=(DB.inactiveStudents||[])[index]; if(!s)return;
-  const restored={...s};
+  const oldKey=s.day?studentKey(s):`${s.name}||`;
+  const day=document.getElementById("raDay")?.value||s.day, time=(document.getElementById("raTime")?.value||s.time||"").trim();
+  if(!time){alert("Informe o horário.");return;}
+  const note=(document.getElementById("raNote")?.value||"").trim();
+  const restored={...s,day,time,level:document.getElementById("raLevel")?.value||s.level,group:s.group||"Individual",progress:s.progress||0,
+    statusLog:[...(s.statusLog||[]),{action:"reativado",date:todayISO(),reason:note}]};
+  restored.members=groupMembers(restored);
   delete restored.active;delete restored.inactivatedAt;delete restored.reason;
   DB.students.push(restored);
   DB.inactiveStudents.splice(index,1);
-  save();renderAll();
-  if(restored.day) Cloud.enqueue("upsertStudent",{student:restored,key:studentKey(restored),active:true});
+  save();closeModal();renderAll();
+  Cloud.enqueue("upsertStudent",{student:restored,key:studentKey(restored),oldKey,active:true});
 }
 function renderAdmin(){
   const activeRows=DB.students.map((s,i)=>`
@@ -1559,7 +1608,7 @@ function renderAdmin(){
   const inactiveRows=(DB.inactiveStudents||[]).map((s,i)=>`
     <div class="row admin-student-row">
       <div class="admin-student-main"><b>${esc(s.name)}</b><div class="meta">${esc(s.level||"")} · ${esc(s.reason||"Sem motivo informado")} ${s.inactivatedAt?`· Inativado em ${dateBR(s.inactivatedAt)}`:""}</div></div>
-      <button class="btn primary small" onclick="reactivateStudent(${i})">Reativar</button>
+      <button class="btn primary small" onclick="openReactivateStudent(${i})">Reativar</button>
     </div>`).join("") || `<div class="muted">Nenhum aluno inativo.</div>`;
   admin.innerHTML=`
   <div class="grid">
@@ -1822,7 +1871,7 @@ function openEditStudent(index){
     <div class="full"><label>Última aula</label><input id="eLast" value="${esc(s.last||"")}" placeholder="Última aula realizada"></div>
     <div class="full"><label>Observações</label><textarea id="eNotes">${esc(s.notes||"")}</textarea></div>
   </div>
-  <button class="btn primary" style="margin-top:14px" onclick="saveEditedStudent(${index})">Salvar alterações</button>`);
+  <div class="toolbar" style="justify-content:space-between;margin-top:14px"><button class="btn" onclick="closeModal();openDeactivateStudent(${index})">⏸️ Marcar como inativo</button><button class="btn primary" onclick="saveEditedStudent(${index})">Salvar alterações</button></div>`);
 }
 function saveEditedStudent(index){
   const s=DB.students[index];
@@ -2093,6 +2142,12 @@ const SITE_FONTS=[["nunito","Nunito","Nunito"],["quicksand","Quicksand","Quicksa
 const SITE_DEFAULT_SECTIONS=[{id:"sec_products",kind:"products",visible:true},{id:"sec_testimonials",kind:"testimonials",visible:true},{id:"sec_contact",kind:"contact",visible:true,title:"Fale comigo",sub:"Me chama em qualquer um desses canais 💜"}];
 const SECTION_KINDS={products:"🛍️ Produtos",testimonials:"🎥 Depoimentos",contact:"💬 Fale comigo (contatos)",text:"📝 Texto",links:"🔗 Lista de links",message:"📣 Mensagem em destaque"};
 function ensureSite(){
+  if(DB.site && !DB.site.popupMigrated){
+    const g=(DB.site.products||[]).find(p=>p.id==="p_guided");
+    if(g && !g.mode){ g.mode="popup"; g.popupTitle=g.popupTitle||"Guided Immersion in English"; g.popupText=g.popupText||"Primeiro descubra a série ideal para você e depois escolha o seu material 💛";
+      g.popupLinks=[{label:"🔎 Descobrir minha série",url:g.url||""},{label:"",url:""},{label:"",url:""},{label:"",url:""},{label:"",url:""},{label:"",url:""}]; }
+    DB.site.popupMigrated=true; save();
+  }
   if(DB.site && !Array.isArray(DB.site.sections)){ DB.site.sections=SITE_DEFAULT_SECTIONS.map(x=>({...x})); DB.site.contactTop=false; save(); }
   if(DB.site && DB.site.productsVersion!==2){ DB.site.products=SITE_PRODUCTS.map(p=>({...p})); DB.site.productsVersion=2; save(); }
   if(DB.site){
@@ -2136,6 +2191,9 @@ function siteLinkUrl(l){
 function sitePublicData(){
   const s=deepClone(DB.site);
   s.links=s.links.map(l=>({...l,url:siteLinkUrl(l),display:(l.type==="instagram"&&l.url&&!/^https?:/.test(l.url))?"@"+String(l.url).replace(/^@/,""):((["whatsapp","email","telegram"].includes(l.type)&&!/^https?:/.test(l.url||""))?l.url:"")}));
+  const fixWa=u=>String(u||"").replace(/(wa\.me\/)(\d{10,11})(?=\D|$)/,(m,a,n)=>a+"55"+n);
+  s.links.forEach(l=>l.url=fixWa(l.url));
+  s.products.forEach(p=>{ p.url=fixWa(p.url); (p.popupLinks||[]).forEach(x=>x.url=fixWa(x.url)); });
   const w=DB.site.links.find(l=>l.type==="whatsapp"&&l.url&&l.visible!==false);
   if(w){ const base=siteLinkUrl({...w,message:""}).split("?")[0];
     s.products.forEach(p=>{ if(!p.url) p.url=base+"?text="+encodeURIComponent(`Oi Denise! Quero saber mais sobre: ${p.title}`); }); }
@@ -2236,7 +2294,7 @@ function renderSite(){
         </div>
         ${s.products.map((p,k)=>{const col=(SITE_COLORS.find(c=>c[0]===p.color)||SITE_COLORS[0])[1];return `<div class="prod-row ${p.visible===false?"off":""}">
           <div class="prod-thumb" style="background:${col}">★</div>
-          <div class="main" style="flex:1;min-width:0" onclick="openSiteProduct('${p.id}')"><b>${esc(p.title)}</b><div class="meta">${esc(p.tag||"")}${p.price?" · "+esc(p.price):""}${p.url?" · com link":" · <span style='color:#c0703a'>sem link no botão</span>"}</div></div>
+          <div class="main" style="flex:1;min-width:0" onclick="openSiteProduct('${p.id}')"><b>${esc(p.title)}</b><div class="meta">${esc(p.tag||"")}${p.price?" · "+esc(p.price):""}${p.mode==="popup"?` · 🪟 pop-up (${(p.popupLinks||[]).filter(x=>x.url).length} links)`:(p.url?" · com link":" · <span style='color:#c0703a'>sem link no botão</span>")}</div></div>
           <div class="mini-actions"><button class="btn small" onclick="siteMove('products','${p.id}',-1)" ${k?"":"disabled"}>↑</button><button class="btn small" onclick="siteMove('products','${p.id}',1)" ${k<s.products.length-1?"":"disabled"}>↓</button><button class="btn small" onclick="siteListSet('products','${p.id}','visible',${p.visible===false});renderSite()">${p.visible===false?"🙈":"👁️"}</button><button class="btn small" onclick="openSiteProduct('${p.id}')">Editar</button></div>
         </div>`}).join("")}
       </div>
@@ -2307,7 +2365,15 @@ function openSiteProduct(id){
       <div class="full"><label>Detalhes (aparecem ao clicar em “Saber mais”)</label><textarea rows="4" oninput="siteListSet('products','${id}','details',this.value)" placeholder="Como funciona, duração, o que inclui...">${esc(p.details||"")}</textarea></div>
       <div><label>Preço</label><input value="${esc(p.price||"")}" placeholder="Ex.: R$ 97 · ou deixe vazio" oninput="siteListSet('products','${id}','price',this.value)"></div>
       <div><label>Texto do botão de compra</label><input value="${esc(p.cta||"")}" oninput="siteListSet('products','${id}','cta',this.value)"></div>
-      <div class="full"><label>Link do botão</label><input id="prodUrl" value="${esc(p.url||"")}" placeholder="Link de pagamento, formulário ou WhatsApp" oninput="siteListSet('products','${id}','url',this.value)">
+      <div class="full"><label>Ao clicar no botão</label>
+        <div class="pills"><button class="pill ${p.mode!=="popup"?"on":""}" onclick="siteListSet('products','${id}','mode','link');openSiteProduct('${id}')">🔗 Abrir um link</button><button class="pill ${p.mode==="popup"?"on":""}" onclick="siteProdPopup('${id}')">🪟 Abrir pop-up com até 6 links</button></div></div>
+      ${p.mode==="popup"?`<div class="full popup-editor">
+        <label>Título do pop-up</label><input value="${esc(p.popupTitle||p.title)}" oninput="siteListSet('products','${id}','popupTitle',this.value)">
+        <label style="margin-top:8px">Texto curto (opcional)</label><input value="${esc(p.popupText||"")}" oninput="siteListSet('products','${id}','popupText',this.value)">
+        <label style="margin-top:10px">Links (o primeiro fica em destaque · só aparecem os preenchidos)</label>
+        ${(p.popupLinks||[]).map((x,k)=>`<div class="site-item-row" style="margin-top:6px"><b style="min-width:18px">${k+1}</b><input value="${esc(x.label||"")}" placeholder="${k===0?"🔎 Descobrir minha série":"Ex.: Comprar Friends"}" oninput="siteProdPopupLink('${id}',${k},'label',this.value)"><input value="${esc(x.url||"")}" placeholder="https://..." oninput="siteProdPopupLink('${id}',${k},'url',this.value)"></div>`).join("")}
+      </div>`:""}
+      <div class="full" ${p.mode==="popup"?'style="display:none"':""}><label>Link do botão</label><input id="prodUrl" value="${esc(p.url||"")}" placeholder="Link de pagamento, formulário ou WhatsApp" oninput="siteListSet('products','${id}','url',this.value)">
         ${whats?`<button class="btn small" style="margin-top:6px" onclick="siteProdWhats('${id}')">💬 Usar WhatsApp com mensagem sobre este produto</button>`:""}</div>
       <div class="full"><label>Cor da estrela cadente</label>
         <div class="swatches">${SITE_COLORS.map(([k,c])=>`<button class="sw ${p.color===k?"on":""}" style="background:${c}" title="${k}" onclick="siteListSet('products','${id}','color','${k}');openSiteProduct('${id}')"></button>`).join("")}</div></div>
@@ -2315,6 +2381,17 @@ function openSiteProduct(id){
   </div>
   <div class="toolbar" style="justify-content:space-between;margin-top:14px"><button class="btn danger" onclick="closeModal();siteRemove('products','${id}')">Excluir produto</button><button class="btn primary" onclick="closeModal()">Concluir</button></div>`);
   window.__onModalClose=()=>renderSite();
+}
+function siteProdPopup(id){
+  const p=DB.site.products.find(x=>x.id===id); if(!p) return;
+  p.mode="popup"; p.popupTitle=p.popupTitle||p.title;
+  p.popupLinks=(p.popupLinks||[]).concat(Array(6).fill(0).map(()=>({label:"",url:""}))).slice(0,6);
+  if(!p.popupLinks[0].url && p.url) p.popupLinks[0]={label:p.popupLinks[0].label||p.cta||"Saiba mais",url:p.url};
+  siteChanged(false); openSiteProduct(id);
+}
+function siteProdPopupLink(id,k,field,value){
+  const p=DB.site.products.find(x=>x.id===id); if(!p||!p.popupLinks[k]) return;
+  p.popupLinks[k][field]=value; siteChanged(false);
 }
 function siteProdWhats(id){
   const p=DB.site.products.find(x=>x.id===id), w=DB.site.links.find(l=>l.type==="whatsapp"&&l.url); if(!p||!w) return;
