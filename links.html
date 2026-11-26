@@ -102,6 +102,15 @@ h2{font-family:var(--font);font-weight:var(--hw);font-size:30px;margin:0;letter-
 .msg h3{margin:0 0 4px;font-family:var(--font);font-weight:var(--hw);font-size:23px;color:var(--mfg)}
 .msg p{margin:0;color:#4e4659;line-height:1.6;white-space:pre-line}
 .msg-btn{display:inline-flex;padding:12px 18px;border-radius:12px;background:var(--mfg);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+.series{display:flex;flex-direction:column;gap:10px;margin-top:12px;align-items:flex-start}
+.series .cta{margin-top:0}
+.series-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid color-mix(in srgb,var(--c) 40%,#fff);background:color-mix(in srgb,var(--c) 10%,#fff);color:#2f2a3a;font:700 14px var(--font);padding:10px 14px;border-radius:12px;cursor:pointer}
+.series-toggle svg{transition:transform .25s}
+.series.open .series-toggle svg{transform:rotate(180deg)}
+.series-list{display:none;flex-direction:column;gap:8px;width:100%}
+.series.open .series-list{display:flex}
+.series-item{display:flex;justify-content:space-between;gap:10px;padding:11px 14px;border-radius:12px;border:1px solid #ece5f1;background:#fff;text-decoration:none;font-weight:700;font-size:14px;color:#2f2a3a}
+.series-item:hover{border-color:var(--c)}
 .pop{position:fixed;inset:0;background:rgba(40,30,50,.42);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
 .pop.show{display:flex;animation:popIn .2s ease}
 @keyframes popIn{from{opacity:0}to{opacity:1}}
@@ -230,9 +239,17 @@ function productHTML(p){
     ${p.tag?`<span class="tag">${esc(p.tag)}</span>`:""}
     <h3>${esc(p.title)}</h3>
     ${p.desc?`<div class="sdesc">${esc(p.desc)}</div>`:""}
-    ${hasMore?`<div class="more"><div><div class="more-in">${p.details?esc(p.details):""}${p.price?`<span class="price">${esc(p.price)}</span>`:""}${href?(pops.length?`<div><button class="cta" onclick="openPopup(${k})">${esc(p.cta||"Quero participar")} →</button></div>`:`<div><a class="cta" href="${esc(href)}" target="_blank" rel="noopener">${esc(p.cta||"Quero participar")} →</a></div>`):""}</div></div></div>
+    ${hasMore?`<div class="more"><div><div class="more-in">${p.details?esc(p.details):""}${p.price?`<span class="price">${esc(p.price)}</span>`:""}${pops.length?seriesHTML(pops,p):(href?`<div><a class="cta" href="${esc(href)}" target="_blank" rel="noopener">${esc(p.cta||"Quero participar")} →</a></div>`:"")}</div></div></div>
     <div class="sfoot"><button class="saber" onclick="this.closest('.slide').classList.toggle('open')">Saber mais <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>`:""}
   </article>`;
+}
+function seriesHTML(pops,p){
+  const first=pops[0], rest=pops.slice(1);
+  return `<div class="series">
+    <a class="cta" href="${esc(safeUrl(first.url))}" target="_blank" rel="noopener">${esc(first.label)} →</a>
+    ${rest.length?`<button class="series-toggle" onclick="this.closest('.series').classList.toggle('open')">📺 ${esc(p.listLabel||"Ver as séries disponíveis")} (${rest.length}) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="series-list">${rest.map(x=>`<a class="series-item" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span>${esc(x.label)}</span><span>→</span></a>`).join("")}</div>`:""}
+  </div>`;
 }
 function openPopup(k){
   const d=POPUPS[k]; if(!d) return;

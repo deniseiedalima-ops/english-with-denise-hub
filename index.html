@@ -2294,7 +2294,7 @@ function renderSite(){
         </div>
         ${s.products.map((p,k)=>{const col=(SITE_COLORS.find(c=>c[0]===p.color)||SITE_COLORS[0])[1];return `<div class="prod-row ${p.visible===false?"off":""}">
           <div class="prod-thumb" style="background:${col}">★</div>
-          <div class="main" style="flex:1;min-width:0" onclick="openSiteProduct('${p.id}')"><b>${esc(p.title)}</b><div class="meta">${esc(p.tag||"")}${p.price?" · "+esc(p.price):""}${p.mode==="popup"?` · 🪟 pop-up (${(p.popupLinks||[]).filter(x=>x.url).length} links)`:(p.url?" · com link":" · <span style='color:#c0703a'>sem link no botão</span>")}</div></div>
+          <div class="main" style="flex:1;min-width:0" onclick="openSiteProduct('${p.id}')"><b>${esc(p.title)}</b><div class="meta">${esc(p.tag||"")}${p.price?" · "+esc(p.price):""}${p.mode==="popup"?` · 📺 lista (${(p.popupLinks||[]).filter(x=>x.url).length} links)`:(p.url?" · com link":" · <span style='color:#c0703a'>sem link no botão</span>")}</div></div>
           <div class="mini-actions"><button class="btn small" onclick="siteMove('products','${p.id}',-1)" ${k?"":"disabled"}>↑</button><button class="btn small" onclick="siteMove('products','${p.id}',1)" ${k<s.products.length-1?"":"disabled"}>↓</button><button class="btn small" onclick="siteListSet('products','${p.id}','visible',${p.visible===false});renderSite()">${p.visible===false?"🙈":"👁️"}</button><button class="btn small" onclick="openSiteProduct('${p.id}')">Editar</button></div>
         </div>`}).join("")}
       </div>
@@ -2366,11 +2366,10 @@ function openSiteProduct(id){
       <div><label>Preço</label><input value="${esc(p.price||"")}" placeholder="Ex.: R$ 97 · ou deixe vazio" oninput="siteListSet('products','${id}','price',this.value)"></div>
       <div><label>Texto do botão de compra</label><input value="${esc(p.cta||"")}" oninput="siteListSet('products','${id}','cta',this.value)"></div>
       <div class="full"><label>Ao clicar no botão</label>
-        <div class="pills"><button class="pill ${p.mode!=="popup"?"on":""}" onclick="siteListSet('products','${id}','mode','link');openSiteProduct('${id}')">🔗 Abrir um link</button><button class="pill ${p.mode==="popup"?"on":""}" onclick="siteProdPopup('${id}')">🪟 Abrir pop-up com até 6 links</button></div></div>
+        <div class="pills"><button class="pill ${p.mode!=="popup"?"on":""}" onclick="siteListSet('products','${id}','mode','link');openSiteProduct('${id}')">🔗 Abrir um link</button><button class="pill ${p.mode==="popup"?"on":""}" onclick="siteProdPopup('${id}')">📺 Botão principal + lista de links</button></div></div>
       ${p.mode==="popup"?`<div class="full popup-editor">
-        <label>Título do pop-up</label><input value="${esc(p.popupTitle||p.title)}" oninput="siteListSet('products','${id}','popupTitle',this.value)">
-        <label style="margin-top:8px">Texto curto (opcional)</label><input value="${esc(p.popupText||"")}" oninput="siteListSet('products','${id}','popupText',this.value)">
-        <label style="margin-top:10px">Links (o primeiro fica em destaque · só aparecem os preenchidos)</label>
+        <label style="margin-top:8px">Texto do botão que abre a lista</label><input value="${esc(p.listLabel||"Ver as séries disponíveis")}" oninput="siteListSet('products','${id}','listLabel',this.value)">
+        <label style="margin-top:10px">Links — o 1º vira o botão principal; os outros aparecem ao clicar no botão da lista (só os preenchidos)</label>
         ${(p.popupLinks||[]).map((x,k)=>`<div class="site-item-row" style="margin-top:6px"><b style="min-width:18px">${k+1}</b><input value="${esc(x.label||"")}" placeholder="${k===0?"🔎 Descobrir minha série":"Ex.: Comprar Friends"}" oninput="siteProdPopupLink('${id}',${k},'label',this.value)"><input value="${esc(x.url||"")}" placeholder="https://..." oninput="siteProdPopupLink('${id}',${k},'url',this.value)"></div>`).join("")}
       </div>`:""}
       <div class="full" ${p.mode==="popup"?'style="display:none"':""}><label>Link do botão</label><input id="prodUrl" value="${esc(p.url||"")}" placeholder="Link de pagamento, formulário ou WhatsApp" oninput="siteListSet('products','${id}','url',this.value)">
