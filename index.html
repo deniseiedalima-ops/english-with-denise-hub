@@ -498,6 +498,27 @@ a{color:var(--or-d)}
 @media(max-width:1100px){.span7,.span5{grid-column:span 12}}
 @media(max-width:700px){.hero-stats{grid-template-columns:repeat(2,1fr)}.ag-item{grid-template-columns:58px 1fr}.ct-top{grid-template-columns:1fr}.dash-hero{padding:22px 20px}}
 </style>
+
+<style id="ewd-crono">
+.lib-title{cursor:pointer}.lib-title:hover{color:var(--or-d);text-decoration:underline}
+.lib-skills{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.lib-skills span{font-size:10px;font-weight:800;background:var(--or-l);color:var(--or-dd);border-radius:999px;padding:1px 7px}
+.lib-link{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--cream);border:1px solid var(--line);margin-right:4px;text-decoration:none;font-size:15px}.lib-link:hover{border-color:var(--or);background:var(--or-ll)}
+select.lib-st{padding:5px 8px;border-radius:999px;font-weight:700;font-size:12px;width:auto}
+.lib-st.s0{background:#EAF4EC}.lib-st.s1{background:#FFF6E8}.lib-st.s2{background:#EEF3FB}.lib-st.s3{background:#F3EFEC}
+.skill-pick{display:flex;flex-wrap:wrap;gap:6px}
+.crono-students{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.cs-item{all:unset;cursor:pointer;flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 12px;display:flex;flex-direction:column;max-width:190px}
+.cs-item b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cs-item span{font-size:11px;color:var(--muted);font-weight:700}
+.cs-item.on{background:var(--or);border-color:var(--or)}.cs-item.on b,.cs-item.on span{color:#fff}
+.plan-list{display:flex;flex-direction:column;gap:8px}
+.plan-item{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.plan-item .main{flex:1;min-width:0}.plan-item.done{background:#F6FBF7}.plan-item.done .plan-n{background:#2F7A4F;color:#fff}.plan-item.skip{opacity:.55}
+.plan-n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--or-l);color:var(--or-dd);display:grid;place-items:center;font-weight:800;font-size:13px}
+.plan-act{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.plan-st{width:auto;padding:5px 6px;font-size:12px;border-radius:999px}
+.plan-avail{max-height:420px;overflow:auto}.pa-item{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}.pa-item .main{flex:1;min-width:0}
+.search-hero{background:linear-gradient(135deg,#fff,var(--or-ll))}
+.search-res{margin-top:10px}mark{background:#FFE2B8;color:inherit;border-radius:4px;padding:0 2px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -517,7 +538,7 @@ a{color:var(--or-d)}
       <button data-view="students">👥 Alunos e turmas</button>
       <button data-view="history">📋 Histórico de aulas</button>
       <button data-view="planning">🗓️ Planning Class</button>
-      <button data-view="lessons">📚 Lições</button>
+      <button data-view="cronogramas">🗂️ Cronogramas</button>
       <button data-view="warmups">🔥 Warm-ups</button>
       <button data-view="meeting">📄 Aulas & Feedback</button>
       <button data-view="assessment">📝 Notas & Avaliações</button>
@@ -568,6 +589,7 @@ a{color:var(--or-d)}
   <section id="finance" class="section"></section>
   <section id="leads" class="section"></section>
   <section id="ficha" class="section"></section>
+  <section id="cronogramas" class="section"></section>
   <section id="wrapped" class="section"></section>
 </main>
 </div>
@@ -682,7 +704,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view==="ficha"?"students":view}"]`)?.classList.add("active");
-  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos",pendencias:"Pendências",contratos:"Contratos",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Aulas & Feedback",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={cronogramas:"Cronogramas",wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos",pendencias:"Pendências",contratos:"Contratos",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Aulas & Feedback",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
   window.scrollTo(0,0);
@@ -693,7 +715,7 @@ try{ const st=JSON.parse(localStorage.getItem("ewd_nav")||"{}"); Object.entries(
 todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
 
 function renderAll(){
-  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderPendencias(); renderContratos(); renderFinance(); renderLeads(); renderFicha(); renderWrapped(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+  renderToday(); renderStudents(); renderLessons(); renderCronogramas(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderPendencias(); renderContratos(); renderFinance(); renderLeads(); renderFicha(); renderWrapped(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
 }
 
 function homeworkKey(name){
@@ -899,18 +921,6 @@ function filterStudents(){
   document.querySelectorAll(".student-card").forEach(el=>el.style.display=el.dataset.name.includes(q)?"block":"none");
 }
 
-function renderLessons(){
-  const levels=["A1","A2","B1","B2","CONV"];
-  lessons.innerHTML=`
-  <div class="curriculum-note">A1, A2 e B1 foram atualizados com os novos cronogramas enviados. O cronograma B2 ainda não foi recebido; lições personalizadas e níveis de conversação permanecem preservados.</div>
-  <div class="toolbar" style="margin-bottom:12px">
-    <input id="lessonSearch" placeholder="Buscar por código, título, grammar ou vocabulary..." oninput="filterLessons()" style="max-width:560px">
-    <select id="lessonLevel" onchange="filterLessons()" style="max-width:180px"><option value="">Todos os níveis</option>${levels.map(l=>`<option>${l}</option>`).join("")}</select>
-    <button class="btn primary" onclick="openAddLesson()">+ Nova lição</button>
-  </div>
-  <div id="lessonTable" class="card tablewrap"></div>`;
-  filterLessons();
-}
 function filterLessons(){
   const q=(document.getElementById("lessonSearch")?.value||"").toLowerCase();
   const level=document.getElementById("lessonLevel")?.value||"";
@@ -2702,9 +2712,10 @@ function renderFicha(){
   if(!s){ box.innerHTML=`<div class="card">Aluno não encontrado. <button class="btn small" onclick="go('students')">Voltar</button></div>`; return; }
   const members=groupMembers(s), hist=studentHistory(s.name);
   const fee=members.map(n=>memberFee(s,n)).filter(v=>v!==null);
-  const tabs=[["resumo","Resumo"],["diario","Diário"],["aulas","Aulas"],["relatorios","Relatórios"],["financeiro","Financeiro"],["cadastro","Cadastro"]];
+  const tabs=[["resumo","Resumo"],["cronograma","Cronograma"],["diario","Diário"],["aulas","Aulas"],["relatorios","Relatórios"],["financeiro","Financeiro"],["cadastro","Cadastro"]];
   let body="";
   if(FICHA.tab==="resumo") body=fichaResumo(s,hist);
+  if(FICHA.tab==="cronograma") body=fichaCronograma(s);
   if(FICHA.tab==="diario") body=fichaDiario(s,hist);
   if(FICHA.tab==="aulas") body=fichaAulas(s,hist);
   if(FICHA.tab==="relatorios") body=fichaRelatorios(s);
@@ -3328,6 +3339,200 @@ function saveAddContract(){ const n=ctN.value.trim(); if(!n) return; const c=ctG
 
 /* ---------- Bloco "Hoje no hub" (mantido para compatibilidade) ---------- */
 function todayHubHTML(){ return ""; }
+
+/* ================= Cronogramas: biblioteca de aulas · cronograma por aluno · busca no material ================= */
+const LIB_STATUS=["✅ Pronta","🛠️ Em construção","💡 Ideia","🗄️ Arquivada"];
+const LIB_LEVELS=["A1","A2","B1","B2","CONV","Personalizada"];
+const LIB_SKILLS=["Speaking","Listening","Reading","Writing","Grammar","Vocabulary","Pronunciation"];
+var CRONO={tab:"biblioteca",q:"",level:"",status:"",who:"",sq:""};
+const lid=l=>`${l.level}|${l.code}`;
+function libFind(id){ return allLessons().find(l=>lid(l)===id); }
+function libStatus(l){ return l.status||(l.link||l.docUrl?"✅ Pronta":"🛠️ Em construção"); }
+function libSorted(){
+  const order=LIB_LEVELS;
+  return [...allLessons()].sort((a,b)=>order.indexOf(a.level)-order.indexOf(b.level)||(parseFloat(a.code.replace(/^[A-Z]+/,""))||0)-(parseFloat(b.code.replace(/^[A-Z]+/,""))||0)||String(a.code).localeCompare(String(b.code)));
+}
+function setCronoTab(t){ CRONO.tab=t; renderCronogramas(); }
+function renderCronogramas(){
+  const box=document.getElementById("cronogramas"); if(!box||!box.classList.contains("active")) return;
+  const tabs=[["biblioteca","📚 Biblioteca de aulas"],["alunos","🧭 Cronograma por aluno"],["busca","🔎 Buscar no material"]];
+  let body=CRONO.tab==="alunos"?cronoAlunos():CRONO.tab==="busca"?cronoBusca():cronoBiblioteca();
+  box.innerHTML=`<div class="tabs" style="margin-bottom:14px">${tabs.map(([k,l])=>`<button class="${CRONO.tab===k?"on":""}" onclick="setCronoTab('${k}')">${l}</button>`).join("")}</div>${body}`;
+}
+function renderLessons(){ if(document.getElementById("lessons")) document.getElementById("lessons").innerHTML=""; }
+
+/* ---------- 1. Biblioteca ---------- */
+function cronoBiblioteca(){
+  const all=libSorted(), q=normName(CRONO.q);
+  const rows=all.filter(l=>(!CRONO.level||l.level===CRONO.level)&&(!CRONO.status||libStatus(l)===CRONO.status)&&(!q||normName([l.code,l.title,l.goal,l.grammar,l.vocab,l.expressions,l.tags].join(" ")).includes(q)));
+  const ready=all.filter(l=>libStatus(l)==="✅ Pronta").length, noLink=all.filter(l=>!(l.link||l.docUrl)).length, build=all.filter(l=>libStatus(l)==="🛠️ Em construção").length;
+  const used=new Set((DB.records||[]).map(r=>`${r.lessonLevel}|${r.lessonCode}`));
+  return `
+  <div class="kpis">
+    <div class="kpic hl"><div class="k">Aulas na biblioteca</div><div class="v">${all.length}</div><div class="d">${LIB_LEVELS.filter(lv=>all.some(l=>l.level===lv)).map(lv=>`${lv} ${all.filter(l=>l.level===lv).length}`).join(" · ")}</div></div>
+    <div class="kpic"><div class="k">Prontas para uso</div><div class="v">${ready}</div><div class="d">${all.length?Math.round(ready/all.length*100):0}% da biblioteca</div></div>
+    <div class="kpic"><div class="k">Em construção</div><div class="v">${build}</div><div class="d">ainda não finalizadas</div></div>
+    <div class="kpic"><div class="k">Sem link do Docs</div><div class="v">${noLink}</div><div class="d">cole o link em cada aula</div></div>
+  </div>
+  <div class="toolbar" style="margin:6px 0 12px">
+    <input placeholder="Filtrar por título, foco, gramática, vocabulário…" value="${esc(CRONO.q)}" oninput="CRONO.q=this.value;clearTimeout(window.__lq);window.__lq=setTimeout(()=>{renderCronogramas();const i=document.querySelector('#cronogramas input[placeholder^=Filtrar]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)" style="max-width:380px">
+    <select onchange="CRONO.level=this.value;renderCronogramas()" style="max-width:160px"><option value="">Todos os níveis</option>${LIB_LEVELS.map(l=>`<option ${CRONO.level===l?"selected":""}>${l}</option>`).join("")}</select>
+    <select onchange="CRONO.status=this.value;renderCronogramas()" style="max-width:190px"><option value="">Todos os status</option>${LIB_STATUS.map(l=>`<option ${CRONO.status===l?"selected":""}>${l}</option>`).join("")}</select>
+    <button class="btn primary" onclick="openLibLesson()">+ Nova aula</button>
+  </div>
+  <div class="card tablewrap"><table class="table lib-table"><thead><tr><th>Nível</th><th>Nº</th><th>Aula</th><th>Foco</th><th>Status</th><th>Material</th><th></th></tr></thead><tbody>
+  ${rows.map(l=>{ const id=JSON.stringify(lid(l)), st=libStatus(l); return `<tr>
+    <td>${badge(l.level)}</td><td class="muted">${esc(l.code)}</td>
+    <td><b class="lib-title" onclick='openLibLesson(${id})'>${esc(l.title)}</b>${used.has(lid(l))?` <span class="chip" title="Já usada em aulas registradas">usada</span>`:""}${(l.skills||[]).length?`<div class="lib-skills">${l.skills.map(k=>`<span>${esc(k)}</span>`).join("")}</div>`:""}</td>
+    <td class="small">${esc(l.goal||"")}${l.grammar?`<div class="muted">📐 ${esc(l.grammar)}</div>`:""}</td>
+    <td><select class="lib-st s${LIB_STATUS.indexOf(st)}" onchange='libSet(${id},"status",this.value)'>${LIB_STATUS.map(s=>`<option ${st===s?"selected":""}>${s}</option>`).join("")}</select></td>
+    <td style="white-space:nowrap">${libLinks(l)||`<button class="btn small" onclick='openLibLesson(${id})'>+ link</button>`}</td>
+    <td><button class="btn small" onclick='openLibLesson(${id})'>✏️</button></td></tr>`; }).join("")||`<tr><td colspan="7" class="muted">Nenhuma aula encontrada.</td></tr>`}
+  </tbody></table></div>`;
+}
+function libLinks(l){
+  const L=[[l.link||l.docUrl,"📄","Aula (Docs)"],[l.activityUrl,"📝","Atividade"],[l.extraUrl,"➕","Extra studies"],[l.audioUrl,"🎧","Listening"],[l.folderUrl,"📁","Pasta"]].filter(x=>x[0]);
+  return L.map(([u,i,t])=>`<a class="lib-link" href="${esc(u)}" target="_blank" rel="noopener" title="${t}">${i}</a>`).join("");
+}
+function libSet(id,field,value){ const l=libFind(id); if(!l) return; l[field]=value; save(); renderCronogramas(); }
+function openLibLesson(id){
+  const l=id?libFind(id):{level:CRONO.level||"A2",code:"",title:"",goal:"",grammar:"",vocab:"",status:"🛠️ Em construção",skills:[]};
+  if(!l) return;
+  const f=(k,lab,ph="",full=true,ta=false)=>`<div class="${full?"full":""}"><label>${lab}</label>${ta?`<textarea id="lb_${k}" rows="3" placeholder="${esc(ph)}">${esc(l[k]||"")}</textarea>`:`<input id="lb_${k}" value="${esc(l[k]||"")}" placeholder="${esc(ph)}">`}</div>`;
+  showModal(`<div class="modalhead"><div><h2>${id?"✏️ "+esc(l.title):"+ Nova aula"}</h2><div class="muted small">Tudo aqui entra na busca do material.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div><label>Nível</label><select id="lb_level">${LIB_LEVELS.map(x=>`<option ${l.level===x?"selected":""}>${x}</option>`).join("")}</select></div>
+    ${f("code","Nº / código","Ex.: 17",false)}
+    ${f("title","Título da aula","Ex.: HOME SWEET HOME")}
+    <div><label>Status</label><select id="lb_status">${LIB_STATUS.map(x=>`<option ${libStatus(l)===x?"selected":""}>${x}</option>`).join("")}</select></div>
+    <div><label>Habilidades em foco</label><div class="skill-pick" id="lb_skills">${LIB_SKILLS.map(k=>`<span class="skillchip ${(l.skills||[]).includes(k)?"on":""}" onclick="this.classList.toggle('on')">${k}</span>`).join("")}</div></div>
+    ${f("goal","🎯 Foco / objetivo da aula","O que o aluno consegue fazer ao final",true,true)}
+    ${f("grammar","📐 Gramática","Ex.: Present Simple — do/does")}
+    ${f("vocab","📚 Vocabulário","Palavras separadas por vírgula",true,true)}
+    ${f("expressions","💬 Expressões / chunks","Ex.: I'm into…, What do you do for a living?",true,true)}
+    ${f("link","📄 Link da aula no Google Docs","https://docs.google.com/document/d/…")}
+    ${f("activityUrl","📝 Link da atividade","",false)}${f("extraUrl","➕ Link do Extra Studies","",false)}
+    ${f("audioUrl","🎧 Link do listening","",false)}${f("folderUrl","📁 Link da pasta no Drive","",false)}
+    ${f("homework","🏠 Homework","",false)}${f("tags","🏷️ Tags","Ex.: viagem, trabalho, entrevista",false)}
+    ${f("content","🔎 Texto do material (opcional)","Cole aqui o texto do Docs para a busca encontrar qualquer palavra dentro da aula",true,true)}
+    ${f("notes","📝 Observações","Ex.: funciona melhor com adultos; dá para dividir em 2 aulas",true,true)}
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin-top:12px">${id&&(DB.customLessons||[]).some(x=>lid(x)===id)?`<button class="btn danger" onclick='delLibLesson(${JSON.stringify(id)})'>Excluir</button>`:"<span></span>"}<button class="btn primary" onclick='saveLibLesson(${JSON.stringify(id||"")})'>Salvar aula</button></div>`);
+}
+function saveLibLesson(id){
+  const g=k=>(document.getElementById("lb_"+k)?.value||"").trim();
+  if(!g("title")){ alert("Dê um título para a aula."); return; }
+  let l=id?libFind(id):null;
+  if(!l){ DB.customLessons=DB.customLessons||[]; l={}; DB.customLessons.push(l); }
+  ["level","code","title","status","goal","grammar","vocab","expressions","link","activityUrl","extraUrl","audioUrl","folderUrl","homework","tags","content","notes"].forEach(k=>l[k]=g(k));
+  if(!l.code) l.code=String(Date.now()).slice(-4);
+  l.skills=[...document.querySelectorAll("#lb_skills .skillchip.on")].map(x=>x.textContent);
+  save(); closeModal(); renderCronogramas();
+}
+function delLibLesson(id){ if(!confirm("Excluir esta aula da biblioteca?")) return; DB.customLessons=(DB.customLessons||[]).filter(x=>lid(x)!==id); save(); closeModal(); renderCronogramas(); }
+
+/* ---------- 2. Cronograma por aluno ---------- */
+const PLAN_ST=["📌 Planejada","✅ Feita","⏭️ Pulada"];
+function planOf(s){ DB.schedules=DB.schedules||{}; return DB.schedules[s.name]=DB.schedules[s.name]||{items:[],level:s.level}; }
+function planDoneMap(s){
+  const recs=studentHistory(s.name).filter(r=>!/Falta/.test(r.status||"")), map={};
+  recs.forEach(r=>{ const k=r.lessonCode?`${r.lessonLevel}|${r.lessonCode}`:""; if(k&&!map[k]) map[k]=r.date;
+    const t=normName(r.lesson||""); allLessons().forEach(l=>{ if(t&&normName(l.title).length>4&&t.includes(normName(l.title))&&!map[lid(l)]) map[lid(l)]=r.date; }); });
+  return map;
+}
+function planItems(s){
+  const p=planOf(s), done=planDoneMap(s);
+  return p.items.map(it=>{ const l=it.ref?libFind(it.ref):null; const auto=it.ref&&done[it.ref]; return {...it,l,title:it.title||l?.title||"Aula",st:it.status||(auto?"✅ Feita":"📌 Planejada"),doneAt:it.doneAt||auto||""}; });
+}
+function cronoEditor(s,inFicha){
+  const p=planOf(s), items=planItems(s), lv=s.level;
+  const doneN=items.filter(i=>i.st==="✅ Feita").length, pct=items.length?Math.round(doneN/items.length*100):0;
+  const next=items.find(i=>i.st==="📌 Planejada");
+  const inPlan=new Set(p.items.map(i=>i.ref).filter(Boolean));
+  const avail=libSorted().filter(l=>!inPlan.has(lid(l))&&libStatus(l)!=="🗄️ Arquivada");
+  const key=JSON.stringify(s.name);
+  return `
+  <div class="grid">
+    <div class="card span8">
+      <div class="toolbar" style="justify-content:space-between;align-items:center">
+        <div><h3 style="margin:0">🧭 Cronograma de ${esc(s.name)}</h3><div class="muted small">${items.length} aula(s) · ${doneN} feita(s)${next?` · próxima: <b>${esc(next.title)}</b>`:""}</div></div>
+        <div class="toolbar"><label class="small" style="margin:0">Nível</label><select onchange='setStudentLevel(${key},this.value)' style="width:auto">${["A1","A2","B1","B2","C1","CONV"].map(x=>`<option ${lv===x?"selected":""}>${x}</option>`).join("")}</select></div>
+      </div>
+      <div class="bar" style="margin:10px 0 14px"><i style="width:${pct}%"></i></div>
+      ${items.length?`<div class="plan-list">${items.map((it,i)=>`<div class="plan-item ${it.st==="✅ Feita"?"done":it.st==="⏭️ Pulada"?"skip":""}">
+        <div class="plan-n">${i+1}</div>
+        <div class="main"><b>${esc(it.title)}</b> ${it.l?`<span class="muted small">${esc(it.l.level)} · ${esc(it.l.code)}</span>`:`<span class="chip">personalizada</span>`}
+          <div class="small muted">${it.l?.goal?esc(it.l.goal):""}${it.note?` · 📝 ${esc(it.note)}`:""}${it.doneAt&&it.st==="✅ Feita"?` · feita ${dateBR(it.doneAt)}`:""}</div></div>
+        <div class="plan-act">${it.l?libLinks(it.l):""}
+          <select class="plan-st" onchange='planSet(${key},"${it.id}","status",this.value)'>${PLAN_ST.map(x=>`<option ${it.st===x?"selected":""}>${x}</option>`).join("")}</select>
+          <button class="btn small" title="Subir" onclick='planMove(${key},"${it.id}",-1)'>↑</button><button class="btn small" title="Descer" onclick='planMove(${key},"${it.id}",1)'>↓</button>
+          <button class="btn small" title="Observação" onclick='planNote(${key},"${it.id}")'>📝</button><button class="btn small danger" title="Remover" onclick='planDel(${key},"${it.id}")'>✕</button></div>
+      </div>`).join("")}</div>`
+      :`<div class="empty-state">${STAR_SVG}<div>Cronograma vazio. Comece pela sequência padrão do nível ${esc(lv)} e ajuste para ${esc(s.name.split(" ")[0])}.</div><button class="btn primary" onclick='planFromLevel(${key})'>Usar sequência do ${esc(lv)} como base</button></div>`}
+    </div>
+    <div class="card span4"><h3>+ Adicionar aulas</h3>
+      <input placeholder="Buscar na biblioteca…" oninput="planFilter(this.value)" style="margin-bottom:8px">
+      <div class="plan-avail" id="planAvail">${avail.map(l=>`<div class="pa-item" data-q="${esc(normName(l.level+" "+l.code+" "+l.title+" "+(l.goal||"")+" "+(l.grammar||"")))}" data-lv="${esc(l.level)}" style="${l.level===lv?"":"display:none"}"><div class="main"><b class="small">${esc(l.title)}</b><div class="muted small">${esc(l.level)} · ${esc(l.code)} · ${esc(libStatus(l).split(" ")[0])}</div></div><button class="btn small" onclick='planAdd(${key},${JSON.stringify(lid(l))})'>+</button></div>`).join("")}</div>
+      <div class="muted small" style="margin-top:6px">Mostrando o nível ${esc(lv)}. Busque para ver aulas de outros níveis.</div>
+      <div class="hr"></div>
+      <label>Aula personalizada (fora da biblioteca)</label>
+      <div class="toolbar" style="flex-wrap:nowrap"><input id="planCustom" placeholder="Ex.: Aula sobre a viagem para Londres"><button class="btn" onclick='planAddCustom(${key})'>+</button></div>
+      ${items.length?`<div class="hr"></div><button class="btn small" onclick='planFromLevel(${key},true)'>+ Acrescentar aulas do ${esc(lv)} que faltam</button>`:""}
+    </div>
+  </div>`;
+}
+function planFilter(q){ q=normName(q); const lv=(document.querySelector("#planAvail")?.dataset.lv)||""; document.querySelectorAll("#planAvail .pa-item").forEach(el=>{ el.style.display=q?(el.dataset.q.includes(q)?"":"none"):(el.dataset.lv===planCurLevel()?"":"none"); }); }
+function planCurLevel(){ const s=cronoStudent(); return s?.level||""; }
+function cronoStudent(){ const name=CRONO.inFicha?fichaStudent()?.name:CRONO.who; return DB.students.find(s=>s.name===name)||null; }
+function planRerender(){ if(document.getElementById("ficha")?.classList.contains("active")) renderFicha(); else renderCronogramas(); }
+function setStudentLevel(name,lv){ const s=DB.students.find(x=>x.name===name); if(!s) return; s.level=lv; planOf(s).level=lv; save(); if(Cloud.enabled()) Cloud.enqueue("upsertStudent",{student:s,key:studentKey(s),active:true}); planRerender(); }
+function planFromLevel(name,onlyMissing){
+  const s=DB.students.find(x=>x.name===name); if(!s) return; const p=planOf(s); const have=new Set(p.items.map(i=>i.ref));
+  libSorted().filter(l=>l.level===s.level&&libStatus(l)!=="🗄️ Arquivada"&&!have.has(lid(l))).forEach((l,i)=>p.items.push({id:"p"+Date.now()+i,ref:lid(l)}));
+  save(); planRerender();
+}
+function planAdd(name,ref){ const s=DB.students.find(x=>x.name===name); if(!s) return; planOf(s).items.push({id:"p"+Date.now(),ref}); save(); planRerender(); }
+function planAddCustom(name){ const v=(document.getElementById("planCustom")?.value||"").trim(); if(!v) return; const s=DB.students.find(x=>x.name===name); planOf(s).items.push({id:"p"+Date.now(),ref:"",title:v}); save(); planRerender(); }
+function planFind(name,id){ const s=DB.students.find(x=>x.name===name); const p=planOf(s); return {p,i:p.items.findIndex(x=>x.id===id)}; }
+function planSet(name,id,f,v){ const {p,i}=planFind(name,id); if(i<0) return; p.items[i][f]=v; if(f==="status") p.items[i].doneAt=v==="✅ Feita"?(p.items[i].doneAt||todayISO()):""; save(); planRerender(); }
+function planMove(name,id,d){ const {p,i}=planFind(name,id); const j=i+d; if(i<0||j<0||j>=p.items.length) return; [p.items[i],p.items[j]]=[p.items[j],p.items[i]]; save(); planRerender(); }
+function planNote(name,id){ const {p,i}=planFind(name,id); if(i<0) return; const v=prompt("Observação para esta aula no cronograma:",p.items[i].note||""); if(v===null) return; p.items[i].note=v.trim(); save(); planRerender(); }
+function planDel(name,id){ const {p,i}=planFind(name,id); if(i<0) return; p.items.splice(i,1); save(); planRerender(); }
+function nextPlanned(s){ return planItems(s).find(i=>i.st==="📌 Planejada")||null; }
+function cronoAlunos(){
+  CRONO.inFicha=false;
+  if(!CRONO.who||!DB.students.some(s=>s.name===CRONO.who)) CRONO.who=DB.students[0]?.name||"";
+  const s=DB.students.find(x=>x.name===CRONO.who);
+  const order=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+  const list=[...DB.students].sort((a,b)=>a.name.localeCompare(b.name));
+  return `<div class="crono-students">${list.map(x=>{ const it=planItems(x), d=it.filter(i=>i.st==="✅ Feita").length; return `<button class="cs-item ${x.name===CRONO.who?"on":""}" onclick='CRONO.who=${JSON.stringify(x.name)};renderCronogramas()'><b>${esc(x.name)}</b><span>${esc(x.level)} · ${it.length?`${d}/${it.length}`:"sem cronograma"}</span></button>`; }).join("")}</div>
+  ${s?cronoEditor(s):`<div class="muted">Cadastre alunos primeiro.</div>`}
+  ${s?`<div class="muted small" style="margin-top:8px">Este cronograma também aparece na Ficha do aluno → aba Cronograma. Aulas registradas com a lição marcam o item como ✅ feito automaticamente. <a href="#" onclick='openFicha(${JSON.stringify(studentKey(s))},"cronograma");return false'>Abrir ficha ↗</a></div>`:""}`;
+}
+function fichaCronograma(s){ CRONO.inFicha=true; return cronoEditor(s,true); }
+
+/* ---------- 3. Busca ---------- */
+function hl(text,q){ const t=String(text||""); if(!q) return esc(t); const i=normName(t).indexOf(normName(q)); if(i<0) return esc(t); return esc(t.slice(0,i))+"<mark>"+esc(t.slice(i,i+q.length))+"</mark>"+esc(t.slice(i+q.length)); }
+function snippet(text,q){ const t=String(text||""), i=normName(t).indexOf(normName(q)); if(i<0) return ""; const a=Math.max(0,i-70), b=Math.min(t.length,i+q.length+90); return (a?"…":"")+hl(t.slice(a,b),q)+(b<t.length?"…":""); }
+function cronoBusca(){
+  const q=CRONO.sq.trim(), nq=normName(q);
+  const FIELDS=[["title","Título"],["goal","Foco"],["grammar","Gramática"],["vocab","Vocabulário"],["expressions","Expressões"],["tags","Tags"],["homework","Homework"],["notes","Observações"],["content","Texto do material"]];
+  const res=q?libSorted().map(l=>({l,hits:FIELDS.filter(([k])=>normName(l[k]).includes(nq))})).filter(x=>x.hits.length).sort((a,b)=>(b.hits.some(h=>h[0]==="title")-a.hits.some(h=>h[0]==="title"))||b.hits.length-a.hits.length):[];
+  const recs=q?(DB.records||[]).filter(r=>normName((r.lesson||"")+" "+(r.note||"")).includes(nq)).slice(0,12):[];
+  return `
+  <div class="card search-hero">
+    <h3 style="margin:0 0 6px">🔎 Buscar no seu material</h3>
+    <div class="muted small" style="margin-bottom:10px">Procure uma palavra, expressão, tema ou ponto gramatical (ex.: “used to”, “fridge”, “phrasal verbs”, “restaurant”).</div>
+    <div class="toolbar" style="flex-wrap:nowrap"><input id="crSearch" value="${esc(q)}" placeholder="Digite e aperte Enter…" onkeydown="if(event.key==='Enter'){CRONO.sq=this.value;renderCronogramas()}" style="font-size:16px">
+      <button class="btn primary" onclick="CRONO.sq=document.getElementById('crSearch').value;renderCronogramas()">Buscar</button></div>
+    ${q?`<div class="toolbar" style="margin-top:10px"><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://drive.google.com/drive/search?q=${encodeURIComponent(q)}">🔍 Buscar “${esc(q)}” dentro de todos os seus Docs no Google Drive ↗</a></div>`:""}
+  </div>
+  ${q?`<h3 style="margin:16px 0 8px">${res.length} aula(s) da biblioteca</h3>
+  ${res.map(({l,hits})=>`<div class="card search-res"><div class="toolbar" style="justify-content:space-between;align-items:flex-start"><div>${badge(l.level)} <b class="lib-title" onclick='openLibLesson(${JSON.stringify(lid(l))})'>${hl(l.code+" — "+l.title,q)}</b> <span class="muted small">${esc(libStatus(l))}</span></div><div>${libLinks(l)}</div></div>
+    ${hits.filter(([k])=>k!=="title").map(([k,lab])=>`<div class="small" style="margin-top:6px"><span class="chip">${lab}</span> ${snippet(l[k],q)}</div>`).join("")}</div>`).join("")||`<div class="muted">Nenhuma aula da biblioteca menciona “${esc(q)}”. Tente o botão de busca no Google Drive acima — ele procura dentro do texto de todos os seus Docs.</div>`}
+  ${recs.length?`<h3 style="margin:16px 0 8px">Aulas registradas que mencionam “${esc(q)}”</h3><div class="card">${recs.map(r=>`<div class="mini-row"><div class="main"><b>${esc(r.student)}</b> · ${dateBR(r.date)}<div class="small">${snippet((r.lesson||"")+" — "+(r.note||""),q)}</div></div></div>`).join("")}</div>`:""}`
+  :`<div class="muted small" style="margin-top:10px">A busca olha título, foco, gramática, vocabulário, expressões, tags, observações e o texto do material de cada aula da Biblioteca.</div>`}`;
+}
 
 /* ================= Projetos 2027 ================= */
 const PROJ_TYPES=["🎬 Clube cultural","🎤 Palestra / convidados","📚 Curso","🛍️ Produto","📅 Evento","✨ Outro"];
