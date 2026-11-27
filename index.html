@@ -2532,6 +2532,9 @@ function hubInit(){
   if(!DB.financeStart){ DB.financeStart=monthISO(); save(DB,{touch:false}); }
 }
 function memberInfo(s,name){ s.memberInfo=s.memberInfo||{}; s.memberInfo[name]=s.memberInfo[name]||{}; return s.memberInfo[name]; }
+function memberField(s,name,f,def){ const mi=(s.memberInfo||{})[name]||{}; const v=mi[f]; return v!==undefined&&v!==""&&v!==null?v:(s[f]!==undefined&&s[f]!==""?s[f]:def); }
+function memberDue(s,name){ return Number(memberField(s,name,"dueDay",10))||10; }
+function memberStart(s,name){ return memberField(s,name,"startDate",""); }
 function memberFee(s,name){ const mi=(s.memberInfo||{})[name]||{}; const v=mi.fee!==undefined&&mi.fee!==""?mi.fee:s.fee; return v===undefined||v===""?null:Number(v); }
 function participationScore(r){ return ({Excelente:1,Boa:1,"Média":0,Baixa:0})[r.participation]; }
 
@@ -2561,7 +2564,7 @@ function renderFicha(){
       <div>
         <div class="eyebrow">Ficha ${members.length>1?"da turma":"do aluno"} · ${esc(s.group||"Individual")}</div>
         <h2 class="ficha-name">${esc(s.name)}</h2>
-        <div class="chips"><span class="chip ok">🟢 Ativo</span>${badge(s.level)}<span class="chip">${esc(s.day)} · ${esc(s.time)}</span>${fee.length?`<span class="chip or">${fmtBRL(fee[0])}/mês${members.length>1?" por aluno":""}</span>`:""}${s.startDate?`<span class="chip">desde ${dateBR(s.startDate)}</span>`:""}</div>
+        <div class="chips"><span class="chip ok">🟢 Ativo</span>${badge(s.level)}<span class="chip">${esc(s.day)} · ${esc(s.time)}</span>${fee.length?`<span class="chip or">${members.length>1&&new Set(fee).size>1?fee.map(v=>fmtBRL(v)).join(" · "):fmtBRL(fee[0])}/mês${members.length>1?" por aluno":""}</span>`:""}${s.startDate?`<span class="chip">desde ${dateBR(s.startDate)}</span>`:""}</div>
       </div>
       <div class="toolbar">
         <button class="btn" onclick="setFichaTab('cadastro')">✏️ Editar cadastro</button>
@@ -2631,32 +2634,36 @@ function fichaAssessment(name,level){ assessmentDraft.student=name; if(["A1","A2
 function fichaFinanceiro(s){
   const members=groupMembers(s), cur=monthISO();
   const months=[-4,-3,-2,-1,0,1].map(k=>addMonths(cur,k));
-  return `<div class="card"><h3>Mensalidades</h3><div class="muted small" style="margin-bottom:10px">Vencimento todo dia ${s.dueDay||10}. Clique para marcar como pago.</div>
-    <div class="tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Valor</th>${months.map(m=>`<th>${monthLabel(m).split(" de ")[0].slice(0,3)}/${m.slice(2,4)}</th>`).join("")}</tr></thead><tbody>
-    ${members.map(n=>{const fee=memberFee(s,n);return `<tr><td><b>${esc(n)}</b></td><td class="money">${fee===null?`<a href="#" onclick="setFichaTab('cadastro');return false">definir</a>`:fmtBRL(fee)}</td>${months.map(m=>{const st=payStatus(s,n,m);return `<td><button class="chip ${st.cls}" style="border:0;cursor:pointer" onclick='togglePaid(${JSON.stringify(m)},${JSON.stringify(n)},${JSON.stringify(studentKey(s))})'>${st.label}</button></td>`}).join("")}</tr>`}).join("")}
+  return `<div class="card"><h3>Mensalidades</h3><div class="muted small" style="margin-bottom:10px">Clique no mês para marcar como pago.</div>
+    <div class="tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Valor</th><th>Vence</th>${months.map(m=>`<th>${monthLabel(m).split(" de ")[0].slice(0,3)}/${m.slice(2,4)}</th>`).join("")}</tr></thead><tbody>
+    ${members.map(n=>{const fee=memberFee(s,n);return `<tr><td><b>${esc(n)}</b></td><td class="money">${fee===null?`<a href="#" onclick="setFichaTab('cadastro');return false">definir</a>`:fmtBRL(fee)}</td><td>dia ${memberDue(s,n)}</td>${months.map(m=>{const st=payStatus(s,n,m);return `<td><button class="chip ${st.cls}" style="border:0;cursor:pointer" onclick='togglePaid(${JSON.stringify(m)},${JSON.stringify(n)},${JSON.stringify(studentKey(s))})'>${st.label}</button></td>`}).join("")}</tr>`}).join("")}
     </tbody></table></div></div>`;
 }
+const PAY_METHODS=["Pix","ASAAS","Cartão","Boleto","Transferência","Outro"];
 function fichaCadastro(s){
-  const members=groupMembers(s), days=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
-  return `<div class="card"><h3>Dados da turma</h3>
+  const members=groupMembers(s), days=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"], grp=members.length>1;
+  const finFields=(get,cls,n,ph)=>`
+          <div><label>Valor mensal</label><input class="${cls}" ${n?`data-n="${esc(n)}"`:""} data-f="fee" id="${n?"":"fcFee"}" type="number" min="0" step="0.01" value="${esc(get("fee")??"")}" placeholder="${ph.fee||"300"}"></div>
+          <div><label>Dia do vencimento</label><input class="${cls}" ${n?`data-n="${esc(n)}"`:""} data-f="dueDay" id="${n?"":"fcDue"}" type="number" min="1" max="31" value="${esc(get("dueDay")||(n?"":10))}" placeholder="${ph.due||"10"}"></div>
+          <div><label>Forma de pagamento</label><select class="${cls}" ${n?`data-n="${esc(n)}"`:""} data-f="payMethod" id="${n?"":"fcPay"}">${PAY_METHODS.map(x=>`<option ${(get("payMethod")||"Pix")===x?"selected":""}>${x}</option>`).join("")}</select></div>
+          <div><label>Aluno desde</label><input class="${cls}" ${n?`data-n="${esc(n)}"`:""} data-f="startDate" id="${n?"":"fcStart"}" type="date" value="${esc(get("startDate")||"")}"></div>`;
+  return `<div class="card"><h3>${grp?"Dados da turma":"Dados do aluno"}</h3>
     <div class="formgrid">
       <div><label>Dia</label><select id="fcDay">${days.map(d=>`<option ${s.day===d?"selected":""}>${d}</option>`).join("")}</select></div>
       <div><label>Horário</label><input id="fcTime" value="${esc(s.time||"")}"></div>
       <div><label>Nível</label><select id="fcLevel">${["A1","A2","B1","B2"].map(l=>`<option ${s.level===l?"selected":""}>${l}</option>`).join("")}</select></div>
       <div><label>Link do Google Meet</label><input id="fcMeet" value="${esc(s.meet||"")}" placeholder="https://meet.google.com/..."></div>
-      <div><label>Valor mensal ${members.length>1?"(por aluno)":""}</label><input id="fcFee" type="number" min="0" step="0.01" value="${esc(s.fee??"")}" placeholder="300"></div>
-      <div><label>Dia do vencimento</label><input id="fcDue" type="number" min="1" max="31" value="${esc(s.dueDay||10)}"></div>
-      <div><label>Forma de pagamento</label><select id="fcPay">${["Pix","ASAAS","Cartão","Boleto","Transferência","Outro"].map(x=>`<option ${s.payMethod===x?"selected":""}>${x}</option>`).join("")}</select></div>
-      <div><label>Aluno desde</label><input id="fcStart" type="date" value="${esc(s.startDate||"")}"></div>
+      ${grp?`<div><label>Turma desde</label><input id="fcStart" type="date" value="${esc(s.startDate||"")}"></div>`:finFields(f=>s[f],"",null,{})}
       <div class="full"><label>Observações</label><textarea id="fcNotes" rows="3">${esc(s.notes||"")}</textarea></div>
     </div></div>
-    <div class="card" style="margin-top:14px"><h3>${members.length>1?"Alunos da turma":"Contato do aluno"}</h3>
-      ${members.map((n,k)=>{const mi=(s.memberInfo||{})[n]||{};return `<div class="site-item" style="margin-bottom:10px"><b>${esc(n)}</b>
+    <div class="card" style="margin-top:14px"><h3>${grp?"Alunos da turma":"Contato do aluno"}</h3>
+      ${grp?`<div class="muted small" style="margin-bottom:10px">Cada aluno tem o seu próprio valor, vencimento, forma de pagamento e data de entrada. Meses antes do “Aluno desde” não são cobrados.</div>`:""}
+      ${members.map(n=>{const mi=(s.memberInfo||{})[n]||{};return `<div class="site-item" style="margin-bottom:10px"><b>${esc(n)}</b>
         <div class="formgrid" style="margin-top:8px">
           <div><label>WhatsApp</label><input class="fcM" data-n="${esc(n)}" data-f="phone" value="${esc(mi.phone||"")}" placeholder="99 99999-9999"></div>
           <div><label>E-mail</label><input class="fcM" data-n="${esc(n)}" data-f="email" value="${esc(mi.email||"")}"></div>
           <div><label>Aniversário</label><input class="fcM" data-n="${esc(n)}" data-f="birthday" type="date" value="${esc(mi.birthday||"")}"></div>
-          ${members.length>1?`<div><label>Valor próprio (opcional)</label><input class="fcM" data-n="${esc(n)}" data-f="fee" type="number" min="0" step="0.01" value="${esc(mi.fee??"")}" placeholder="usa o valor da turma"></div>`:""}
+          ${grp?finFields(f=>mi[f],"fcM",n,{fee:s.fee!==undefined&&s.fee!==""?`${s.fee} (padrão da turma)`:"300",due:String(s.dueDay||10)}):""}
         </div></div>`}).join("")}
     </div>
     <div class="toolbar" style="justify-content:space-between;margin-top:14px">
@@ -2666,10 +2673,12 @@ function fichaCadastro(s){
 function saveFichaCadastro(){
   const s=fichaStudent(); if(!s) return;
   const meet=normalizeMeet(document.getElementById("fcMeet").value); if(meet===null){alert("Link do Meet inválido.");return;}
-  const oldKey=studentKey(s);
-  s.day=fcDay.value; s.time=fcTime.value.trim(); s.level=fcLevel.value; s.meet=meet;
-  s.fee=fcFee.value===""?"":Number(fcFee.value); s.dueDay=Number(fcDue.value)||10; s.payMethod=fcPay.value; s.startDate=fcStart.value; s.notes=fcNotes.value.trim();
-  document.querySelectorAll(".fcM").forEach(el=>{ const mi=memberInfo(s,el.dataset.n); const v=el.value.trim(); mi[el.dataset.f]=el.dataset.f==="fee"?(v===""?"":Number(v)):v; });
+  const oldKey=studentKey(s), grp=groupMembers(s).length>1, val=id=>document.getElementById(id)?.value;
+  s.day=val("fcDay"); s.time=(val("fcTime")||"").trim(); s.level=val("fcLevel"); s.meet=meet; s.notes=(val("fcNotes")||"").trim();
+  s.startDate=val("fcStart")||"";
+  if(!grp){ const f=val("fcFee"); s.fee=f===""||f===undefined?"":Number(f); s.dueDay=Number(val("fcDue"))||10; s.payMethod=val("fcPay"); }
+  document.querySelectorAll(".fcM").forEach(el=>{ const mi=memberInfo(s,el.dataset.n); const v=String(el.value||"").trim(); const f=el.dataset.f;
+    mi[f]=(f==="fee"||f==="dueDay")?(v===""?"":Number(v)):v; });
   FICHA.key=studentKey(s);
   save(); Cloud.enqueue("upsertStudent",{student:s,key:studentKey(s),oldKey}); renderFicha(); alert("Cadastro salvo.");
 }
@@ -2680,7 +2689,9 @@ function payKey(m,name,key){ return `${m}|${key}|${name}`; }
 function payStatus(s,name,m){
   const p=DB.payments[payKey(m,name,studentKey(s))];
   if(p&&p.paid) return {cls:"ok",label:"✓ Pago",paid:true};
-  const due=`${m}-${String(Math.min(Number(s.dueDay)||10,28)).padStart(2,"0")}`;
+  const start=memberStart(s,name);
+  if(start && m<start.slice(0,7)) return {cls:"",label:"—",paid:false,na:true};
+  const due=`${m}-${String(Math.min(memberDue(s,name),28)).padStart(2,"0")}`;
   if(m<(DB.financeStart||m)) return {cls:"",label:"—",paid:false,na:true};
   if(todayISO()>due) return {cls:"bad",label:"Atrasado",paid:false,late:true};
   return {cls:"warn",label:"Pendente",paid:false};
@@ -2718,7 +2729,7 @@ function renderFinance(){
   <div class="grid">
     <div class="card span8"><h3>Mensalidades de ${monthLabel(m).split(" de ")[0].toLowerCase()}</h3>
       <div class="tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Turma</th><th>Vence</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody>
-      ${rows.sort((a,b)=>(a.st.paid-b.st.paid)||a.n.localeCompare(b.n)).map(r=>`<tr><td><b>${esc(r.n)}</b></td><td><a href="#" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"financeiro");return false'>${esc(r.s.name===r.n?"Individual":r.s.name)}</a></td><td>dia ${r.s.dueDay||10}</td><td class="money">${r.fee===null?"—":fmtBRL(r.fee)}</td><td><span class="chip ${r.st.cls}">${r.st.label}</span></td>
+      ${rows.sort((a,b)=>(a.st.paid-b.st.paid)||a.n.localeCompare(b.n)).map(r=>`<tr><td><b>${esc(r.n)}</b></td><td><a href="#" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"financeiro");return false'>${esc(r.s.name===r.n?"Individual":r.s.name)}</a></td><td>dia ${memberDue(r.s,r.n)}</td><td class="money">${r.fee===null?"—":fmtBRL(r.fee)}</td><td><span class="chip ${r.st.cls}">${r.st.label}</span></td>
         <td>${r.st.na?"":r.st.nofee?`<button class="btn small" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"cadastro")'>Definir valor</button>`:`<button class="btn small ${r.st.paid?"":"primary"}" onclick='togglePaid(${JSON.stringify(m)},${JSON.stringify(r.n)},${JSON.stringify(studentKey(r.s))})'>${r.st.paid?"Desfazer":"Marcar pago"}</button>`}${r.s.memberInfo?.[r.n]?.phone&&!r.st.paid?` <a class="btn small" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/55${String(r.s.memberInfo[r.n].phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(`Oi ${r.n.split(" ")[0]}! Passando para lembrar da mensalidade de ${monthLabel(m)} 💛`)}">💬</a>`:""}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">Nenhum aluno ativo.</td></tr>`}
       </tbody></table></div></div>
     <div class="card span4"><h3>Outras entradas e saídas</h3>
