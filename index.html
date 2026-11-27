@@ -3698,9 +3698,19 @@ function mergeBackup(cur,inc){
   const ids=new Set(cur.records.map(r=>r.id)), slots=new Set(cur.records.map(r=>`${r.date}|${r.schedule||r.student}`));
   (inc.records||[]).forEach(r=>{ if(ids.has(r.id)||slots.has(`${r.date}|${r.schedule||r.student}`)){ const c=cur.records.find(x=>x.id===r.id); if(c) fillBlanks(c,r); return; } cur.records.push(r); rep.aulas++; });
   cur.records.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  // biblioteca de aulas (arquivo gerado a partir do Google Drive): completa as aulas sem apagar o que já foi preenchido
+  rep.biblioteca=0;
+  (inc.libraryUpdate||[]).forEach(u=>{
+    const pool=[...(cur.lessons||[]),...(cur.customLessons=cur.customLessons||[])];
+    let l=pool.find(x=>x.level===u.level&&String(x.code)===String(u.code));
+    if(!l){ l={level:u.level,code:u.code,title:u.title}; cur.customLessons.push(l); }
+    let changed=false;
+    Object.keys(u).forEach(k=>{ if(isBlank(l[k])&&!isBlank(u[k])){ l[k]=u[k]; changed=true; } });
+    if(changed) rep.biblioteca++;
+  });
   // demais listas e dicionários
   Object.keys(inc).forEach(k=>{
-    if(["students","inactiveStudents","records"].includes(k)) return;
+    if(["students","inactiveStudents","records","libraryUpdate","_info"].includes(k)) return;
     const a=cur[k], b=inc[k];
     if(isBlank(a)){ if(!isBlank(b)){ cur[k]=b; rep.outros++; } return; }
     if(Array.isArray(a)&&Array.isArray(b)){
@@ -3726,7 +3736,7 @@ async function importBackup(file){
   if(!DB.meetingNotes)DB.meetingNotes=[];
   if(!DB.ideas)DB.ideas=[];
     save();renderAll();
-    alert(`Backup mesclado ✔\n\n+ ${rep.aulas} registro(s) de aula\n+ ${rep.alunos} aluno(s)/turma(s)\n+ ${rep.inativos} inativo(s)\n+ ${rep.outros} outro(s) item(ns)\n\nNada do que você já tinha foi apagado ou alterado — campos vazios foram preenchidos com o backup.`);
+    alert(`Backup mesclado ✔\n\n${rep.biblioteca?`📚 ${rep.biblioteca} aula(s) da biblioteca completada(s)\n`:""}+ ${rep.aulas} registro(s) de aula\n+ ${rep.alunos} aluno(s)/turma(s)\n+ ${rep.inativos} inativo(s)\n+ ${rep.outros} outro(s) item(ns)\n\nNada do que você já tinha foi apagado ou alterado — campos vazios foram preenchidos com o backup.`);
     if(Cloud.enabled() && confirm("Enviar também as novidades para o Notion agora?")) Cloud.syncAll();
     return;
   }
