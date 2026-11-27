@@ -636,6 +636,26 @@ function applyCurriculum(data){
     data.lessons = [...(data.lessons||[]).filter(l=>!["A1","A2","B1"].includes(l.level)), ...fresh];
     data.curriculumVersion = CURRICULUM_VERSION;
   }
+  // Nova ordem do A1 (nov/2026): Placement Test → American Pronunciation → As Pessoas do Inglês → The Greetings → resto
+  if(data.a1OrderVersion !== "2026-11-27-placement"){
+    const A1=(data.lessons||[]).filter(l=>l.level==="A1"), by=c=>A1.find(l=>String(l.code)===String(c));
+    const o1=by(1), o2=by(2), o3=by(3);
+    if(o1&&o2&&o3&&/greeting/i.test(o1.title)&&/pronunc/i.test(o3.title)&&!A1.some(l=>/placement/i.test(l.title))){
+      const g1={goal:o1.goal,grammar:o1.grammar}, g2={goal:o2.goal,grammar:o2.grammar}, g3={goal:o3.goal,grammar:o3.grammar};
+      const map={};
+      A1.forEach(l=>{ const n=parseInt(l.code,10); if(String(n)===String(l.code)){ map[l.code]=String(n+1); } });
+      A1.forEach(l=>{ if(map[l.code]) l.code=map[l.code]; });
+      Object.assign(o3,{code:"2",title:"1A — The American Pronunciation",goal:g2.goal,grammar:g2.grammar});
+      Object.assign(o2,{code:"3",title:"1C — As Pessoas do Inglês",goal:g1.goal,grammar:g1.grammar});
+      Object.assign(o1,{code:"4",title:"2A — The Greetings",goal:g3.goal,grammar:g3.grammar});
+      data.lessons.push({level:"A1",code:"1",title:"PLACEMENT TEST",goal:"Primeira aula: teste de nivelamento + ficha de perfil do aluno (gostos, rotina, objetivos).",grammar:"",vocab:"",pages:"",homework:"",link:"",status:"✅ Pronta"});
+      // cronogramas já montados acompanham a nova numeração
+      const oldToNew={}; Object.keys(map).forEach(k=>oldToNew["A1|"+k]="A1|"+map[k]);
+      oldToNew["A1|1"]="A1|4"; oldToNew["A1|2"]="A1|3"; oldToNew["A1|3"]="A1|2";
+      Object.values(data.schedules||{}).forEach(p=>(p.items||[]).forEach(it=>{ if(oldToNew[it.ref]) it.ref=oldToNew[it.ref]; }));
+    }
+    data.a1OrderVersion="2026-11-27-placement";
+  }
   // Atualização pontual do nível da dupla; a versão impede sobrescrever futuras edições manuais.
   if(data.studentLevelVersion !== "2026-11-06-pedro-isabella-a2"){
     const dupla = (data.students||[]).find(s=>s.name === "Pedro Henrique + Isabella Rissi" && s.day === "Sexta" && s.time === "14:00–15:00");
