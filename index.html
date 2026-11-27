@@ -438,6 +438,66 @@ a{color:var(--or-d)}
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#E8821E">
 <script src="report-render.js"></script>
+
+<style id="ewd-dash">
+.span7{grid-column:span 7}.span5{grid-column:span 5}
+.dash-hero{position:relative;overflow:hidden;border-radius:26px;padding:28px 30px 24px;margin-bottom:16px;color:#fff;background:linear-gradient(130deg,#E8821E 0%,#F09A48 55%,#F6BC85 100%);box-shadow:0 18px 40px -22px rgba(201,106,18,.7)}
+.dash-hero .eyebrow{color:rgba(255,255,255,.88);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11px}
+.dash-hero h2{font-size:clamp(28px,4vw,40px);margin:8px 0 4px;color:#fff;line-height:1.05}
+.dash-hero p{margin:0;font-size:15px;opacity:.95}
+.dash-stars{position:absolute;inset:0;pointer-events:none}.dash-stars svg{position:absolute;fill:rgba(255,255,255,.25)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px;max-width:720px}
+.hero-stats button{all:unset;cursor:pointer;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:16px;padding:10px 14px;display:flex;flex-direction:column;transition:transform .15s,background .15s}
+.hero-stats button:hover{background:rgba(255,255,255,.28);transform:translateY(-2px)}
+.hero-stats b{font-size:24px;line-height:1.1;color:#fff}.hero-stats span{font-size:12px;font-weight:700;opacity:.92}
+.dash .card{border-radius:22px}.dash-side{display:flex;flex-direction:column;gap:14px}.dash-side .card{margin:0}
+.dash-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.dash-h h2{margin:0;font-size:19px}
+.go-link{color:var(--or-d);font-weight:800;font-size:12px}
+.dash-sub{font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+.agenda{position:relative}
+.ag-item{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;padding:12px 12px;border-radius:16px;border:1px solid var(--line);background:#fff;margin-bottom:8px;transition:box-shadow .15s}
+.ag-item:hover{box-shadow:0 8px 20px -16px rgba(58,46,38,.5)}
+.ag-item.now{border-color:var(--or);background:var(--or-ll);box-shadow:0 0 0 3px var(--or-l)}
+.ag-item.done{opacity:.72}.ag-item.done .ag-time{background:#EAF4EC;color:#2F7A4F}
+.ag-time{background:var(--or-l);color:var(--or-dd);font-weight:800;border-radius:12px;padding:10px 6px;text-align:center;font-size:15px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ag-live{font-size:10px;background:var(--or);color:#fff;border-radius:999px;padding:1px 7px;text-transform:uppercase;letter-spacing:.06em}
+.ag-ok{font-size:12px}
+.ag-title{font-weight:800}.ag-title a{color:var(--ink)}.ag-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}.ag-hw .homework-group{display:flex;gap:6px;flex-wrap:wrap}.ag-hw .homework-check{margin:0}
+.ag-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.mini-row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}.mini-row:last-child{border:0}.mini-row .main{flex:1;min-width:0}
+.quick-add{display:flex;gap:8px}.quick-add input{flex:1}.quick-add input[type=date]{flex:0 0 160px}
+.pd-item{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px dashed var(--line)}.pd-item:last-child{border:0}.pd-item .main{flex:1;min-width:0}
+.pd-t{font-weight:700}.pd-item.done .pd-t{text-decoration:line-through;opacity:.55}
+.pd-check{position:relative;flex:none;margin-top:2px;cursor:pointer}.pd-check input{position:absolute;opacity:0}
+.pd-check span{display:block;width:20px;height:20px;border-radius:7px;border:2px solid var(--or);background:#fff;transition:.15s}
+.pd-check input:checked+span{background:var(--or);box-shadow:inset 0 0 0 3px #fff}
+.late{color:#B4472F;font-weight:700}.today-tag{color:var(--or-d);font-weight:800}
+.auto-item{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--cream);border:1px solid var(--line);margin-top:6px;cursor:pointer;font-size:13px;transition:.15s}
+.auto-item:hover{border-color:var(--or);background:var(--or-ll)}.auto-item b{flex:1;font-weight:700}.auto-item .go{color:var(--or-d);font-weight:800}
+.auto-item.hot{background:#FBEDE8;border-color:#F2CFC4}
+.av-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--or-l);background:#fff;margin-top:8px}
+.av-item.imp{border-left-color:var(--or);background:var(--or-ll)}
+.av-ic{font-size:18px;line-height:1.2}.av-item .main{flex:1;min-width:0}.av-t{font-weight:800}.av-act{display:flex;gap:4px}
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);padding:22px 0;text-align:center}.empty-state svg{width:28px;height:28px;fill:var(--or-l)}
+.empty-state.small{padding:10px 0}
+.bd-row{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}.bd-row:last-child{border:0}.bd-row .main{flex:1}
+.bd-date{width:46px;border-radius:12px;background:var(--or-l);color:var(--or-dd);text-align:center;padding:5px 0;line-height:1.05}.bd-date b{display:block;font-size:18px}.bd-date span{font-size:11px;font-weight:800;text-transform:uppercase}
+.bd-row.hoje .bd-date{background:var(--or);color:#fff}
+.ct-dash{display:flex;gap:16px;align-items:center}.ct-big{font-size:22px;font-weight:800;color:var(--ink)}
+.fin-big{font-size:26px;font-weight:800;color:var(--or-dd)}.fin-big span{font-size:13px;color:var(--muted);font-weight:700}
+.bar{height:10px;border-radius:999px;background:var(--or-l);overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#F2A25A,var(--or))}
+.fin-bar{height:12px;margin-top:10px}
+.dash-mini{min-height:190px}
+.ct-top{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.ct-ringbox{display:flex;gap:16px;align-items:center}.ct-folder label{font-weight:800}
+.ct-table select.ct-status{padding:6px 8px;border-radius:999px;font-weight:700;font-size:13px}
+.ct-status.s0{background:#FFF6E8}.ct-status.s1{background:#EEF3FB}.ct-status.s2{background:#EAF4EC}.ct-status.s3{background:#F3EFEC}
+.ct-table tr.ct-ok td{background:#FAFDF9}.ct-note td{border-top:0!important;padding-top:0!important}
+.ct-link{font-weight:800;color:var(--or-d)}.ct-url{min-width:220px}
+.bigcheck{width:20px;height:20px;accent-color:var(--or)}
+@media(max-width:1100px){.span7,.span5{grid-column:span 12}}
+@media(max-width:700px){.hero-stats{grid-template-columns:repeat(2,1fr)}.ag-item{grid-template-columns:58px 1fr}.ct-top{grid-template-columns:1fr}.dash-hero{padding:22px 20px}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -449,7 +509,8 @@ a{color:var(--or-d)}
   <nav id="nav">
     <div class="navgroup" data-g="dia"><div class="navhead" onclick="toggleNavGroup('dia')">Dia a dia <span class="chev">⌄</span></div>
       <button data-view="today" class="active">🏠 Início</button>
-      <button data-view="avisos">🔔 Avisos e aniversários</button>
+      <button data-view="avisos">📣 Avisos</button>
+      <button data-view="pendencias">✅ Pendências</button>
       <button data-view="makeups">🔄 Reposições</button>
     </div>
     <div class="navgroup" data-g="ped"><div class="navhead" onclick="toggleNavGroup('ped')">Pedagógico <span class="chev">⌄</span></div>
@@ -464,6 +525,7 @@ a{color:var(--or-d)}
     </div>
     <div class="navgroup" data-g="adm"><div class="navhead" onclick="toggleNavGroup('adm')">Administrativo <span class="chev">⌄</span></div>
       <button data-view="finance">💰 Financeiro</button>
+      <button data-view="contratos">📑 Contratos</button>
       <button data-view="admin">⚙️ Administração</button>
     </div>
     <div class="navgroup" data-g="com"><div class="navhead" onclick="toggleNavGroup('com')">Comercial <span class="chev">⌄</span></div>
@@ -501,6 +563,8 @@ a{color:var(--or-d)}
   <section id="history" class="section"></section>
   <section id="admin" class="section"></section>
   <section id="avisos" class="section"></section>
+  <section id="pendencias" class="section"></section>
+  <section id="contratos" class="section"></section>
   <section id="finance" class="section"></section>
   <section id="leads" class="section"></section>
   <section id="ficha" class="section"></section>
@@ -618,7 +682,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view==="ficha"?"students":view}"]`)?.classList.add("active");
-  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos e aniversários",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Aulas & Feedback",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos",pendencias:"Pendências",contratos:"Contratos",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Aulas & Feedback",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
   window.scrollTo(0,0);
@@ -629,7 +693,7 @@ try{ const st=JSON.parse(localStorage.getItem("ewd_nav")||"{}"); Object.entries(
 todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
 
 function renderAll(){
-  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderFinance(); renderLeads(); renderFicha(); renderWrapped(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderPendencias(); renderContratos(); renderFinance(); renderLeads(); renderFicha(); renderWrapped(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
 }
 
 function homeworkKey(name){
@@ -655,89 +719,114 @@ function homeworkCheck(name,label){
 }
 
 function renderToday(){
+  if(!document.getElementById("today")) return;
+  hubExtraInit();
   const day=currentDay();
-  const sched=DB.students.filter(s=>s.day===day);
-  // Continuidade mostra somente alunos do dia selecionado que ainda não concluíram a última aula.
+  const sched=DB.students.filter(s=>s.day===day).sort((a,b)=>String(a.time).localeCompare(String(b.time)));
   const partials=DB.students.filter(s=>{
     if(s.day!==day) return false;
     const h=studentHistory(s.name)[0];
     const progress=h ? Number(h.progress) : Number(s.progress||0);
     return progress>0 && progress<100;
   });
-  const pending=(DB.records||[]).filter(r=>r.status==="🔄 Rep. Pendente");
-  // Recupera o Planning Class preenchido para cada aluno/turma no dia de hoje.
   const planningWeek=getMondayISO();
   const todaysPlannings=sched.map(s=>{
     const p=DB.weeklyPlanning?.[planningKey(planningWeek,s)]||{};
     return {...s, plannedLesson:(p.lesson||"").trim(), plannedNotes:(p.notes||"").trim()};
   }).filter(s=>s.plannedLesson||s.plannedNotes);
+  const nowHM=new Date().toTimeString().slice(0,5);
   const rows=sched.map(s=>{
-    const hist=studentHistory(s.name);
-    const last=hist[0];
+    const hist=studentHistory(s.name), last=hist[0];
+    const doneToday=last&&last.date===todayISO();
     const shown = last ? `${last.lesson||"Aula sem título"} · ${last.progress||0}%` : (s.last ? `${s.last} · ${s.progress||0}%` : "Sem registro");
     const members=groupMembers(s);
-    const hw = members.length>1
-      ? `<div class="homework-group">${members.map(n=>`${homeworkCheck(n,n.split(" ")[0])}`).join("")}</div>`
-      : homeworkCheck(members[0]||s.name);
-    return `<div class="row">
-      <div class="main">
-        <div class="title today-title-line">
-          <span>${esc(s.time)} · <a href="#" style="color:inherit" onclick='openFicha(${JSON.stringify(studentKey(s))});return false'>${esc(s.name)}</a> ${badge(s.level)}</span>
-          <span class="today-homework-inline">${hw}</span>
-        </div>
-        <div class="meta">Último: <b>${esc(shown)}</b></div>
+    const hw = members.length>1 ? `<div class="homework-group">${members.map(n=>`${homeworkCheck(n,n.split(" ")[0])}`).join("")}</div>` : homeworkCheck(members[0]||s.name);
+    const t0=String(s.time).match(/\d{1,2}[:h]\d{0,2}/)?.[0].replace("h",":").padEnd(5,"0")||"";
+    const isNow=!doneToday&&t0&&t0<=nowHM&&String(s.time).match(/[–-]\s*(\d{1,2}:\d{2})/)?.[1]>=nowHM;
+    const plan=DB.weeklyPlanning?.[planningKey(planningWeek,s)]?.lesson;
+    return `<div class="ag-item ${doneToday?"done":""} ${isNow?"now":""}">
+      <div class="ag-time">${esc(String(s.time).split(/[–-]/)[0].trim())}${isNow?`<span class="ag-live">agora</span>`:""}${doneToday?`<span class="ag-ok">✓</span>`:""}</div>
+      <div class="ag-body">
+        <div class="ag-title"><a href="#" onclick='openFicha(${JSON.stringify(studentKey(s))});return false'>${esc(s.name)}</a> ${badge(s.level)}</div>
+        <div class="meta">${plan?`🗓️ <b>${esc(plan)}</b> · `:""}Último: ${esc(shown)}</div>
+        <div class="ag-foot"><div class="ag-hw">${hw}</div>
+      <div class="ag-actions">
+        ${s.meet?`<a class="btn small meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Meet</a>`:`<button class="btn small" onclick='openEditStudent(${DB.students.indexOf(s)})' title="Adicionar link do Meet">＋ Meet</button>`}
+        <button class="btn small" onclick='startClassRecording(${JSON.stringify(studentKey(s))})' title="Colar transcrição e gerar feedback">📄 Feedback</button>
+        <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>${doneToday?"Registrada":"Registrar aula"}</button>
+      </div></div>
       </div>
-      <div class="today-actions">
-        ${s.meet?`<a class="btn small meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Abrir Meet</a>`:`<button class="btn small" onclick='openEditStudent(${DB.students.indexOf(s)})' title="Adicionar link do Meet">＋ Link Meet</button>`}
-        <button class="btn small" onclick='startClassRecording(${JSON.stringify(studentKey(s))})'>📄 Registrar aula</button>
-        <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar aula</button>
-      </div>
-    </div>`
-  }).join("") || `<div class="muted">Nenhuma aula cadastrada para ${day}.</div>`;
+    </div>`;
+  }).join("") || `<div class="empty-state">${STAR_SVG}<div>Nenhuma aula cadastrada para ${day}. Aproveite o dia! ☕</div></div>`;
 
-  hubInit();
   const hr=new Date().getHours(), hi=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
-  const lateN=lateCount(), leadsN=leadsDueToday().length;
+  const pend=pendOpen(), auto=autoPendencias(), avs=avisosAtivos(), bdays=upcomingBirthdays(14);
+  const pendCount=pend.length+auto.length;
+  const doneN=sched.filter(s=>studentHistory(s.name)[0]?.date===todayISO()).length;
+  const m=monthISO(), fr=finRows(m).filter(r=>r.fee), paid=fr.filter(r=>r.st.paid), lateM=fr.filter(r=>r.st.late);
+  const sum=a=>a.reduce((t,r)=>t+(Number(r.fee)||0),0), exp=sum(fr), got=sum(paid);
+  const cy=String(new Date().getMonth()>=9?new Date().getFullYear()+1:new Date().getFullYear()); const cst=contractStats(cy);
+  const makeToday=(DB.records||[]).filter(r=>r.manualMakeup && (r.makeupDate||r.date)===todayISO());
+  const stars=[[92,14,40],[80,64,18],[96,72,12],[70,20,10],[60,78,8]].map(([x,y,s])=>`<svg style="left:${x}%;top:${y}%;width:${s}px;height:${s}px" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.45l-5.8 3.05 1.1-6.45-4.7-4.6 6.5-.95z"/></svg>`).join("");
+  const line=[sched.length?`${sched.length} aula${sched.length>1?"s":""} hoje`:"nenhuma aula hoje", pendCount?`${pendCount} pendência${pendCount>1?"s":""}`:"", avs.length?`${avs.length} aviso${avs.length>1?"s":""}`:""].filter(Boolean);
   today.innerHTML=`
-  <div class="page-head" style="margin-bottom:10px"><div><div class="eyebrow">English with Denise</div><h2 class="greet">${hi}, Denise! ☀️</h2><div class="muted small">Aqui está o seu dia na escola.</div></div></div>
-  <div class="kpis">
-    <div class="kpic hl"><div class="k">Aulas hoje</div><div class="v">${sched.length}</div><div class="d">${partials.length} para continuar</div></div>
-    <div class="kpic" style="cursor:pointer" onclick="go('makeups')"><div class="k">Reposições pendentes</div><div class="v">${pending.length}</div><div class="d">ver reposições</div></div>
-    <div class="kpic" style="cursor:pointer" onclick="go('finance')"><div class="k">Mensalidades atrasadas</div><div class="v" style="color:${lateN?"#B4472F":"inherit"}">${lateN}</div><div class="d">ver financeiro</div></div>
-    <div class="kpic" style="cursor:pointer" onclick="go('leads')"><div class="k">Leads para hoje</div><div class="v">${leadsN}</div><div class="d">ver leads</div></div>
+  <div class="dash-hero"><div class="dash-stars">${stars}</div>
+    <div class="eyebrow">English with Denise · ${esc(dateLongBR())}</div>
+    <h2>${hi}, Denise! ☀️</h2>
+    <p>${line.length>1?line.slice(0,-1).join(", ")+" e "+line.slice(-1):line[0]}.</p>
+    <div class="hero-stats">
+      <button onclick="document.getElementById('dashAgenda').scrollIntoView({behavior:'smooth'})"><b>${doneN}/${sched.length}</b><span>aulas registradas</span></button>
+      <button onclick="go('pendencias')"><b>${pendCount}</b><span>pendências</span></button>
+      <button onclick="go('avisos')"><b>${avs.length}</b><span>avisos</span></button>
+      <button onclick="go('contratos')"><b>${cst.signed}/${cst.total}</b><span>contratos ${cy}</span></button>
+    </div>
   </div>
-  <div class="grid">
-    ${todayHubHTML()}
-    <div class="card span12"><h2>Agenda de ${day}</h2>
-      <div class="notice blue small" style="margin-bottom:12px">☑️ Marque <b>Homework</b> somente depois que você enviar a tarefa no aplicativo. O check fica salvo no diário para a data de hoje.</div>
-      <div class="list">${rows}</div>
+  <div class="grid dash">
+    <div class="card span7" id="dashAgenda">
+      <div class="dash-h"><h2>🗓️ Agenda de ${day}</h2><button class="btn small" onclick="openAddMakeup()">+ Reposição</button></div>
+      <div class="muted small" style="margin:-4px 0 10px">☑️ Marque o homework depois de enviar a tarefa no aplicativo.</div>
+      <div class="agenda">${rows}</div>
+      ${makeToday.length?`<div class="dash-sub">🔄 Reposições de hoje</div>${makeToday.map(r=>`<div class="mini-row"><div class="main"><b>${esc(r.student)}</b> · ${esc(r.lesson||"Aula não informada")}<div class="muted small">${esc(r.note||"Reposição agendada")} · ${esc(r.status)}</div></div>${r.status==="🔄 Rep. Pendente"?`<button class="btn small" onclick="completeMakeup(${r.id})">Feita</button>`:""}</div>`).join("")}`:""}
     </div>
-    <div class="card span12">
-      <div class="toolbar" style="justify-content:space-between;align-items:center">
-        <div><h2 style="margin:0">Planning Lessons · ${day}</h2>
-        <div class="muted small">Aulas planejadas na aba Planning Class para os alunos de hoje.</div></div>
-        <button class="btn small" onclick="go('planning')">Editar Planning Class</button>
+    <div class="span5 dash-side">
+      <div class="card dash-pend">
+        <div class="dash-h"><h2>✅ Pendências</h2><button class="btn small" onclick="go('pendencias')">Ver todas</button></div>
+        <div class="quick-add"><input id="dPdQuick" placeholder="+ Adicionar pendência… (Enter)" onkeydown="if(event.key==='Enter')quickPend('dPdQuick','')"></div>
+        ${pend.slice(0,6).map(p=>pendRow(p,true)).join("")}
+        ${pend.length>6?`<div class="muted small" style="margin-top:6px">+ ${pend.length-6} pendência(s)</div>`:""}
+        ${auto.length?`<div class="dash-sub">⚡ Encontradas pelo Studio</div>${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="go('${x.go}')"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")}`:""}
+        ${!pend.length&&!auto.length?`<div class="empty-state small">${STAR_SVG}<div>Tudo em dia ✨</div></div>`:""}
       </div>
-      ${todaysPlannings.length?todaysPlannings.map(s=>`
-        <div class="row" style="margin-top:9px;align-items:flex-start">
-          <div class="main">
-            <div class="title"><b>${esc(s.time)} · ${esc(s.name)}</b> ${badge(s.level)}</div>
-            ${s.plannedLesson?`<div style="margin-top:5px"><b>Aula planejada:</b> ${esc(s.plannedLesson)}</div>`:""}
-            ${s.plannedNotes?`<div class="meta" style="margin-top:4px"><b>Observações:</b> ${esc(s.plannedNotes)}</div>`:""}
-          </div>
-        </div>`).join(""):`<div class="muted" style="margin-top:12px">Nenhuma Planning Lesson preenchida para os alunos de hoje. Adicione as aulas na aba Planning Class para que apareçam aqui.</div>`}
+      <div class="card dash-av">
+        <div class="dash-h"><h2>📣 Avisos</h2><button class="btn small" onclick="openAviso()">+ Aviso</button></div>
+        ${avs.slice(0,5).map(a=>avisoRow(a,true)).join("")||`<div class="muted small">Nenhum aviso ativo.</div>`}
+        ${avs.length>5?`<div class="muted small" style="margin-top:6px"><a href="#" onclick="go('avisos');return false">+ ${avs.length-5} aviso(s)</a></div>`:""}
+      </div>
     </div>
-    <div class="card span12"><h2>Continuidade · ${day}</h2>
-      <div class="muted small" style="margin:-8px 0 12px">Alunos deste dia que precisam continuar uma aula iniciada anteriormente.</div>
-      ${partials.length?partials.map(s=>{
-        const h=studentHistory(s.name)[0];
-        const lesson=h?.lesson || s.last || "Aula em andamento";
-        const progress=Number(h?.progress ?? s.progress ?? 0);
-        return `<div class="notice" style="margin-bottom:8px"><b>${esc(s.name)}</b><br>${esc(lesson)} · ${progress}% concluído</div>`;
-      }).join(""):`<div class="muted">Nenhuma aula parcial para ${day}.</div>`}
+
+    <div class="card span4 dash-mini">
+      <div class="dash-h"><h2>🎂 Aniversários</h2><button class="btn small" onclick="go('avisos')">Ver</button></div>
+      ${bdays.slice(0,4).map(b=>`<div class="bd-row ${b.diff===0?"hoje":""}"><div class="bd-date"><b>${String(b.date.getDate()).padStart(2,"0")}</b><span>${b.date.toLocaleDateString("pt-BR",{month:"short"}).replace(".","")}</span></div><div class="main"><b>${esc(b.name)}</b><div class="muted small">${b.diff===0?"hoje! 🎉":b.diff===1?"amanhã":`em ${b.diff} dias`}${b.age?` · ${b.age} anos`:""}</div></div>${b.diff<=7?`<button class="btn small ${b.diff===0?"primary":""}" onclick='openBdayModal(${JSON.stringify(b.name)},${b.date.getFullYear()},${JSON.stringify(b.phone||"")})'>✨</button>`:""}</div>`).join("")||`<div class="muted small">Nenhum aniversário nas próximas 2 semanas.</div>`}
     </div>
-    <div class="card span12"><div class="toolbar" style="justify-content:space-between"><div><h2 style="margin:0">Reposições de ${day}</h2><div class="muted small">Reposições agendadas manualmente para hoje.</div></div><button class="btn primary" onclick="openAddMakeup()">+ Adicionar reposição</button></div>
-      ${(DB.records||[]).filter(r=>r.manualMakeup && (r.makeupDate||r.date)===todayISO()).map(r=>`<div class="row" style="margin-top:9px"><div class="main"><div class="title"><b>${esc(r.student)}</b> · ${esc(r.lesson||"Aula não informada")}</div><div class="meta">${esc(r.note||"Reposição agendada")} · ${esc(r.status)}</div></div>${r.status==="🔄 Rep. Pendente"?`<button class="btn small" onclick="completeMakeup(${r.id})">Marcar feita</button>`:""}</div>`).join("") || `<div class="muted" style="margin-top:12px">Nenhuma reposição agendada para hoje.</div>`}
+    <div class="card span4 dash-mini" style="cursor:pointer" onclick="go('contratos')">
+      <div class="dash-h"><h2>📑 Contratos ${cy}</h2><span class="go-link">abrir →</span></div>
+      <div class="ct-dash">${ctRing(cst.pct,96)}<div><div class="ct-big">${cst.signed} de ${cst.total}</div><div class="muted small">assinados</div><div class="small" style="margin-top:6px">📤 ${cst.sent} enviados<br>⏳ ${Math.max(0,cst.pend-cst.sent)} a renovar</div></div></div>
+    </div>
+    <div class="card span4 dash-mini" style="cursor:pointer" onclick="go('finance')">
+      <div class="dash-h"><h2>💰 ${esc(monthLabel(m))}</h2><span class="go-link">abrir →</span></div>
+      <div class="fin-big">${fmtBRL(got)}<span> de ${fmtBRL(exp)}</span></div>
+      <div class="bar fin-bar"><i style="width:${exp?Math.round(got/exp*100):0}%"></i></div>
+      <div class="small" style="margin-top:8px">✓ ${paid.length} pagos · ⏳ ${fr.length-paid.length-lateM.length} a vencer · <span style="color:${lateM.length?"#B4472F":"inherit"}">⚠️ ${lateM.length} atrasados</span></div>
+    </div>
+
+    <div class="card span6">
+      <div class="dash-h"><h2>📚 Planning · ${day}</h2><button class="btn small" onclick="go('planning')">Editar</button></div>
+      ${todaysPlannings.length?todaysPlannings.map(s=>`<div class="mini-row"><div class="main"><b>${esc(s.time)} · ${esc(s.name)}</b> ${badge(s.level)}${s.plannedLesson?`<div class="small">${esc(s.plannedLesson)}</div>`:""}${s.plannedNotes?`<div class="muted small">${esc(s.plannedNotes)}</div>`:""}</div></div>`).join(""):`<div class="muted small">Nenhuma aula planejada para hoje. Preencha na aba Planning Class.</div>`}
+    </div>
+    <div class="card span6">
+      <div class="dash-h"><h2>⏯️ Continuidade · ${day}</h2></div>
+      ${partials.length?partials.map(s=>{ const h=studentHistory(s.name)[0]; const progress=Number(h?.progress ?? s.progress ?? 0);
+        return `<div class="mini-row"><div class="main"><b>${esc(s.name)}</b><div class="small">${esc(h?.lesson || s.last || "Aula em andamento")}</div><div class="bar" style="margin-top:6px"><i style="width:${progress}%"></i></div></div><span class="muted small">${progress}%</span></div>`; }).join(""):`<div class="muted small">Nenhuma aula para continuar hoje.</div>`}
     </div>
   </div>`;
 }
@@ -2946,39 +3035,6 @@ function upcomingBirthdays(days=45){
   }));
   return out.sort((a,b)=>a.diff-b.diff);
 }
-function renderAvisos(){
-  const box=document.getElementById("avisos"); if(!box||!box.classList.contains("active")) return;
-  hubInit();
-  const bdays=upcomingBirthdays(60);
-  const withB=DB.students.reduce((a,s)=>a+groupMembers(s).filter(n=>(s.memberInfo||{})[n]?.birthday).length,0), totalM=DB.students.reduce((a,s)=>a+groupMembers(s).length,0);
-  const av=[...DB.avisos].sort((a,b)=>(a.done-b.done)||(a.date||"9999").localeCompare(b.date||"9999"));
-  const pendRep=(DB.records||[]).filter(r=>r.status==="🔄 Rep. Pendente").length, late=lateCount(), ld=leadsDueToday().length;
-  box.innerHTML=`
-  <div class="grid">
-    <div class="card span6"><h3>🔔 Avisos e lembretes</h3>
-      <div class="toolbar" style="flex-wrap:nowrap;margin-bottom:10px"><input id="avTitle" placeholder="Ex.: Enviar contrato 2027 para todos"><input id="avDate" type="date" value="${todayISO()}" style="max-width:160px"><button class="btn primary" onclick="addAviso()">+</button></div>
-      ${av.map(a=>`<div class="step"><label class="homework-check" style="font-size:13px"><input type="checkbox" ${a.done?"checked":""} onchange="toggleAviso(${a.id})"><span style="${a.done?"text-decoration:line-through;opacity:.55":""}">${esc(a.title)}${a.date?` <span class="${!a.done&&a.date<todayISO()?"late":"muted"}">· ${dateBR(a.date)}</span>`:""}</span></label><button class="btn small" onclick="delAviso(${a.id})">✕</button></div>`).join("")||`<div class="muted small">Nenhum aviso. Anote aqui o que não pode esquecer.</div>`}
-    </div>
-    <div class="card span6"><h3>🎂 Próximos aniversários</h3>
-      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"🎉 Hoje!":b.diff===1?"Amanhã":`em ${b.diff} dias`}</div></div><div>${b.diff<=7?bdayButtons(b):""}</div></div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
-      <div class="notice small" style="margin-top:10px">${withB} de ${totalM} alunos com aniversário cadastrado. Adicione na Ficha do aluno → Cadastro (aniversário + WhatsApp).</div>
-      <div class="hr"></div>
-      <label>💌 Mensagem padrão (usada se a IA estiver fora do ar) <span class="muted">— use {nome} para o primeiro nome</span></label>
-      <textarea rows="4" oninput="DB.birthdayMsg=this.value;save()">${esc(DB.birthdayMsg||BDAY_DEFAULT)}</textarea>
-    </div>
-    <div class="card span12"><h3>⚡ Pendências automáticas</h3>
-      <div class="kpis" style="margin:0">
-        <div class="kpic" style="cursor:pointer" onclick="go('makeups')"><div class="k">Reposições pendentes</div><div class="v">${pendRep}</div></div>
-        <div class="kpic" style="cursor:pointer" onclick="go('finance')"><div class="k">Mensalidades atrasadas</div><div class="v" style="color:${late?"#B4472F":"inherit"}">${late}</div></div>
-        <div class="kpic" style="cursor:pointer" onclick="go('leads')"><div class="k">Leads com ação hoje</div><div class="v">${ld}</div></div>
-        <div class="kpic" style="cursor:pointer" onclick="go('ideas')"><div class="k">Posts agendados hoje</div><div class="v">${(DB.ideas||[]).filter(i=>i.date===todayISO()&&i.stage!=="Postado").length}</div></div>
-      </div></div>
-  </div>`;
-}
-function addAviso(){ const t=(avTitle.value||"").trim(); if(!t) return; DB.avisos.push({id:Date.now(),title:t,date:avDate.value,done:false}); save(); renderAvisos(); }
-function toggleAviso(id){ const a=DB.avisos.find(x=>x.id===id); if(a){a.done=!a.done; save(); renderAvisos();} }
-function delAviso(id){ DB.avisos=DB.avisos.filter(x=>x.id!==id); save(); renderAvisos(); }
-
 /* ---------- Wrappeds ---------- */
 const WRAPPED_BASE="https://2026wrapped-nine.vercel.app/";
 function allMemberNames(){ const out=[]; DB.students.forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:studentKey(s),active:true}))); (DB.inactiveStudents||[]).forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:"",active:false}))); const seen=new Set(); return out.filter(x=>!/^a adicionar$/i.test(x.n)&&!seen.has(x.n)&&seen.add(x.n)).sort((a,b)=>a.n.localeCompare(b.n)); }
@@ -3041,19 +3097,237 @@ function sendWrapped(id){ const w=DB.wrappeds.find(x=>x.id===id); if(!w) return;
 function toggleWrappedSent(id){ const w=DB.wrappeds.find(x=>x.id===id); if(!w) return; w.sent=w.sent?"":todayISO(); save(); renderWrapped(); }
 function delWrapped(id){ if(!confirm("Excluir este registro?")) return; DB.wrappeds=DB.wrappeds.filter(x=>x.id!==id); save(); renderWrapped(); }
 
-/* ---------- Bloco "Hoje no hub" do Início ---------- */
-function todayHubHTML(){
+/* ================= Avisos · Pendências · Contratos · Dashboard ================= */
+const STAR_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.45l-5.8 3.05 1.1-6.45-4.7-4.6 6.5-.95z"/></svg>';
+function hubExtraInit(){
   hubInit();
-  const b=upcomingBirthdays(7), av=DB.avisos.filter(a=>!a.done&&a.date&&a.date<=todayISO()), ld=leadsDueToday(), late=lateCount();
-  const items=[
-    ...b.map(x=>`<div class="row" style="margin-top:8px"><div class="main"><b>🎂 ${esc(x.name)}</b><div class="meta">${x.diff===0?"Aniversário hoje! 🎉":x.diff===1?"Aniversário amanhã":`Aniversário em ${x.diff} dias`}</div></div><div>${x.diff===0?bdayButtons(x):""}</div></div>`),
-    ...av.map(a=>`<div class="row" style="margin-top:8px"><div class="main"><b>🔔 ${esc(a.title)}</b><div class="meta ${a.date<todayISO()?"late":""}">${dateBR(a.date)}</div></div><button class="btn small" onclick="toggleAviso(${a.id});renderToday()">Feito</button></div>`),
-    ...ld.map(l=>`<div class="row" style="margin-top:8px;cursor:pointer" onclick="openLead(${l.id})"><div class="main"><b>🎯 ${esc(l.name)}</b><div class="meta">${esc(l.nextAction||"Próxima ação")} · ${dateBR(l.nextDate)}</div></div></div>`),
-    late?`<div class="row" style="margin-top:8px;cursor:pointer" onclick="go('finance')"><div class="main"><b>💰 ${late} mensalidade(s) atrasada(s)</b><div class="meta">Ver no Financeiro</div></div></div>`:""
-  ].filter(Boolean);
-  return `<div class="card span12"><div class="toolbar" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Hoje no hub</h2><button class="btn small" onclick="go('avisos')">Ver avisos</button></div>
-    ${items.join("")||`<div class="muted" style="margin-top:10px">Tudo em dia por aqui ✨</div>`}</div>`;
+  if(!Array.isArray(DB.pendencias)) DB.pendencias=[];
+  if(!Array.isArray(DB.contracts)) DB.contracts=[];
+  if(DB.contractsFolder===undefined) DB.contractsFolder="https://drive.google.com/drive/folders/1MwSmaiWmLDZ7he0oMX0Mjzm66doAbgC5";
+  if(!DB.contractsSeed262){
+    [["Bruna da Silva","1MOzx9tYHhIOZartLPPeBK8EXS5xOjiam"],["Janaina Rocha","1SdGM8hT0YD1QT5UuCY-0oVGl_nEEFcpO"],["Laura Catarine da Costa Perpetuo","1WimqeFoi73TZDPTs2nlSLYuKSeXk2rV2"],["Amanda Rafaella","14YwFR84zW_LcR0SdtPi-fTclKlGgxCFi"],["Emilly Lira","1-D8jjgjXWngn6-NEViIOT6LN47zgVqle"]]
+      .forEach(([full,id],i)=>{ const name=matchMember(full); if(DB.contracts.some(c=>c.year==="2026/2"&&c.name===name)) return;
+        DB.contracts.push({id:Date.now()+i,year:"2026/2",name,fullName:full,status:"✍️ Assinado",url:`https://drive.google.com/file/d/${id}/view`,sentAt:"",signedAt:"",note:"Importado da pasta CONTRATOS ALUNOS › 2026/2"}); });
+    DB.contractsSeed262=true; save(DB,{touch:false});
+  }
 }
+function dateLongBR(d=new Date()){ const s=d.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}); return s.charAt(0).toUpperCase()+s.slice(1); }
+function waLink(phone,text){ const p=String(phone||"").replace(/\D/g,"").replace(/^55/,""); return p?`https://wa.me/55${p}?text=${encodeURIComponent(text)}`:`https://wa.me/?text=${encodeURIComponent(text)}`; }
+
+/* ---------- Avisos ---------- */
+const AV_KINDS=["📣 Geral","📅 Agenda / feriado","🎓 Alunos","💰 Financeiro","📱 Conteúdo","⭐ Importante"];
+function avisosAtivos(){
+  return (DB.avisos||[]).filter(a=>!a.done&&(!a.until||a.until>=todayISO()))
+    .sort((a,b)=>(!!b.pinned-!!a.pinned)||((b.kind==="⭐ Importante")-(a.kind==="⭐ Importante"))||(a.date||"9999").localeCompare(b.date||"9999"));
+}
+function avisoRow(a,compact){
+  const imp=a.kind==="⭐ Importante"||a.pinned;
+  return `<div class="av-item ${imp?"imp":""}">
+    <div class="av-ic">${esc((a.kind||"📣").split(" ")[0])}</div>
+    <div class="main"><div class="av-t">${a.pinned?"📌 ":""}${esc(a.title)}</div>
+      <div class="muted small">${a.date?`${a.date<todayISO()?"desde ":""}${dateBR(a.date)}`:""}${a.until?` · até ${dateBR(a.until)}`:""}${!compact&&a.kind?` · ${esc(a.kind.replace(/^\S+\s/,""))}`:""}</div>
+      ${a.text&&!compact?`<div class="small" style="margin-top:4px;white-space:pre-wrap">${esc(a.text)}</div>`:""}</div>
+    <div class="av-act">${compact?"":`<button class="btn small" onclick="openAviso(${a.id})" title="Editar">✏️</button>`}<button class="btn small" title="${a.done?"Reativar":"Arquivar"}" onclick="toggleAviso(${a.id})">${a.done?"↩︎":"✓"}</button></div>
+  </div>`;
+}
+function renderAvisos(){
+  const box=document.getElementById("avisos"); if(!box||!box.classList.contains("active")) return;
+  hubExtraInit();
+  const ativos=avisosAtivos(), arq=(DB.avisos||[]).filter(a=>a.done||(a.until&&a.until<todayISO()));
+  const bdays=upcomingBirthdays(60);
+  const withB=DB.students.reduce((a,s)=>a+groupMembers(s).filter(n=>(s.memberInfo||{})[n]?.birthday).length,0), totalM=DB.students.reduce((a,s)=>a+groupMembers(s).length,0);
+  box.innerHTML=`
+  <div class="grid">
+    <div class="card span8"><div class="toolbar" style="justify-content:space-between;align-items:center"><h3 style="margin:0">📣 Avisos ativos <span class="pill-count">${ativos.length}</span></h3><button class="btn primary" onclick="openAviso()">+ Novo aviso</button></div>
+      <div class="muted small" style="margin:4px 0 10px">Recados, feriados, lembretes e comunicados. Os avisos ativos aparecem no Início.</div>
+      ${ativos.map(a=>avisoRow(a)).join("")||`<div class="empty-state">${STAR_SVG}<div>Nenhum aviso ativo.</div></div>`}
+      ${arq.length?`<details style="margin-top:12px"><summary class="small">Arquivados (${arq.length})</summary>${arq.slice(-30).reverse().map(a=>`<div style="opacity:.6">${avisoRow(a)}</div>`).join("")}</details>`:""}
+    </div>
+    <div class="card span4"><h3>🎂 Próximos aniversários</h3>
+      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"hoje 🎉":b.diff===1?"amanhã":`em ${b.diff} dias`}</div></div>${b.diff<=7?`<div style="margin-top:4px">${bdayButtons(b)}</div>`:""}</div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
+      <div class="notice small" style="margin-top:10px">${withB} de ${totalM} alunos com aniversário cadastrado (Ficha do aluno → Cadastro).</div>
+      <details style="margin-top:10px"><summary class="small">💌 Mensagem padrão de parabéns</summary><textarea rows="4" oninput="DB.birthdayMsg=this.value;save()">${esc(DB.birthdayMsg||BDAY_DEFAULT)}</textarea><div class="muted small">Usada se a IA estiver fora do ar. Use {nome} para o primeiro nome.</div></details>
+    </div>
+  </div>`;
+}
+function openAviso(id){
+  const a=id?DB.avisos.find(x=>x.id===id):{title:"",kind:"📣 Geral",date:todayISO(),until:"",text:"",pinned:false};
+  showModal(`<div class="modalhead"><h2>${id?"Editar aviso":"Novo aviso"}</h2><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div class="full"><label>Aviso</label><input id="avT" value="${esc(a.title)}" placeholder="Ex.: Feriado dia 15 — sem aulas"></div>
+    <div><label>Tipo</label><select id="avK">${AV_KINDS.map(k=>`<option ${a.kind===k?"selected":""}>${k}</option>`).join("")}</select></div>
+    <div><label>Fixar no topo</label><select id="avP"><option value="">Não</option><option value="1" ${a.pinned?"selected":""}>📌 Sim</option></select></div>
+    <div><label>Data</label><input type="date" id="avD" value="${esc(a.date||"")}"></div>
+    <div><label>Mostrar até (opcional)</label><input type="date" id="avU" value="${esc(a.until||"")}"></div>
+    <div class="full"><label>Detalhes (opcional)</label><textarea id="avX" rows="3">${esc(a.text||"")}</textarea></div>
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin-top:12px">${id?`<button class="btn danger" onclick="delAviso(${id});closeModal()">Excluir</button>`:"<span></span>"}<button class="btn primary" onclick="saveAviso(${id||0})">Salvar</button></div>`);
+  setTimeout(()=>document.getElementById("avT")?.focus(),50);
+}
+function saveAviso(id){
+  const t=avT.value.trim(); if(!t){ alert("Escreva o aviso."); return; }
+  const o={title:t,kind:avK.value,pinned:!!avP.value,date:avD.value,until:avU.value,text:avX.value.trim()};
+  if(id){ Object.assign(DB.avisos.find(x=>x.id===id),o); } else DB.avisos.push({id:Date.now(),done:false,...o});
+  save(); closeModal(); renderAvisos(); renderToday();
+}
+function addAviso(){ openAviso(); }
+function toggleAviso(id){ const a=DB.avisos.find(x=>x.id===id); if(a){a.done=!a.done; save(); renderAvisos(); renderToday();} }
+function delAviso(id){ if(!confirm("Excluir este aviso?")) return; DB.avisos=DB.avisos.filter(x=>x.id!==id); save(); renderAvisos(); renderToday(); }
+
+/* ---------- Pendências ---------- */
+const PEND_PRI=["🔴 Alta","🟠 Média","⚪ Baixa"];
+var PEND_UI={view:"abertas"};
+function autoPendencias(){
+  const out=[];
+  const rep=(DB.records||[]).filter(r=>r.status==="🔄 Rep. Pendente").length;
+  if(rep) out.push({ic:"🔄",t:`${rep} reposição(ões) pendente(s)`,go:"makeups"});
+  const late=lateCount(); if(late) out.push({ic:"💰",t:`${late} mensalidade(s) atrasada(s)`,go:"finance",hot:true});
+  const ld=leadsDueToday().length; if(ld) out.push({ic:"🎯",t:`${ld} lead(s) com ação para hoje`,go:"leads"});
+  const y="2027", st=contractStats(y), started=(DB.contracts||[]).some(c=>c.year===y);
+  if(st.sent) out.push({ic:"📑",t:`${st.sent} contrato(s) ${y} aguardando assinatura`,go:"contratos"});
+  else if(started&&st.pend) out.push({ic:"📑",t:`${st.pend} contrato(s) ${y} a renovar`,go:"contratos"});
+  const wr=(DB.wrappeds||[]).filter(w=>!w.sent).length; if(wr) out.push({ic:"🎁",t:`${wr} Wrapped(s) ainda não enviado(s)`,go:"wrapped"});
+  let rp=0; (DB.meetingNotes||[]).forEach(n=>Object.values(n.reports||{}).forEach(r=>{ if(!r.sentAt) rp++; })); if(rp) out.push({ic:"📊",t:`${rp} relatório(s) de aula não enviado(s)`,go:"meeting"});
+  const posts=(DB.ideas||[]).filter(i=>i.date===todayISO()&&i.stage!=="Postado").length; if(posts) out.push({ic:"📱",t:`${posts} post(s) agendado(s) para hoje`,go:"ideas"});
+  return out;
+}
+function pendOpen(){ return (DB.pendencias||[]).filter(p=>!p.done).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||PEND_PRI.indexOf(a.pri)-PEND_PRI.indexOf(b.pri)); }
+function pendRow(p,compact){
+  const over=!p.done&&p.due&&p.due<todayISO(), isToday=p.due===todayISO();
+  return `<div class="pd-item ${p.done?"done":""}">
+    <label class="pd-check"><input type="checkbox" ${p.done?"checked":""} onchange="togglePend(${p.id})"><span></span></label>
+    <div class="main"><div class="pd-t">${esc(p.title)}</div>
+      <div class="small muted">${p.pri?`${esc(p.pri.split(" ")[0])} `:""}${p.due?`<span class="${over?"late":isToday?"today-tag":""}">${over?"atrasada · ":isToday?"hoje · ":""}${dateBR(p.due)}</span>`:"sem prazo"}${p.who?` · ${esc(p.who)}`:""}${p.done&&p.doneAt?` · feita ${dateBR(p.doneAt)}`:""}</div></div>
+    ${compact?"":`<button class="btn small" onclick="openPend(${p.id})">✏️</button>`}
+  </div>`;
+}
+function renderPendencias(){
+  const box=document.getElementById("pendencias"); if(!box||!box.classList.contains("active")) return;
+  hubExtraInit();
+  const open=pendOpen(), done=(DB.pendencias||[]).filter(p=>p.done).sort((a,b)=>(b.doneAt||"").localeCompare(a.doneAt||""));
+  const over=open.filter(p=>p.due&&p.due<todayISO()).length, tod=open.filter(p=>p.due===todayISO()).length;
+  const auto=autoPendencias();
+  const list=PEND_UI.view==="feitas"?done:open;
+  box.innerHTML=`
+  <div class="kpis">
+    <div class="kpic hl"><div class="k">Abertas</div><div class="v">${open.length}</div><div class="d">suas pendências</div></div>
+    <div class="kpic"><div class="k">Atrasadas</div><div class="v" style="color:${over?"#B4472F":"inherit"}">${over}</div><div class="d">passaram do prazo</div></div>
+    <div class="kpic"><div class="k">Para hoje</div><div class="v">${tod}</div><div class="d">${dateBR(todayISO())}</div></div>
+    <div class="kpic"><div class="k">Automáticas</div><div class="v">${auto.length}</div><div class="d">geradas pelo Studio</div></div>
+  </div>
+  <div class="grid">
+    <div class="card span8">
+      <div class="quick-add"><input id="pdQuick" placeholder="+ Nova pendência… (Enter para salvar)" onkeydown="if(event.key==='Enter')quickPend('pdQuick','pdQuickDue')"><input id="pdQuickDue" type="date"><button class="btn primary" onclick="quickPend('pdQuick','pdQuickDue')">Adicionar</button><button class="btn" onclick="openPend()">Detalhes…</button></div>
+      <div class="pills" style="margin:12px 0 6px"><button class="pill ${PEND_UI.view!=="feitas"?"on":""}" onclick="PEND_UI.view='abertas';renderPendencias()">Abertas (${open.length})</button><button class="pill ${PEND_UI.view==="feitas"?"on":""}" onclick="PEND_UI.view='feitas';renderPendencias()">Concluídas (${done.length})</button></div>
+      ${list.map(p=>pendRow(p)).join("")||`<div class="empty-state">${STAR_SVG}<div>${PEND_UI.view==="feitas"?"Nada concluído ainda.":"Nenhuma pendência aberta. ✨"}</div></div>`}
+    </div>
+    <div class="card span4"><h3>⚡ Pendências automáticas</h3><div class="muted small" style="margin:-4px 0 10px">O Studio encontra sozinho o que está faltando.</div>
+      ${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="go('${x.go}')"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")||`<div class="muted small">Tudo em dia ✨</div>`}
+    </div>
+  </div>`;
+}
+function quickPend(inputId,dueId){
+  const i=document.getElementById(inputId), t=(i?.value||"").trim(); if(!t) return;
+  DB.pendencias=DB.pendencias||[]; DB.pendencias.push({id:Date.now(),title:t,due:document.getElementById(dueId)?.value||"",pri:"🟠 Média",who:"",done:false,createdAt:todayISO()});
+  save(); renderPendencias(); renderToday();
+  setTimeout(()=>document.getElementById(inputId)?.focus(),30);
+}
+function openPend(id){
+  const p=id?DB.pendencias.find(x=>x.id===id):{title:"",due:"",pri:"🟠 Média",who:"",note:""};
+  showModal(`<div class="modalhead"><h2>${id?"Editar pendência":"Nova pendência"}</h2><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div class="full"><label>O que precisa ser feito</label><input id="pdT" value="${esc(p.title)}" placeholder="Ex.: Enviar contrato 2027 para a Glenda"></div>
+    <div><label>Prazo</label><input type="date" id="pdD" value="${esc(p.due||"")}"></div>
+    <div><label>Prioridade</label><select id="pdP">${PEND_PRI.map(k=>`<option ${p.pri===k?"selected":""}>${k}</option>`).join("")}</select></div>
+    <div class="full"><label>Aluno / relacionado a (opcional)</label><input id="pdW" list="pdNames" value="${esc(p.who||"")}"><datalist id="pdNames">${allMemberNames().map(x=>`<option value="${esc(x.n)}">`).join("")}</datalist></div>
+    <div class="full"><label>Observação</label><textarea id="pdN" rows="2">${esc(p.note||"")}</textarea></div>
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin-top:12px">${id?`<button class="btn danger" onclick="delPend(${id})">Excluir</button>`:"<span></span>"}<button class="btn primary" onclick="savePend(${id||0})">Salvar</button></div>`);
+  setTimeout(()=>document.getElementById("pdT")?.focus(),50);
+}
+function savePend(id){
+  const t=pdT.value.trim(); if(!t){ alert("Escreva a pendência."); return; }
+  const o={title:t,due:pdD.value,pri:pdP.value,who:pdW.value.trim(),note:pdN.value.trim()};
+  if(id) Object.assign(DB.pendencias.find(x=>x.id===id),o); else DB.pendencias.push({id:Date.now(),done:false,createdAt:todayISO(),...o});
+  save(); closeModal(); renderPendencias(); renderToday();
+}
+function togglePend(id){ const p=DB.pendencias.find(x=>x.id===id); if(!p) return; p.done=!p.done; p.doneAt=p.done?todayISO():""; save(); setTimeout(()=>{renderPendencias(); renderToday();},250); }
+function delPend(id){ if(!confirm("Excluir esta pendência?")) return; DB.pendencias=DB.pendencias.filter(x=>x.id!==id); save(); closeModal(); renderPendencias(); renderToday(); }
+
+/* ---------- Contratos ---------- */
+const CT_STATUS=["⏳ A renovar","📤 Enviado","✍️ Assinado","🚫 Não renova"];
+var CT_UI={year:"2027",q:""};
+function contractRows(year){
+  const recs=(DB.contracts||[]).filter(c=>c.year===year);
+  const rows=recs.map(c=>({...c,_rec:true}));
+  if(year==="2027"||year===String(new Date().getFullYear()+1)) allMemberNames().filter(x=>x.active).forEach(x=>{ if(!rows.some(r=>r.name===x.n)) rows.push({id:0,year,name:x.n,status:"⏳ A renovar",url:"",_rec:false}); });
+  return rows.sort((a,b)=>a.name.localeCompare(b.name));
+}
+function contractStats(year){
+  const rows=contractRows(year), active=rows.filter(r=>r.status!=="🚫 Não renova");
+  const signed=active.filter(r=>r.status==="✍️ Assinado").length;
+  return {total:active.length,signed,sent:active.filter(r=>r.status==="📤 Enviado").length,pend:active.length-signed,out:rows.length-active.length,pct:active.length?Math.round(signed/active.length*100):0};
+}
+function ctGet(year,name){ DB.contracts=DB.contracts||[]; let c=DB.contracts.find(x=>x.year===year&&x.name===name); if(!c){ c={id:Date.now()+Math.floor(Math.random()*999),year,name,status:"⏳ A renovar",url:"",sentAt:"",signedAt:"",note:""}; DB.contracts.push(c); } return c; }
+function ctSet(year,name,field,value){
+  const c=ctGet(year,name); c[field]=value;
+  if(field==="url"&&value&&!/^https?:\/\//.test(value)) c.url="https://"+value;
+  if(field==="status"){ if(value==="✍️ Assinado"&&!c.signedAt) c.signedAt=todayISO(); if(value==="📤 Enviado"&&!c.sentAt) c.sentAt=todayISO(); }
+  save(); renderContratos(); renderToday();
+}
+function ctRing(p,size=110){ const r=size*0.4, c=2*Math.PI*r; return `<svg class="ct-ring" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#F6E3CF" stroke-width="${size*0.11}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#E8821E" stroke-width="${size*0.11}" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 ${size/2} ${size/2})"/><text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" font-size="${size*0.22}" font-weight="800" fill="#C96A12">${p}%</text></svg>`; }
+function ctSend(year,name){
+  const c=ctGet(year,name); const first=name.split(" ")[0];
+  const msg=`Oi, ${first}! 💛 Segue o seu contrato de acompanhamento ${year} do English with Denise. É só assinar pela assinatura eletrônica do gov.br e me devolver por aqui 😊${c.url?`\n${c.url}`:""}`;
+  window.open(waLink(memberPhone(name),msg),"_blank");
+  if(c.status==="⏳ A renovar"){ c.status="📤 Enviado"; c.sentAt=todayISO(); }
+  save(); renderContratos();
+}
+function renderContratos(){
+  const box=document.getElementById("contratos"); if(!box||!box.classList.contains("active")) return;
+  hubExtraInit();
+  const years=[...new Set(["2027",...(DB.contracts||[]).map(c=>c.year)])].sort().reverse();
+  const y=CT_UI.year, st=contractStats(y);
+  const q=normName(CT_UI.q);
+  const rows=contractRows(y).filter(r=>!q||normName(r.name+" "+(r.fullName||"")).includes(q));
+  box.innerHTML=`
+  <div class="ct-top card">
+    <div class="ct-ringbox">${ctRing(st.pct)}<div><div class="eyebrow">Contratos ${esc(y)}</div><div class="ct-big">${st.signed} de ${st.total} assinados</div>
+      <div class="muted small">📤 ${st.sent} enviados · ⏳ ${st.pend-st.sent} a renovar${st.out?` · 🚫 ${st.out} não renovam`:""}</div></div></div>
+    <div class="ct-folder"><label>📁 Pasta dos contratos no Google Drive</label>
+      <div class="toolbar" style="flex-wrap:nowrap"><input id="ctFolder" value="${esc(DB.contractsFolder||"")}" placeholder="Cole o link da pasta do Drive" onchange="DB.contractsFolder=this.value.trim();save();renderContratos()">${DB.contractsFolder?`<a class="btn primary" style="text-decoration:none;white-space:nowrap" href="${esc(DB.contractsFolder)}" target="_blank" rel="noopener">Abrir pasta ↗</a>`:""}</div>
+      <div class="muted small" style="margin-top:4px">Dica: crie a subpasta <b>2027</b> no Drive e cole o link dela aqui.</div></div>
+  </div>
+  <div class="toolbar" style="justify-content:space-between;margin:14px 0 8px">
+    <div class="pills">${years.map(x=>`<button class="pill ${x===y?"on":""}" onclick="CT_UI.year='${esc(x)}';renderContratos()">${esc(x)}</button>`).join("")}<button class="pill" onclick="newContractYear()">+ período</button></div>
+    <div class="toolbar"><input placeholder="Buscar aluno…" value="${esc(CT_UI.q)}" oninput="CT_UI.q=this.value;clearTimeout(window.__ctq);window.__ctq=setTimeout(()=>{renderContratos();const i=document.querySelector('#contratos .toolbar input[placeholder^=Buscar]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)" style="max-width:220px"><button class="btn" onclick="openAddContract()">+ Contrato de outro aluno</button></div>
+  </div>
+  <div class="card tablewrap"><table class="table ct-table"><thead><tr><th style="width:60px">Assinado</th><th>Aluno</th><th>Status</th><th>Contrato no Drive</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>{ const n=JSON.stringify(r.name), yy=JSON.stringify(y); const signed=r.status==="✍️ Assinado";
+      return `<tr class="${signed?"ct-ok":""}">
+      <td style="text-align:center"><input type="checkbox" class="bigcheck" ${signed?"checked":""} onchange='ctSet(${yy},${n},"status",this.checked?"✍️ Assinado":"📤 Enviado")'></td>
+      <td><b>${esc(r.name)}</b>${r.fullName&&r.fullName!==r.name?`<div class="muted small">${esc(r.fullName)}</div>`:""}${r.signedAt&&signed?`<div class="muted small">assinado ${dateBR(r.signedAt)}</div>`:r.sentAt&&r.status==="📤 Enviado"?`<div class="muted small">enviado ${dateBR(r.sentAt)}</div>`:""}</td>
+      <td><select class="ct-status s${CT_STATUS.indexOf(r.status)}" onchange='ctSet(${yy},${n},"status",this.value)'>${CT_STATUS.map(s=>`<option ${r.status===s?"selected":""}>${s}</option>`).join("")}</select></td>
+      <td>${r.url?`<a class="ct-link" href="${esc(r.url)}" target="_blank" rel="noopener">📄 Abrir contrato ↗</a> <button class="btn small" title="Trocar link" onclick='ctEditLink(${yy},${n})'>✏️</button>`:`<input class="ct-url" placeholder="Cole o link do Drive" onchange='ctSet(${yy},${n},"url",this.value.trim())'>`}</td>
+      <td style="white-space:nowrap"><button class="btn small ${r.status==="⏳ A renovar"?"primary":""}" onclick='ctSend(${yy},${n})'>💬 Enviar</button> ${r._rec?`<button class="btn small" title="Observação" onclick='ctNote(${yy},${n})'>📝</button>`:""}</td></tr>
+      ${r.note&&r._rec?`<tr class="ct-note"><td></td><td colspan="4" class="muted small">📝 ${esc(r.note)}</td></tr>`:""}`; }).join("")||`<tr><td colspan="5" class="muted">Nenhum contrato neste período.</td></tr>`}
+  </tbody></table></div>
+  <div class="notice small" style="margin-top:12px">Para pegar o link: no Google Drive, clique com o botão direito no contrato → <b>Compartilhar → Copiar link</b> e cole na linha do aluno. O link abre direto no Drive (só para quem tem acesso).</div>`;
+}
+function ctEditLink(y,n){ const c=ctGet(y,n); const v=prompt("Link do contrato no Drive:",c.url||""); if(v===null) return; ctSet(y,n,"url",v.trim()); }
+function ctNote(y,n){ const c=ctGet(y,n); const v=prompt("Observação:",c.note||""); if(v===null) return; c.note=v.trim(); save(); renderContratos(); }
+function newContractYear(){ const v=prompt("Nome do período (ex.: 2028, 2027/2):"); if(!v) return; CT_UI.year=v.trim(); renderContratos(); }
+function openAddContract(){
+  showModal(`<div class="modalhead"><h2>+ Contrato</h2><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid"><div class="full"><label>Aluno</label><input id="ctN" list="ctNames" placeholder="Nome do aluno"><datalist id="ctNames">${allMemberNames().map(x=>`<option value="${esc(x.n)}">`).join("")}</datalist></div>
+  <div><label>Período</label><input id="ctY" value="${esc(CT_UI.year)}"></div><div><label>Status</label><select id="ctS">${CT_STATUS.map(s=>`<option>${s}</option>`).join("")}</select></div>
+  <div class="full"><label>Link do contrato no Drive</label><input id="ctU" placeholder="https://drive.google.com/..."></div></div>
+  <div class="toolbar" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" onclick="saveAddContract()">Salvar</button></div>`);
+}
+function saveAddContract(){ const n=ctN.value.trim(); if(!n) return; const c=ctGet(ctY.value.trim()||CT_UI.year,n); c.status=ctS.value; if(ctU.value.trim()) c.url=/^https?:\/\//.test(ctU.value.trim())?ctU.value.trim():"https://"+ctU.value.trim(); CT_UI.year=c.year; save(); closeModal(); renderContratos(); }
+
+/* ---------- Bloco "Hoje no hub" (mantido para compatibilidade) ---------- */
+function todayHubHTML(){ return ""; }
 
 /* ================= Projetos 2027 ================= */
 const PROJ_TYPES=["🎬 Clube cultural","🎤 Palestra / convidados","📚 Curso","🛍️ Produto","📅 Evento","✨ Outro"];
