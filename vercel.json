@@ -11,6 +11,9 @@
     },
     "api/site.js": {
       "maxDuration": 30
+    },
+    "api/birthday.js": {
+      "maxDuration": 60
     }
   },
   "cleanUrls": true,

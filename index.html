@@ -455,6 +455,7 @@ a{color:var(--or-d)}
       <button data-view="warmups">🔥 Warm-ups</button>
       <button data-view="meeting">🎙️ Meeting Notes</button>
       <button data-view="assessment">📝 Notas & Avaliações</button>
+      <button data-view="wrapped">🎁 Wrappeds</button>
     </div>
     <div class="navgroup" data-g="adm"><div class="navhead" onclick="toggleNavGroup('adm')">Administrativo <span class="chev">⌄</span></div>
       <button data-view="finance">💰 Financeiro</button>
@@ -477,7 +478,7 @@ a{color:var(--or-d)}
     <div class="toolbar">
       <button id="cloudChip" class="btn cloud-chip" onclick="openCloudSettings()">☁️ Notion: configurar</button>
       <button class="btn" onclick="exportBackup()">⬇️ Backup</button>
-      <label class="btn" style="margin:0;cursor:pointer">⬆️ Importar<input id="importFile" type="file" accept=".json" style="display:none"></label>
+      <label class="btn" style="margin:0;cursor:pointer" title="Mescla um backup sem apagar o que você já tem">⬆️ Importar / mesclar<input id="importFile" type="file" accept=".json" style="display:none"></label>
     </div>
   </div>
 
@@ -498,6 +499,7 @@ a{color:var(--or-d)}
   <section id="finance" class="section"></section>
   <section id="leads" class="section"></section>
   <section id="ficha" class="section"></section>
+  <section id="wrapped" class="section"></section>
 </main>
 </div>
 
@@ -611,7 +613,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view==="ficha"?"students":view}"]`)?.classList.add("active");
-  const titles={ficha:"Ficha do aluno",avisos:"Avisos e aniversários",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos e aniversários",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
   window.scrollTo(0,0);
@@ -622,7 +624,7 @@ try{ const st=JSON.parse(localStorage.getItem("ewd_nav")||"{}"); Object.entries(
 todayLabel.textContent = new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
 
 function renderAll(){
-  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderFinance(); renderLeads(); renderFicha(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
+  renderToday(); renderStudents(); renderLessons(); renderWarmups(); renderPlanning(); renderMeetingNotes(); renderIdeas(); renderProjects(); renderSite(); renderAvisos(); renderFinance(); renderLeads(); renderFicha(); renderWrapped(); renderAssessment(); renderMakeups(); renderHistory(); renderAdmin();
 }
 
 function homeworkKey(name){
@@ -2626,6 +2628,7 @@ function fichaRelatorios(s){
   return `<div class="grid">
     <div class="card span6"><h3>📝 Relatório de desempenho</h3><p class="muted small">Gera o documento de notas e avaliação (Word ou impressão) já com o nome e o nível preenchidos.</p>
       ${groupMembers(s).map(n=>`<button class="btn small" style="margin:4px 6px 0 0" onclick='fichaAssessment(${JSON.stringify(n)},${JSON.stringify(s.level)})'>Gerar para ${esc(n)}</button>`).join("")}</div>
+    <div class="card span6"><h3>🎁 Wrappeds</h3>${(DB.wrappeds||[]).filter(w=>groupMembers(s).includes(w.name)).map(w=>`<div class="small" style="margin:6px 0"><b>${esc(w.name)}</b> · ${esc(w.period||"")} · <a href="${esc(w.url)}" target="_blank" rel="noopener">abrir ↗</a> ${w.sent?`<span class="chip ok">enviado</span>`:""}</div>`).join("")||`<div class="muted small">Nenhum Wrapped registrado. <a href="#" onclick="go('wrapped');return false">Registrar</a></div>`}</div>
     <div class="card span6"><h3>🎙️ Resumos das aulas transcritas</h3>
       ${notes.map(n=>`<div class="tl-item"><div class="tl-date">${dateBR(n.date||n.week).slice(0,5)}</div><div><b class="small">${esc(n.title||"Aula")}</b>${n.notionUrl?` · <a class="small" href="${esc(n.notionUrl)}" target="_blank" rel="noopener">Notion ↗</a>`:""}<div class="small muted" style="white-space:pre-wrap;margin-top:4px">${esc((n.summary||"").slice(0,600))}</div></div></div>`).join("")||`<div class="muted small">Nenhuma aula transcrita ainda. Use 🎙️ Meeting Notes para gravar.</div>`}</div>
   </div>`;
@@ -2827,10 +2830,51 @@ function bdayText(name){ return (DB.birthdayMsg||BDAY_DEFAULT).replace(/\{nome\}
 function bdayLink(b){ return b.phone?`https://wa.me/55${String(b.phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(bdayText(b.name))}`:""; }
 function bdaySentKey(b){ return `${b.date.getFullYear()}|${b.name}`; }
 function markBday(name,year){ DB.bdaySent=DB.bdaySent||{}; const k=`${year}|${name}`; if(DB.bdaySent[k]) delete DB.bdaySent[k]; else DB.bdaySent[k]=todayISO(); save(); renderToday(); renderAvisos(); }
+function studentNotesFor(name){
+  const st=[...DB.students,...(DB.inactiveStudents||[])].find(s=>groupMembers(s).includes(name)); if(!st) return {level:"",text:""};
+  const key=st.day?studentKey(st):"";
+  const lines=[];
+  (DB.diary||[]).filter(d=>d.key===key).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15).forEach(d=>lines.push(`[${d.date}] Teacher note: ${d.text}`));
+  studentHistory(st.name).slice(0,15).forEach(r=>{ const att=Array.isArray(r.attendance)?r.attendance.find(a=>a.name===name):null; if(att&&/Falta/.test(att.status)) return;
+    lines.push(`[${r.date}] Class: ${r.lesson||""}${r.skills&&r.skills.length?` | skills: ${r.skills.join(", ")}`:""}${r.participation?` | participation: ${r.participation}`:""}${r.note?` | note: ${r.note}`:""}`); });
+  (DB.meetingNotes||[]).filter(n=>n.student===st.name||n.studentKey===key).slice(-3).forEach(n=>lines.push(`[${n.date||n.week}] Class summary: ${(n.summary||n.teacherNotes||"").slice(0,800)}`));
+  if(st.notes) lines.push(`General notes: ${st.notes}`);
+  return {level:st.level,text:lines.join("\n")};
+}
+function openBdayModal(name,year,phone){
+  DB.bdayCustom=DB.bdayCustom||{};
+  const k=`${year}|${name}`;
+  const cur=DB.bdayCustom[k]||"";
+  showModal(`<div class="modalhead"><div><h2>🎂 Parabéns para ${esc(name.split(" ")[0])}</h2><div class="muted small">Mensagem em inglês escrita a partir das suas anotações, aulas e resumos deste aluno. Revise antes de enviar.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+    <textarea id="bdMsg" rows="8" placeholder="Clique em “Gerar com IA”…" oninput="DB.bdayCustom['${k.replace(/'/g,"\\'")}']=this.value;save()">${esc(cur)}</textarea>
+    <div id="bdStatus" class="muted small" style="margin-top:6px"></div>
+    <div class="toolbar" style="justify-content:space-between;margin-top:12px">
+      <button class="btn" id="bdGen" onclick='genBday(${JSON.stringify(name)},${year})'>✨ ${cur?"Gerar de novo":"Gerar com IA"}</button>
+      ${phone?`<button class="btn primary" onclick='sendBday(${JSON.stringify(name)},${year},${JSON.stringify(phone)})'>💬 Enviar no WhatsApp</button>`:`<span class="muted small">Cadastre o WhatsApp do aluno para enviar.</span>`}
+    </div>`);
+  if(!cur) genBday(name,year);
+}
+async function genBday(name,year){
+  const st=document.getElementById("bdStatus"), btn=document.getElementById("bdGen");
+  if(!Cloud.enabled()){ st.textContent="Conecte o painel (☁️ no topo) para usar a IA. Enquanto isso, deixei a mensagem padrão."; const t=document.getElementById("bdMsg"); if(!t.value) t.value=bdayText(name); return; }
+  const n=studentNotesFor(name);
+  st.textContent=`Escrevendo… (usando ${n.text?n.text.split("\n").length:0} anotação(ões)/aula(s))`; if(btn) btn.disabled=true;
+  try{
+    const r=await Cloud.call("birthday",{name,level:n.level,notes:n.text});
+    const t=document.getElementById("bdMsg"); if(t){ t.value=r.message; DB.bdayCustom[`${year}|${name}`]=r.message; save(); }
+    st.textContent=n.text?"Pronto! Edite à vontade.":"Pronto! (Este aluno ainda tem poucas anotações, então a mensagem ficou mais geral.)";
+  }catch(e){ st.textContent="Não foi possível gerar: "+e.message; }
+  if(btn){ btn.disabled=false; btn.textContent="✨ Gerar de novo"; }
+}
+function sendBday(name,year,phone){
+  const text=(document.getElementById("bdMsg")?.value||"").trim()||bdayText(name);
+  window.open(`https://wa.me/55${String(phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(text)}`,"_blank");
+  DB.bdaySent=DB.bdaySent||{}; DB.bdaySent[`${year}|${name}`]=todayISO(); save(); closeModal(); renderToday(); renderAvisos();
+}
 function bdayButtons(b){
   const sent=(DB.bdaySent||{})[bdaySentKey(b)];
   if(sent) return `<span class="chip ok">✓ Parabéns enviado</span> <button class="btn small" onclick='markBday(${JSON.stringify(b.name)},${b.date.getFullYear()})'>Desfazer</button>`;
-  return (b.phone?`<a class="btn small primary" style="text-decoration:none" target="_blank" rel="noopener" href="${esc(bdayLink(b))}" onclick='setTimeout(()=>markBday(${JSON.stringify(b.name)},${b.date.getFullYear()}),400)'>💬 Enviar parabéns</a>`:(b.key?`<button class="btn small" onclick='openFicha(${JSON.stringify(b.key)},"cadastro")'>+ WhatsApp</button>`:""));
+  return `<button class="btn small primary" onclick='openBdayModal(${JSON.stringify(b.name)},${b.date.getFullYear()},${JSON.stringify(b.phone||"")})'>✨ Mensagem personalizada</button>`+(!b.phone&&b.key?` <button class="btn small" onclick='openFicha(${JSON.stringify(b.key)},"cadastro")'>+ WhatsApp</button>`:"");
 }
 function upcomingBirthdays(days=45){
   const out=[], today=new Date(); today.setHours(0,0,0,0);
@@ -2855,10 +2899,10 @@ function renderAvisos(){
       ${av.map(a=>`<div class="step"><label class="homework-check" style="font-size:13px"><input type="checkbox" ${a.done?"checked":""} onchange="toggleAviso(${a.id})"><span style="${a.done?"text-decoration:line-through;opacity:.55":""}">${esc(a.title)}${a.date?` <span class="${!a.done&&a.date<todayISO()?"late":"muted"}">· ${dateBR(a.date)}</span>`:""}</span></label><button class="btn small" onclick="delAviso(${a.id})">✕</button></div>`).join("")||`<div class="muted small">Nenhum aviso. Anote aqui o que não pode esquecer.</div>`}
     </div>
     <div class="card span6"><h3>🎂 Próximos aniversários</h3>
-      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"🎉 Hoje!":b.diff===1?"Amanhã":`em ${b.diff} dias`}</div></div><div>${b.diff<=1?bdayButtons(b):""}</div></div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
+      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"🎉 Hoje!":b.diff===1?"Amanhã":`em ${b.diff} dias`}</div></div><div>${b.diff<=7?bdayButtons(b):""}</div></div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
       <div class="notice small" style="margin-top:10px">${withB} de ${totalM} alunos com aniversário cadastrado. Adicione na Ficha do aluno → Cadastro (aniversário + WhatsApp).</div>
       <div class="hr"></div>
-      <label>💌 Mensagem de parabéns <span class="muted">— use {nome} para o primeiro nome</span></label>
+      <label>💌 Mensagem padrão (usada se a IA estiver fora do ar) <span class="muted">— use {nome} para o primeiro nome</span></label>
       <textarea rows="4" oninput="DB.birthdayMsg=this.value;save()">${esc(DB.birthdayMsg||BDAY_DEFAULT)}</textarea>
     </div>
     <div class="card span12"><h3>⚡ Pendências automáticas</h3>
@@ -2873,6 +2917,52 @@ function renderAvisos(){
 function addAviso(){ const t=(avTitle.value||"").trim(); if(!t) return; DB.avisos.push({id:Date.now(),title:t,date:avDate.value,done:false}); save(); renderAvisos(); }
 function toggleAviso(id){ const a=DB.avisos.find(x=>x.id===id); if(a){a.done=!a.done; save(); renderAvisos();} }
 function delAviso(id){ DB.avisos=DB.avisos.filter(x=>x.id!==id); save(); renderAvisos(); }
+
+/* ---------- Wrappeds ---------- */
+const WRAPPED_BASE="https://2026wrapped-nine.vercel.app/";
+function allMemberNames(){ const out=[]; DB.students.forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:studentKey(s),active:true}))); (DB.inactiveStudents||[]).forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:"",active:false}))); const seen=new Set(); return out.filter(x=>!seen.has(x.n)&&seen.add(x.n)).sort((a,b)=>a.n.localeCompare(b.n)); }
+function memberPhone(name){ for(const s of [...DB.students,...(DB.inactiveStudents||[])]){ const p=(s.memberInfo||{})[name]?.phone; if(p) return p; } return ""; }
+function renderWrapped(){
+  const box=document.getElementById("wrapped"); if(!box||!box.classList.contains("active")) return;
+  DB.wrappeds=DB.wrappeds||[];
+  const W=[...DB.wrappeds].sort((a,b)=>(b.period||"").localeCompare(a.period||"")||a.name.localeCompare(b.name));
+  const names=allMemberNames(), withW=new Set(W.map(w=>w.name));
+  const missing=names.filter(x=>x.active&&!withW.has(x.n));
+  box.innerHTML=`
+  <div class="page-head"><div class="muted small">Registro de todos os Wrappeds enviados aos alunos, com o link de cada um.</div><a class="btn" style="text-decoration:none" href="${WRAPPED_BASE}" target="_blank" rel="noopener">↗ Abrir site do Wrapped</a></div>
+  <div class="kpis">
+    <div class="kpic hl"><div class="k">Wrappeds registrados</div><div class="v">${W.length}</div><div class="d">todos os períodos</div></div>
+    <div class="kpic"><div class="k">Enviados</div><div class="v">${W.filter(w=>w.sent).length}</div><div class="d">marcados como enviados</div></div>
+    <div class="kpic"><div class="k">Alunos com Wrapped</div><div class="v">${withW.size}</div><div class="d">de ${names.filter(x=>x.active).length} ativos</div></div>
+    <div class="kpic"><div class="k">Ainda sem Wrapped</div><div class="v">${missing.length}</div><div class="d">alunos ativos</div></div>
+  </div>
+  <div class="grid">
+    <div class="card span4"><h3>+ Registrar Wrapped</h3>
+      <label>Aluno</label><select id="wrName">${names.map(x=>`<option value="${esc(x.n)}">${esc(x.n)}${x.active?"":" (inativo)"}</option>`).join("")}</select>
+      <label style="margin-top:8px">Período</label><input id="wrPeriod" value="2026" placeholder="Ex.: 2026 · 1º semestre 2027">
+      <label style="margin-top:8px">Link</label><input id="wrUrl" placeholder="${WRAPPED_BASE}nome-do-aluno">
+      <label style="margin-top:8px">Observação (opcional)</label><input id="wrNote" placeholder="Ex.: destaque: speaking">
+      <button class="btn primary" style="margin-top:12px;width:100%" onclick="addWrapped()">Salvar</button>
+      ${missing.length?`<div class="small muted" style="margin-top:12px"><b>Sem Wrapped ainda:</b> ${missing.map(x=>esc(x.n)).join(", ")}</div>`:""}
+    </div>
+    <div class="card span8 tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Período</th><th>Link</th><th>Status</th><th></th></tr></thead><tbody>
+      ${W.map(w=>{const ph=memberPhone(w.name);return `<tr><td><b>${esc(w.name)}</b>${w.note?`<div class="muted small">${esc(w.note)}</div>`:""}</td><td>${esc(w.period||"")}</td><td><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(String(w.url).replace(/^https?:\/\//,"").slice(0,42))}</a></td>
+        <td>${w.sent?`<span class="chip ok">✓ Enviado ${dateBR(w.sent).slice(0,5)}</span>`:`<span class="chip warn">Não enviado</span>`}</td>
+        <td style="white-space:nowrap"><button class="btn small" onclick="copyWrapped(${w.id})">📋</button> ${ph?`<button class="btn small primary" onclick="sendWrapped(${w.id})">💬 Enviar</button>`:""} <button class="btn small" onclick="toggleWrappedSent(${w.id})">${w.sent?"Desmarcar":"Marcar enviado"}</button> <button class="btn small danger" onclick="delWrapped(${w.id})">✕</button></td></tr>`}).join("")||`<tr><td colspan="5" class="muted">Nenhum Wrapped registrado ainda.</td></tr>`}
+    </tbody></table></div>
+  </div>`;
+}
+function addWrapped(){
+  let url=(wrUrl.value||"").trim(); if(!url){alert("Cole o link do Wrapped.");return;} if(!/^https?:\/\//.test(url)) url="https://"+url;
+  DB.wrappeds=DB.wrappeds||[]; DB.wrappeds.push({id:Date.now(),name:wrName.value,period:(wrPeriod.value||"").trim(),url,note:(wrNote.value||"").trim(),sent:""});
+  save(); renderWrapped();
+}
+function wrappedMsg(w){ return `Hi ${w.name.split(" ")[0]}! 🎁 Your English Wrapped ${w.period||""} is ready! Take a look at everything you achieved this year 💛\n${w.url}`; }
+function copyWrapped(id){ const w=DB.wrappeds.find(x=>x.id===id); if(!w) return; navigator.clipboard.writeText(w.url).then(()=>alert("Link copiado!")).catch(()=>prompt("Copie o link:",w.url)); }
+function sendWrapped(id){ const w=DB.wrappeds.find(x=>x.id===id); if(!w) return; const ph=memberPhone(w.name);
+  window.open(`https://wa.me/55${String(ph).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(wrappedMsg(w))}`,"_blank"); w.sent=todayISO(); save(); renderWrapped(); }
+function toggleWrappedSent(id){ const w=DB.wrappeds.find(x=>x.id===id); if(!w) return; w.sent=w.sent?"":todayISO(); save(); renderWrapped(); }
+function delWrapped(id){ if(!confirm("Excluir este registro?")) return; DB.wrappeds=DB.wrappeds.filter(x=>x.id!==id); save(); renderWrapped(); }
 
 /* ---------- Bloco "Hoje no hub" do Início ---------- */
 function todayHubHTML(){
@@ -3022,10 +3112,69 @@ function exportBackup(){
   const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`EWD_backup_${todayISO()}.json`;a.click();URL.revokeObjectURL(a.href);
 }
+function isBlank(v){ return v===undefined||v===null||v===""||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length); }
+function fillBlanks(cur,inc){ // mantém o que já existe; só preenche o que está vazio
+  Object.keys(inc||{}).forEach(k=>{
+    if(isBlank(cur[k])) cur[k]=inc[k];
+    else if(cur[k]&&typeof cur[k]==="object"&&!Array.isArray(cur[k])&&inc[k]&&typeof inc[k]==="object"&&!Array.isArray(inc[k])) fillBlanks(cur[k],inc[k]);
+  });
+  return cur;
+}
+function mergeBackup(cur,inc){
+  const rep={alunos:0,inativos:0,aulas:0,outros:0};
+  const kOf=s=>s.day?`${s.name}|${s.day}|${s.time||""}`:s.name;
+  // alunos ativos
+  (inc.students||[]).forEach(st=>{
+    const same=cur.students.find(x=>kOf(x)===kOf(st));
+    if(same){ fillBlanks(same,st); return; }
+    if((cur.inactiveStudents||[]).some(x=>x.name===st.name)) return; // está inativo hoje: respeita
+    cur.students.push(st); rep.alunos++;
+  });
+  cur.inactiveStudents=cur.inactiveStudents||[];
+  (inc.inactiveStudents||[]).forEach(st=>{
+    const same=cur.inactiveStudents.find(x=>x.name===st.name);
+    if(same){ fillBlanks(same,st); return; }
+    if(cur.students.some(x=>x.name===st.name)) return; // voltou a ser ativo
+    cur.inactiveStudents.push(st); rep.inativos++;
+  });
+  // registros de aula
+  cur.records=cur.records||[];
+  const ids=new Set(cur.records.map(r=>r.id)), slots=new Set(cur.records.map(r=>`${r.date}|${r.schedule||r.student}`));
+  (inc.records||[]).forEach(r=>{ if(ids.has(r.id)||slots.has(`${r.date}|${r.schedule||r.student}`)){ const c=cur.records.find(x=>x.id===r.id); if(c) fillBlanks(c,r); return; } cur.records.push(r); rep.aulas++; });
+  cur.records.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  // demais listas e dicionários
+  Object.keys(inc).forEach(k=>{
+    if(["students","inactiveStudents","records"].includes(k)) return;
+    const a=cur[k], b=inc[k];
+    if(isBlank(a)){ if(!isBlank(b)){ cur[k]=b; rep.outros++; } return; }
+    if(Array.isArray(a)&&Array.isArray(b)){
+      const key=x=>x&&typeof x==="object"?(x.id!=null?"id:"+x.id:(x.level&&x.code!=null?`L:${x.level}|${x.code}`:JSON.stringify(x))):String(x);
+      const have=new Set(a.map(key)); b.forEach(x=>{ if(!have.has(key(x))){ a.push(x); rep.outros++; } });
+    } else if(a&&typeof a==="object"&&!Array.isArray(a)&&b&&typeof b==="object"&&!Array.isArray(b)){
+      Object.keys(b).forEach(x=>{ if(isBlank(a[x])){ a[x]=b[x]; rep.outros++; } else if(typeof a[x]==="object"&&typeof b[x]==="object"&&!Array.isArray(a[x])) fillBlanks(a[x],b[x]); });
+    } // valores simples: mantém o atual
+  });
+  return rep;
+}
 async function importBackup(file){
   if(!file)return;
   let obj;
   try{obj=JSON.parse(await file.text());}catch(e){alert("Não foi possível importar este arquivo.");return;}
+  const merge=confirm("Como importar este backup?\n\nOK = MESCLAR (recomendado): mantém tudo o que você já cadastrou e só acrescenta o que falta (alunos, aulas, anotações).\n\nCancelar = escolher substituir tudo.");
+  if(merge){
+    const before=JSON.stringify(DB);
+    try{ localStorage.setItem("ewd_before_merge",before); }catch(e){}
+    const rep=mergeBackup(DB,ensureGroupData(obj));
+    DB=applyCurriculum(ensureGroupData(DB));
+  if(!DB.weeklyPlanning)DB.weeklyPlanning={};
+  if(!DB.meetingNotes)DB.meetingNotes=[];
+  if(!DB.ideas)DB.ideas=[];
+    save();renderAll();
+    alert(`Backup mesclado ✔\n\n+ ${rep.aulas} registro(s) de aula\n+ ${rep.alunos} aluno(s)/turma(s)\n+ ${rep.inativos} inativo(s)\n+ ${rep.outros} outro(s) item(ns)\n\nNada do que você já tinha foi apagado ou alterado — campos vazios foram preenchidos com o backup.`);
+    if(Cloud.enabled() && confirm("Enviar também as novidades para o Notion agora?")) Cloud.syncAll();
+    return;
+  }
+  if(!confirm("SUBSTITUIR tudo pelo backup? O que você cadastrou depois desse backup será perdido.\n\n(Dica: clique em Cancelar e use “Exportar” antes, por segurança.)")) return;
   DB=applyCurriculum(ensureGroupData(obj));
   if(!DB.weeklyPlanning)DB.weeklyPlanning={};
   if(!DB.meetingNotes)DB.meetingNotes=[];
