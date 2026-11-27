@@ -519,6 +519,19 @@ select.lib-st{padding:5px 8px;border-radius:999px;font-weight:700;font-size:12px
 .search-hero{background:linear-gradient(135deg,#fff,var(--or-ll))}
 .search-res{margin-top:10px}mark{background:#FFE2B8;color:inherit;border-radius:4px;padding:0 2px}
 </style>
+
+<style id="ewd-navtoggle">
+.nav-toggle{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;cursor:pointer;transition:background .15s,border-color .15s}
+.nav-toggle:hover{border-color:var(--or);background:var(--or-ll)}
+.nav-toggle span{display:block;width:18px;height:2px;border-radius:2px;background:var(--or-d);transition:transform .2s,opacity .2s,width .2s}
+.app{transition:grid-template-columns .25s ease}
+aside{transition:opacity .2s}
+body.nav-collapsed .app{grid-template-columns:0 1fr}
+body.nav-collapsed aside{opacity:0;pointer-events:none;overflow:hidden;padding-left:0;padding-right:0}
+body.nav-collapsed .nav-toggle span:nth-child(1){width:12px}
+body.nav-collapsed .nav-toggle span:nth-child(3){width:14px}
+@media(max-width:900px){body.nav-collapsed aside{display:none}body.nav-collapsed .app{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -562,7 +575,7 @@ select.lib-st{padding:5px 8px;border-radius:999px;font-weight:700;font-size:12px
 
 <main>
   <div class="topbar">
-    <div><h1 id="pageTitle">Hoje</h1><div id="todayLabel" class="muted small"></div></div>
+    <div style="display:flex;align-items:center;gap:14px"><button id="navToggle" class="nav-toggle" onclick="toggleSidebar()" title="Ocultar/mostrar menu (atalho: Ctrl + \)" aria-label="Ocultar ou mostrar o menu"><span></span><span></span><span></span></button><div><h1 id="pageTitle">Hoje</h1><div id="todayLabel" class="muted small"></div></div></div>
     <div class="toolbar">
       <button id="cloudChip" class="btn cloud-chip" onclick="openCloudSettings()">☁️ Notion: configurar</button>
       <button class="btn" onclick="exportBackup()">⬇️ Backup</button>
@@ -3553,6 +3566,16 @@ function cronoBusca(){
   ${recs.length?`<h3 style="margin:16px 0 8px">Aulas registradas que mencionam “${esc(q)}”</h3><div class="card">${recs.map(r=>`<div class="mini-row"><div class="main"><b>${esc(r.student)}</b> · ${dateBR(r.date)}<div class="small">${snippet((r.lesson||"")+" — "+(r.note||""),q)}</div></div></div>`).join("")}</div>`:""}`
   :`<div class="muted small" style="margin-top:10px">A busca olha título, foco, gramática, vocabulário, expressões, tags, observações e o texto do material de cada aula da Biblioteca.</div>`}`;
 }
+
+
+/* ---------- Ocultar / mostrar o menu lateral ---------- */
+function toggleSidebar(force){
+  const on=typeof force==="boolean"?force:!document.body.classList.contains("nav-collapsed");
+  document.body.classList.toggle("nav-collapsed",on);
+  try{ localStorage.setItem("ewd_nav_collapsed",on?"1":""); }catch(e){}
+}
+try{ if(localStorage.getItem("ewd_nav_collapsed")==="1") document.body.classList.add("nav-collapsed"); }catch(e){}
+document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key==="\\"){ e.preventDefault(); toggleSidebar(); } });
 
 /* ================= Projetos 2027 ================= */
 const PROJ_TYPES=["🎬 Clube cultural","🎤 Palestra / convidados","📚 Curso","🛍️ Produto","📅 Evento","✨ Outro"];
