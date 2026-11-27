@@ -2822,6 +2822,16 @@ function enrollLead(id){
 function leadFromEx(i){ const s=(DB.inactiveStudents||[])[i]; if(!s) return; DB.leads.push({id:Date.now(),name:s.name,origin:"Ex-aluno",stage:"Novo",level:s.level,interest:"Voltar às aulas",createdAt:todayISO(),nextAction:"Mandar mensagem de reativação",nextDate:todayISO()}); save(); LEADS_UI.tab="novos"; renderLeads(); }
 
 /* ---------- Avisos e aniversários ---------- */
+const BDAY_DEFAULT="Happy birthday, {nome}! 🎉💛\nQue o seu novo ano seja cheio de coisas boas (e de muito inglês, claro!). Um abraço carinhoso da Teacher Denise ✨";
+function bdayText(name){ return (DB.birthdayMsg||BDAY_DEFAULT).replace(/\{nome\}/g,name.split(" ")[0]); }
+function bdayLink(b){ return b.phone?`https://wa.me/55${String(b.phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(bdayText(b.name))}`:""; }
+function bdaySentKey(b){ return `${b.date.getFullYear()}|${b.name}`; }
+function markBday(name,year){ DB.bdaySent=DB.bdaySent||{}; const k=`${year}|${name}`; if(DB.bdaySent[k]) delete DB.bdaySent[k]; else DB.bdaySent[k]=todayISO(); save(); renderToday(); renderAvisos(); }
+function bdayButtons(b){
+  const sent=(DB.bdaySent||{})[bdaySentKey(b)];
+  if(sent) return `<span class="chip ok">✓ Parabéns enviado</span> <button class="btn small" onclick='markBday(${JSON.stringify(b.name)},${b.date.getFullYear()})'>Desfazer</button>`;
+  return (b.phone?`<a class="btn small primary" style="text-decoration:none" target="_blank" rel="noopener" href="${esc(bdayLink(b))}" onclick='setTimeout(()=>markBday(${JSON.stringify(b.name)},${b.date.getFullYear()}),400)'>💬 Enviar parabéns</a>`:(b.key?`<button class="btn small" onclick='openFicha(${JSON.stringify(b.key)},"cadastro")'>+ WhatsApp</button>`:""));
+}
 function upcomingBirthdays(days=45){
   const out=[], today=new Date(); today.setHours(0,0,0,0);
   [...DB.students,...(DB.inactiveStudents||[]).map(s=>({...s,_inactive:true}))].forEach(s=>Object.entries(s.memberInfo||{}).forEach(([n,mi])=>{
@@ -2845,8 +2855,11 @@ function renderAvisos(){
       ${av.map(a=>`<div class="step"><label class="homework-check" style="font-size:13px"><input type="checkbox" ${a.done?"checked":""} onchange="toggleAviso(${a.id})"><span style="${a.done?"text-decoration:line-through;opacity:.55":""}">${esc(a.title)}${a.date?` <span class="${!a.done&&a.date<todayISO()?"late":"muted"}">· ${dateBR(a.date)}</span>`:""}</span></label><button class="btn small" onclick="delAviso(${a.id})">✕</button></div>`).join("")||`<div class="muted small">Nenhum aviso. Anote aqui o que não pode esquecer.</div>`}
     </div>
     <div class="card span6"><h3>🎂 Próximos aniversários</h3>
-      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"🎉 Hoje!":b.diff===1?"Amanhã":`em ${b.diff} dias`}</div></div>${b.phone?`<a class="btn small" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/55${String(b.phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(`Happy birthday, ${b.name.split(" ")[0]}! 🎉💛`)}">💬 Parabéns</a>`:""}</div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
-      <div class="notice small" style="margin-top:10px">${withB} de ${totalM} alunos com aniversário cadastrado. Adicione na Ficha do aluno → Cadastro.</div>
+      ${bdays.map(b=>`<div class="tl-item"><div class="tl-date">${String(b.date.getDate()).padStart(2,"0")}/${String(b.date.getMonth()+1).padStart(2,"0")}</div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div class="small"><b>${esc(b.name)}</b>${b.age?` · ${b.age} anos`:""}<div class="muted">${b.diff===0?"🎉 Hoje!":b.diff===1?"Amanhã":`em ${b.diff} dias`}</div></div><div>${b.diff<=1?bdayButtons(b):""}</div></div></div>`).join("")||`<div class="muted small">Nenhum aniversário nos próximos 60 dias.</div>`}
+      <div class="notice small" style="margin-top:10px">${withB} de ${totalM} alunos com aniversário cadastrado. Adicione na Ficha do aluno → Cadastro (aniversário + WhatsApp).</div>
+      <div class="hr"></div>
+      <label>💌 Mensagem de parabéns <span class="muted">— use {nome} para o primeiro nome</span></label>
+      <textarea rows="4" oninput="DB.birthdayMsg=this.value;save()">${esc(DB.birthdayMsg||BDAY_DEFAULT)}</textarea>
     </div>
     <div class="card span12"><h3>⚡ Pendências automáticas</h3>
       <div class="kpis" style="margin:0">
@@ -2866,7 +2879,7 @@ function todayHubHTML(){
   hubInit();
   const b=upcomingBirthdays(7), av=DB.avisos.filter(a=>!a.done&&a.date&&a.date<=todayISO()), ld=leadsDueToday(), late=lateCount();
   const items=[
-    ...b.map(x=>`<div class="row" style="margin-top:8px"><div class="main"><b>🎂 ${esc(x.name)}</b><div class="meta">${x.diff===0?"Aniversário hoje!":`Aniversário em ${x.diff} dia(s)`}</div></div></div>`),
+    ...b.map(x=>`<div class="row" style="margin-top:8px"><div class="main"><b>🎂 ${esc(x.name)}</b><div class="meta">${x.diff===0?"Aniversário hoje! 🎉":x.diff===1?"Aniversário amanhã":`Aniversário em ${x.diff} dias`}</div></div><div>${x.diff===0?bdayButtons(x):""}</div></div>`),
     ...av.map(a=>`<div class="row" style="margin-top:8px"><div class="main"><b>🔔 ${esc(a.title)}</b><div class="meta ${a.date<todayISO()?"late":""}">${dateBR(a.date)}</div></div><button class="btn small" onclick="toggleAviso(${a.id});renderToday()">Feito</button></div>`),
     ...ld.map(l=>`<div class="row" style="margin-top:8px;cursor:pointer" onclick="openLead(${l.id})"><div class="main"><b>🎯 ${esc(l.name)}</b><div class="meta">${esc(l.nextAction||"Próxima ação")} · ${dateBR(l.nextDate)}</div></div></div>`),
     late?`<div class="row" style="margin-top:8px;cursor:pointer" onclick="go('finance')"><div class="main"><b>💰 ${late} mensalidade(s) atrasada(s)</b><div class="meta">Ver no Financeiro</div></div></div>`:""
