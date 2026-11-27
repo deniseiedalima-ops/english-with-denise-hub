@@ -3,9 +3,6 @@
     "api/notion.js": {
       "maxDuration": 60
     },
-    "api/transcribe.js": {
-      "maxDuration": 60
-    },
     "api/summarize.js": {
       "maxDuration": 60
     },
@@ -14,6 +11,12 @@
     },
     "api/birthday.js": {
       "maxDuration": 60
+    },
+    "api/feedback.js": {
+      "maxDuration": 60
+    },
+    "api/report.js": {
+      "maxDuration": 30
     }
   },
   "cleanUrls": true,

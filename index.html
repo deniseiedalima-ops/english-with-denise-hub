@@ -437,6 +437,7 @@ a{color:var(--or-d)}
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#E8821E">
+<script src="report-render.js"></script>
 </head>
 <body>
 <div class="app">
@@ -457,7 +458,7 @@ a{color:var(--or-d)}
       <button data-view="planning">🗓️ Planning Class</button>
       <button data-view="lessons">📚 Lições</button>
       <button data-view="warmups">🔥 Warm-ups</button>
-      <button data-view="meeting">🎙️ Meeting Notes</button>
+      <button data-view="meeting">📄 Aulas & Feedback</button>
       <button data-view="assessment">📝 Notas & Avaliações</button>
       <button data-view="wrapped">🎁 Wrappeds</button>
     </div>
@@ -617,7 +618,7 @@ function go(view){
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   document.getElementById(view).classList.add("active");
   document.querySelector(`#nav button[data-view="${view==="ficha"?"students":view}"]`)?.classList.add("active");
-  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos e aniversários",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Meeting Notes → Notion",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
+  const titles={wrapped:"Wrappeds",ficha:"Ficha do aluno",avisos:"Avisos e aniversários",finance:"Financeiro",leads:"Leads",today:"Início",students:"Alunos e turmas",lessons:"Lições",warmups:"Warm-ups",planning:"Sugestão de Aulas da Semana",meeting:"Aulas & Feedback",ideas:"Posts & Ideias",projects:"Projetos 2027",site:"Página de links",assessment:"Notas & Avaliações",makeups:"Reposições",history:"Histórico",admin:"Administração"};
   pageTitle.textContent=titles[view];
   renderAll();
   window.scrollTo(0,0);
@@ -688,7 +689,7 @@ function renderToday(){
       </div>
       <div class="today-actions">
         ${s.meet?`<a class="btn small meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Abrir Meet</a>`:`<button class="btn small" onclick='openEditStudent(${DB.students.indexOf(s)})' title="Adicionar link do Meet">＋ Link Meet</button>`}
-        <button class="btn small" onclick='startClassRecording(${JSON.stringify(studentKey(s))})'>🎙️ Gravar & transcrever</button>
+        <button class="btn small" onclick='startClassRecording(${JSON.stringify(studentKey(s))})'>📄 Registrar aula</button>
         <button class="btn primary small" onclick='openRegister(${JSON.stringify(studentKey(s))})'>Registrar aula</button>
       </div>
     </div>`
@@ -1178,10 +1179,9 @@ function completeMakeup(id){
 }
 
 
-/* ================= Meeting Notes + gravação/transcrição de aulas do Google Meet ================= */
-const SEG_MS = 90*1000; // cada trecho de áudio enviado para transcrição (~90 s, bem abaixo do limite da Vercel)
-var REC = {key:"",title:"",week:"",date:"",transcript:"",summary:"",teacher:"",recording:false,startedAt:0,elapsed:0,
-  segments:0,queue:[],failed:[],busy:false,status:"",mime:"",ctx:null,dest:null,recorder:null,streams:[],segTimer:null,tick:null,durationMin:0,summarizing:false,saving:false};
+/* ================= Transcrições & Feedback (transcrição do Google Meet colada → registro + relatório do aluno) ================= */
+var TR = {key:"",title:"",week:"",date:"",transcript:"",summary:"",teacher:"",roles:{},lang:"auto",reports:{},editingId:null,generating:false,summarizing:false,status:""};
+var REC = TR; // compatibilidade com código antigo
 
 function normalizeMeet(v){
   v=String(v||"").trim();
@@ -1190,242 +1190,303 @@ function normalizeMeet(v){
   if(!/^https?:\/\//i.test(v)) v="https://"+v;
   try{ const u=new URL(v); return u.protocol.startsWith("http")?u.href:null; }catch(e){ return null; }
 }
-function recStudent(){ return DB.students.find(s=>studentKey(s)===REC.key) || null; }
-function mmss(sec){ sec=Math.max(0,Math.round(sec)); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; return (h?h+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); }
-function recElapsed(){ return REC.recording ? REC.elapsed + (Date.now()-REC.startedAt)/1000 : REC.elapsed; }
-function recSet(field,value){ REC[field]=value; }
-function recDefaults(){
-  if(!REC.week) REC.week=getMondayISO();
-  if(!REC.date) REC.date=todayISO();
-}
-function startClassRecording(key){
-  if(REC.recording && REC.key!==key){ alert("Já existe uma gravação em andamento. Encerre-a antes de iniciar outra."); go("meeting"); return; }
-  if(!REC.recording && REC.key!==key && (REC.transcript||REC.summary||REC.teacher)){
-    if(!confirm("Há um rascunho de transcrição não salvo. Descartar e começar outra aula?")){ go("meeting"); return; }
-    recReset();
-  }
-  REC.key=key;
+function recStudent(){ return DB.students.find(s=>studentKey(s)===TR.key) || null; }
+function recDefaults(){ if(!TR.week) TR.week=getMondayISO(); if(!TR.date) TR.date=todayISO(); }
+function trReset(){ Object.assign(TR,{title:"",week:"",date:"",transcript:"",summary:"",teacher:"",roles:{},lang:"auto",reports:{},editingId:null,generating:false,summarizing:false,status:""}); }
+function startClassRecording(key){ // nome mantido: botão "Registrar aula" do Início
+  if(TR.key!==key && (TR.transcript||TR.teacher) && !confirm("Há um rascunho não salvo. Descartar e começar outra aula?")){ go("meeting"); return; }
+  if(TR.key!==key) trReset();
+  TR.key=key;
   const s=recStudent();
-  if(s && !REC.title){
-    const plan=DB.weeklyPlanning?.[planningKey(getMondayISO(),s)]?.lesson;
-    REC.title=(plan||"").trim() || `Aula — ${s.name}`;
-  }
+  if(s && !TR.title){ const plan=DB.weeklyPlanning?.[planningKey(getMondayISO(),s)]?.lesson; TR.title=(plan||"").trim() || `Aula — ${s.name}`; }
   go("meeting");
   setTimeout(()=>document.getElementById("recPanel")?.scrollIntoView({behavior:"smooth",block:"start"}),60);
 }
-function recReset(){
-  Object.assign(REC,{title:"",week:"",date:"",transcript:"",summary:"",teacher:"",elapsed:0,segments:0,queue:[],failed:[],status:"",durationMin:0});
+
+/* ---- leitura da transcrição ---- */
+function parseTranscript(text){
+  let lines=String(text||"").replace(/\r/g,"").split("\n");
+  const turns=[]; let cur=null;
+  const isStamp=l=>/^\s*(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d+)?(\s*-->\s*(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d+)?)?\s*$/.test(l)||/^\s*\d+\s*$/.test(l)||/^WEBVTT/i.test(l);
+  for(let raw of lines){
+    let l=raw.trim(); if(!l||isStamp(l)) continue;
+    let m=l.match(/^<v\s+([^>]+)>(.*)$/i);
+    if(m){ cur={speaker:m[1].trim(),text:m[2].replace(/<\/v>/i,"").trim()}; turns.push(cur); continue; }
+    m=l.match(/^(?:\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s*)?([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ.'\- ]{0,40}?)\s*:\s+(.+)$/);
+    if(m && m[1].trim().split(/\s+/).length<=5 && !/^(https?|obs|nota|ps)$/i.test(m[1].trim())){ cur={speaker:m[1].trim(),text:m[2].trim()}; turns.push(cur); continue; }
+    if(cur) cur.text+=" "+l; else turns.push(cur={speaker:"",text:l});
+  }
+  const counts={}; turns.forEach(t=>{ if(t.speaker) counts[t.speaker]=(counts[t.speaker]||0)+1; });
+  const speakers=Object.keys(counts).filter(s=>counts[s]>=1).sort((a,b)=>counts[b]-counts[a]);
+  const labeled=speakers.length>0 && turns.filter(t=>t.speaker).length>=turns.length*0.6;
+  return {turns:labeled?turns.filter(t=>t.speaker):turns.map(t=>({speaker:"",text:t.text})),speakers:labeled?speakers:[],counts,labeled};
+}
+const PT_WORDS=new Set("de o que e da em um para é com não uma os na por mais dos como mas foi ao ele das tem à seu sua ou ser quando muito há nos já está eu também só pelo pela até isso ela entre era depois sem mesmo aos ter seus quem nas esse eles estão você tinha foram essa num nem suas meu às minha têm numa pelos elas havia seja qual será nós tenho lhe deles essas esses pelas este fosse dele tu te vocês teu tua nosso nossa dela esta estes estas aquele aquela isto aquilo estou estamos estava então tipo né assim aí gente vou vai vamos fazer faz fiz porque sim tá tô pra coisa coisas aqui ali lá agora hoje ontem amanhã bem bom boa obrigada obrigado professora eh hum acho sei sabe entendi certo legal caramba onde quanto quais dia semana trabalho casa ainda sempre nunca nada tudo todo toda todos todas outro outra cada palavra inglês português falar falei fala falou quero queria posso pode podemos preciso tava ficou fica fui ir vem veio disse diz dizer pergunta resposta exemplo verdade mesma mulher homem filho filha mãe pai amiga amigo escola aula aulas lição dever tarefa entendeu desculpa desculpe nao voce entao tambem ja ate so".split(" "));
+const EN_WORDS=new Set("the an and or but to of in on at for with is are was were be been am i you he she it we they him her them my your his its our their this that these those what where when who why how does did don't doesn't didn't have has had can could will would should not yes so very really just like go went going get got make made know think want need some any there here about from up out if then than too also because well okay ok yeah hi hello thank thanks please one two three time day good great nice i'm it's that's you're we're they're isn't aren't wasn't can't won't i've i'll i'd let's people thing things work home school class teacher today yesterday tomorrow week year much many more most every all something nothing everything always never sometimes usually often after before again still yet only other another same each lot little big small new old first last next right left way back over into by off down".split(" "));
+const EN_STOP=new Set([...EN_WORDS,"um","uh","uhm","hmm","oh","ah","mm","yep","yup","gonna","wanna","gotta","do","no","as","me","us","a"]);
+const AMBIG=new Set(["a","no","do","as","me","se","pro","for","e","o"]);
+function wordsOf(t){ return (String(t||"").toLowerCase().match(/[a-zà-ÿ]+(?:'[a-z]+)?/g)||[]); }
+function langTag(turnWords){
+  let pt=0,en=0; turnWords.forEach(w=>{ if(AMBIG.has(w)) return; if(PT_WORDS.has(w)||/[ãõçáéíóúâêôà]/.test(w)) pt++; else if(EN_WORDS.has(w)||w.includes("'")) en++; });
+  const fallback=pt>en?"pt":"en";
+  return turnWords.map(w=>{ if(PT_WORDS.has(w)||/[ãõçáéíóúâêôà]/.test(w)) return "pt"; if(EN_WORDS.has(w)||w.includes("'")) return "en"; return fallback; });
+}
+function computeStats(parsed,speakerNames){
+  const names=new Set(speakerNames||[]);
+  const exclude=new Set(); (parsed.speakers||[]).forEach(s=>wordsOf(s).forEach(w=>exclude.add(w)));
+  let total=0, mine=0, pt=0, en=0, turns=0, questions=0, longest=0; const freq={}, uniq=new Set();
+  parsed.turns.forEach(t=>{
+    const ws=wordsOf(t.text); total+=ws.length;
+    const isMine=parsed.labeled?names.has(t.speaker):true; if(!isMine) return;
+    turns++; mine+=ws.length; longest=Math.max(longest,ws.length); questions+=(t.text.match(/\?/g)||[]).length;
+    const tags=String(t.text).split(/[.,!?;:…"“”()]+/).flatMap(cl=>langTag(wordsOf(cl)));
+    ws.forEach((w,i)=>{ if(tags[i]==="pt"){ pt++; return; } en++; if(exclude.has(w)) return; uniq.add(w); if(w.length>=3&&!EN_STOP.has(w)) freq[w]=(freq[w]||0)+1; });
+  });
+  const topWords=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  return {speakersKnown:parsed.labeled, talkShare:parsed.labeled&&total?Math.round(mine/total*100):null, ptPct:pt+en?Math.round(pt/(pt+en)*100):0,
+    enWords:en, uniqueWords:uniq.size, turns:parsed.labeled?turns:null, avgTurn:parsed.labeled&&turns?Math.round(mine/turns):null, questions:parsed.labeled?questions:null, longest:parsed.labeled?longest:null, topWords, totalWords:mine};
+}
+function trMembers(){ const s=recStudent(); return s?groupMembers(s).filter(n=>!/^a adicionar$/i.test(n)):allMemberNames().map(x=>x.n); }
+function guessRole(speaker,members){
+  const n=normName(speaker);
+  if(/\bdenise\b/.test(n)||/teacher|professora/.test(n)) return "teacher";
+  const tok=n.split(/\s+/);
+  let best="",bs=0; members.forEach(m=>{ const mt=normName(m).split(/\s+/); let sc=mt.filter(x=>tok.includes(x)).length*2; if(mt[0]&&tok[0]&&mt[0].slice(0,4)===tok[0].slice(0,4)) sc+=1; if(sc>bs){bs=sc;best=m;} });
+  return bs>=2?best:"";
+}
+function trParsed(){ return parseTranscript(TR.transcript); }
+function trAutoRoles(){
+  const p=trParsed(), members=trMembers();
+  p.speakers.forEach(sp=>{ if(TR.roles[sp]===undefined) TR.roles[sp]=guessRole(sp,members); });
+  const unassigned=p.speakers.filter(sp=>!TR.roles[sp]), free=members.filter(m=>!Object.values(TR.roles).includes(m));
+  if(unassigned.length===1&&free.length===1) TR.roles[unassigned[0]]=free[0];
+  return p;
+}
+function trStudentsInReport(p){
+  if(!p.labeled) return trMembers().map(n=>({name:n,speakers:[]}));
+  const by={}; p.speakers.forEach(sp=>{ const r=TR.roles[sp]; if(r&&r!=="teacher"&&r!=="ignore") (by[r]=by[r]||[]).push(sp); });
+  return Object.keys(by).map(n=>({name:n,speakers:by[n]}));
+}
+function levelOfMember(name){ const s=[...DB.students,...(DB.inactiveStudents||[])].find(x=>groupMembers(x).includes(name)); return s?.level||recStudent()?.level||""; }
+function reportLang(name){ if(TR.lang==="pt"||TR.lang==="en") return TR.lang; return /^(B1|B2|C1|C2)/i.test(levelOfMember(name))?"en":"pt"; }
+function lastReportOf(name,beforeId){
+  const ns=(DB.meetingNotes||[]).filter(n=>n.id!==beforeId&&n.reports&&n.reports[name]).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  return ns[0]?ns[0].reports[name]:null;
+}
+function trFile(input){
+  const f=input.files[0]; if(!f) return;
+  if(/\.docx$/i.test(f.name)){ alert("Para arquivo do Google Docs/Word: no Google Docs use Arquivo → Fazer download → Texto simples (.txt), ou copie e cole o texto aqui."); input.value=""; return; }
+  f.text().then(t=>{ TR.transcript=t; TR.roles={}; renderMeetingNotes(); });
 }
 
-async function recStart(){
-  if(REC.recording) return;
-  if(!Cloud.enabled()){ alert("Conecte o painel ao Notion primeiro (botão ☁️ no topo). A transcrição usa as funções seguras da Vercel."); openCloudSettings(); return; }
-  if(!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder==="undefined"){
-    alert("A gravação funciona no Google Chrome (ou Edge) no computador. Abra o painel por lá."); return;
-  }
-  let display;
+/* ---- IA ---- */
+async function trGenerate(){
+  TR.transcript=(document.getElementById("recTranscript")?.value||TR.transcript||"").trim();
+  if(TR.transcript.length<80){ alert("Cole a transcrição da aula primeiro."); return; }
+  if(!Cloud.enabled()){ openCloudSettings(); return; }
+  const p=trAutoRoles(), list=trStudentsInReport(p);
+  if(!list.length){ alert("Indique quem é cada participante (pelo menos um aluno)."); renderMeetingNotes(); return; }
+  TR.generating=true; TR.status=`A IA está lendo a aula e escrevendo ${list.length>1?`os ${list.length} relatórios`:"o relatório"}… (leva de 20 a 60 segundos)`; renderMeetingNotes();
   try{
-    display = await navigator.mediaDevices.getDisplayMedia({
-      video:true,
-      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},
-      systemAudio:"include", selfBrowserSurface:"exclude", surfaceSwitching:"include", preferCurrentTab:false
-    });
-  }catch(e){ REC.status="Compartilhamento cancelado."; recUpdateLive(); return; }
-  const tabAudio = display.getAudioTracks();
-  if(!tabAudio.length){
-    if(!confirm("Nenhum áudio da guia foi compartilhado — a voz dos alunos não será captada.\n\nPara corrigir: clique em Cancelar, inicie de novo, escolha a guia do Google Meet e deixe marcado “Compartilhar áudio da guia”.\n\nContinuar só com o seu microfone?")){
-      display.getTracks().forEach(t=>t.stop()); return;
+    const langs=[...new Set(list.map(x=>reportLang(x.name)))];
+    for(const lang of langs){
+      const grp=list.filter(x=>reportLang(x.name)===lang);
+      const students=grp.map(x=>{ const prev=lastReportOf(x.name,TR.editingId); return {name:x.name,speaker:x.speakers.join(" / "),level:levelOfMember(x.name),previous:prev?JSON.stringify({date:prev.date,scores:prev.ai?.scores,errors:(prev.ai?.errors||[]).slice(0,6),headline:prev.ai?.headline}):""}; });
+      const r=await Cloud.call("feedback",{transcript:TR.transcript,students,lesson:TR.title,lang});
+      grp.forEach(x=>{ const kk=Object.keys(r.reports||{}).find(k=>normName(k)===normName(x.name))||(grp.length===1?Object.keys(r.reports||{})[0]:""); const ai=(kk&&r.reports[kk])||{};
+        const old=TR.reports[x.name]||{};
+        TR.reports[x.name]={student:x.name,level:levelOfMember(x.name),date:TR.date,lesson:TR.title,lang,stats:computeStats(p,x.speakers),ai,public:old.public||null}; });
     }
-  }
-  let mic=null;
-  try{ mic = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}); }
-  catch(e){ if(!tabAudio.length){ display.getTracks().forEach(t=>t.stop()); alert("Sem microfone e sem áudio da guia — não há o que gravar."); return; } }
-
-  const ctx = new (window.AudioContext||window.webkitAudioContext)();
-  const dest = ctx.createMediaStreamDestination();
-  if(tabAudio.length) ctx.createMediaStreamSource(new MediaStream(tabAudio)).connect(dest);
-  if(mic) ctx.createMediaStreamSource(mic).connect(dest);
-  REC.ctx=ctx; REC.dest=dest; REC.streams=[display,mic].filter(Boolean);
-  display.getVideoTracks().forEach(t=>t.addEventListener("ended",()=>{ if(REC.recording) recStop(); }));
-  tabAudio.forEach(t=>t.addEventListener("ended",()=>{ if(REC.recording) recStop(); }));
-
-  REC.mime = ["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"].find(m=>MediaRecorder.isTypeSupported(m)) || "";
-  recDefaults();
-  REC.recording=true; REC.startedAt=Date.now(); REC.status=tabAudio.length?"Gravando a guia do Meet + seu microfone.":"Gravando só o seu microfone.";
-  recStartSegment();
-  REC.segTimer=setInterval(()=>{ if(REC.recorder && REC.recorder.state==="recording") REC.recorder.stop(); }, SEG_MS);
-  REC.tick=setInterval(recUpdateLive,1000);
-  window.onbeforeunload=()=> "A aula ainda está sendo gravada.";
-  renderMeetingNotes();
-}
-function recStartSegment(){
-  const opts = REC.mime ? {mimeType:REC.mime,audioBitsPerSecond:32000} : {audioBitsPerSecond:32000};
-  const r = new MediaRecorder(REC.dest.stream, opts);
-  const chunks=[]; const offset=recElapsed();
-  r.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); };
-  r.onstop=()=>{
-    if(chunks.length) recEnqueue({blob:new Blob(chunks,{type:r.mimeType||REC.mime||"audio/webm"}),offset});
-    if(REC.recording) recStartSegment();
-  };
-  r.start();
-  REC.recorder=r;
-}
-function recStop(){
-  if(!REC.recording) return;
-  REC.elapsed=recElapsed(); REC.recording=false;
-  REC.durationMin=Math.max(1,Math.round(REC.elapsed/60));
-  clearInterval(REC.segTimer); clearInterval(REC.tick);
-  try{ if(REC.recorder && REC.recorder.state!=="inactive") REC.recorder.stop(); }catch(e){}
-  REC.streams.forEach(s=>s.getTracks().forEach(t=>t.stop()));
-  setTimeout(()=>{ try{REC.ctx && REC.ctx.close()}catch(e){} },1500);
-  window.onbeforeunload=null;
-  REC.status="Gravação encerrada. Aguarde a transcrição dos últimos trechos.";
-  renderMeetingNotes();
-}
-function recEnqueue(item){ REC.queue.push(item); recPump(); }
-async function recPump(){
-  if(REC.busy) return;
-  REC.busy=true; recUpdateLive();
-  while(REC.queue.length){
-    const item=REC.queue.shift();
-    try{
-      const text=await Cloud.transcribe(item.blob);
-      REC.segments++;
-      if(text) recAppend(`[${mmss(item.offset)}] ${text}`);
-      if(!REC.recording) REC.status="Transcrição pronta. Revise, gere o resumo e salve no Notion.";
-    }catch(e){
-      REC.failed.push(item);
-      REC.status="Falha ao transcrever um trecho: "+e.message;
-    }
-    recUpdateLive();
-  }
-  REC.busy=false; recUpdateLive();
-}
-function recRetry(){ REC.queue.push(...REC.failed.splice(0)); REC.queue.sort((a,b)=>a.offset-b.offset); recPump(); }
-function recAppend(line){
-  REC.transcript = (REC.transcript ? REC.transcript.replace(/\s+$/,"")+"\n" : "") + line;
-  const ta=document.getElementById("recTranscript");
-  if(ta){ const atEnd = ta.scrollTop+ta.clientHeight >= ta.scrollHeight-30; ta.value=REC.transcript; if(atEnd) ta.scrollTop=ta.scrollHeight; }
-}
-function recUpdateLive(){
-  const t=document.getElementById("recTimer"); if(t) t.textContent=mmss(recElapsed());
-  const d=document.getElementById("recDot"); if(d) d.classList.toggle("on",REC.recording);
-  const st=document.getElementById("recStatus");
-  if(st){
-    const pend=REC.queue.length+(REC.busy?1:0);
-    st.innerHTML=`${esc(REC.status||"Pronto para gravar.")}<br><span class="muted small">${REC.segments} trecho(s) transcrito(s)${pend?` · ${pend} na fila`:""}${REC.failed.length?` · <b>${REC.failed.length} com erro</b> <button class="btn small" onclick="recRetry()">Tentar de novo</button>`:""}</span>`;
-  }
+    TR.status="Pronto! Revise os relatórios abaixo e clique em Salvar.";
+  }catch(e){ TR.status="Não foi possível gerar: "+e.message; }
+  TR.generating=false; renderMeetingNotes();
 }
 async function recSummarize(){
-  const transcript=(document.getElementById("recTranscript")?.value||REC.transcript||"").trim();
+  const transcript=(document.getElementById("recTranscript")?.value||TR.transcript||"").trim();
   if(transcript.length<40){ alert("A transcrição ainda está curta demais para resumir."); return; }
   if(!Cloud.enabled()){ openCloudSettings(); return; }
   const s=recStudent();
-  REC.summarizing=true; renderMeetingNotes();
-  try{
-    const r=await Cloud.call("summarize",{transcript,student:s?.name||"",level:s?.level||"",lesson:REC.title});
-    REC.summary=r.summary||"";
-  }catch(e){ alert("Não foi possível gerar o resumo: "+e.message); }
-  REC.summarizing=false; renderMeetingNotes();
-}
-function recSave(){
-  if(REC.recording){ alert("Encerre a gravação antes de salvar."); return; }
-  const pend=REC.queue.length+(REC.busy?1:0);
-  if(pend && !confirm(`Ainda há ${pend} trecho(s) sendo transcrito(s). Salvar mesmo assim (sem eles)?`)) return;
-  if(REC.failed.length && !confirm(`${REC.failed.length} trecho(s) falharam na transcrição e ficarão de fora. Salvar mesmo assim?`)) return;
-  const transcript=(REC.transcript||"").trim(), summary=(REC.summary||"").trim(), teacher=(REC.teacher||"").trim();
-  if(!transcript && !summary && !teacher){ alert("Grave a aula ou cole uma transcrição/anotação antes de salvar."); return; }
-  recDefaults();
-  const s=recStudent();
-  const note={
-    id:Date.now(), week:REC.week, date:REC.date, createdAt:todayISO(),
-    student:s?.name||"", studentKey:s?studentKey(s):"",
-    title:(REC.title||"").trim() || (s?`Aula — ${s.name}`:"Meeting"),
-    transcript, summary, teacherNotes:teacher,
-    durationMin:REC.durationMin||null, meetLink:s?.meet||"",
-    source:REC.segments>0?"recorded":"manual"
-  };
-  DB.meetingNotes=DB.meetingNotes||[];
-  DB.meetingNotes.push(note);
-  save();
-  Cloud.enqueue("saveMeeting",{meeting:note});
-  recReset(); REC.key=s?studentKey(s):"";
-  renderMeetingNotes();
-  if(!Cloud.enabled()) alert("Meeting Note salva neste navegador. Conecte o Notion (☁️ no topo) para enviá-la ao Notion.");
-}
-function recDiscard(){
-  if(REC.recording){ alert("Encerre a gravação primeiro."); return; }
-  if((REC.transcript||REC.summary||REC.teacher) && !confirm("Descartar este rascunho?")) return;
-  recReset(); renderMeetingNotes();
+  TR.summarizing=true; renderMeetingNotes();
+  try{ const r=await Cloud.call("summarize",{transcript,student:s?.name||"",level:s?.level||"",lesson:TR.title}); TR.summary=r.summary||""; }
+  catch(e){ alert("Não foi possível gerar o resumo: "+e.message); }
+  TR.summarizing=false; renderMeetingNotes();
 }
 
+/* ---- salvar / abrir ---- */
+function recSave(){
+  const transcript=(TR.transcript||"").trim(), summary=(TR.summary||"").trim(), teacher=(TR.teacher||"").trim();
+  if(!transcript && !summary && !teacher){ alert("Cole a transcrição ou escreva uma anotação antes de salvar."); return; }
+  recDefaults();
+  const s=recStudent();
+  const reports={}; Object.entries(TR.reports||{}).forEach(([n,r])=>{ reports[n]={...r,date:TR.date,lesson:(TR.title||"").trim()}; });
+  const base={ week:TR.week, date:TR.date, student:s?.name||"", studentKey:s?studentKey(s):"",
+    title:(TR.title||"").trim() || (s?`Aula — ${s.name}`:"Meeting"), transcript, summary, teacherNotes:teacher, meetLink:s?.meet||"",
+    source:"transcript", roles:{...TR.roles}, reports };
+  DB.meetingNotes=DB.meetingNotes||[];
+  let note=TR.editingId&&DB.meetingNotes.find(n=>n.id===TR.editingId);
+  if(note){ Object.assign(note,base); if(!transcript&&note.transcriptInNotion) note.transcript=""; }
+  else { note={id:Date.now(),createdAt:todayISO(),...base}; DB.meetingNotes.push(note); }
+  save();
+  Cloud.enqueue("saveMeeting",{meeting:note});
+  trReset(); TR.key=s?studentKey(s):"";
+  renderMeetingNotes(); renderFicha();
+  if(!Cloud.enabled()) alert("Registro salvo neste navegador. Conecte o Notion (☁️ no topo) para enviá-lo ao Notion.");
+}
+function recDiscard(){ if((TR.transcript||TR.summary||TR.teacher) && !confirm("Descartar este rascunho?")) return; trReset(); renderMeetingNotes(); }
+function editMeetingNote(id){
+  const n=(DB.meetingNotes||[]).find(x=>x.id===id); if(!n) return;
+  if((TR.transcript||TR.teacher)&&TR.editingId!==id&&!confirm("Há um rascunho aberto. Substituir?")) return;
+  trReset(); Object.assign(TR,{editingId:id,key:n.studentKey||"",title:n.title||"",date:n.date||"",week:n.week||"",transcript:n.transcript||"",summary:n.summary||"",teacher:n.teacherNotes||"",roles:{...(n.roles||{})},reports:JSON.parse(JSON.stringify(n.reports||{}))});
+  if(!n.transcript&&n.transcriptInNotion) TR.status="A transcrição desta aula está no Notion. Para gerar de novo, cole-a outra vez.";
+  renderMeetingNotes(); document.getElementById("recPanel")?.scrollIntoView({behavior:"smooth"});
+}
+
+/* ---- relatórios ---- */
+function reportFrom(src,name){ return (src==="draft"?TR.reports:((DB.meetingNotes||[]).find(n=>n.id===src)||{}).reports||{})[name]; }
+function reportData(r){ return {student:r.student,level:r.level,date:r.date,lesson:r.lesson,lang:r.lang,stats:r.stats,ai:r.ai}; }
+function viewReport(src,name){
+  const r=reportFrom(src,name); if(!r) return;
+  const w=window.open("","_blank"); if(!w){ alert("Permita pop-ups para ver o relatório."); return; }
+  w.document.open(); w.document.write(EWDReport.render(reportData(r)).replace('href="/favicon.svg"',`href="${location.origin}/favicon.svg"`)); w.document.close();
+}
+function downloadReport(src,name){
+  const r=reportFrom(src,name); if(!r) return;
+  const blob=new Blob([EWDReport.render(reportData(r))],{type:"text/html"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`Relatorio_${name.replace(/\s+/g,"_")}_${r.date||todayISO()}.html`; a.click(); URL.revokeObjectURL(a.href);
+}
+function rndKey(){ const a=new Uint8Array(18); crypto.getRandomValues(a); return Array.from(a,b=>b.toString(16).padStart(2,"0")).join(""); }
+async function publishReport(id,name,btn){
+  const n=(DB.meetingNotes||[]).find(x=>x.id===id), r=n?.reports?.[name]; if(!r) return;
+  if(!Cloud.enabled()){ openCloudSettings(); return; }
+  if(btn){ btn.disabled=true; btn.textContent="Publicando…"; }
+  try{
+    const key=r.public?.key||rndKey();
+    const out=await Cloud.notion("publishReport",{report:{...reportData(r),key},pageId:r.public?.pageId||""});
+    r.public={pageId:out.pageId,key,url:`${location.origin}/report?id=${out.pageId.replace(/-/g,"")}&k=${key}`,at:todayISO()};
+    save(); renderMeetingNotes(); renderFicha();
+    navigator.clipboard?.writeText(r.public.url).catch(()=>{});
+    alert("Link publicado e copiado! Só quem tiver o link consegue ver o relatório.");
+  }catch(e){ alert("Não foi possível publicar: "+e.message); if(btn){btn.disabled=false;btn.textContent="🔗 Publicar link";} }
+}
+function copyReportLink(id,name){ const r=reportFrom(id,name); if(!r?.public) return; navigator.clipboard.writeText(r.public.url).then(()=>alert("Link copiado!")).catch(()=>prompt("Copie o link:",r.public.url)); }
+function sendReport(id,name){
+  const r=reportFrom(id,name); if(!r?.public) return; const ph=memberPhone(name);
+  const msg=r.lang==="en"?`Hi ${name.split(" ")[0]}! 🌟 Here's your class report from ${dateBR(r.date)}: your stats, what you nailed and what to practice next 💛\n${r.public.url}`:`Oi, ${name.split(" ")[0]}! 🌟 Seu relatório da aula de ${dateBR(r.date)} está pronto: seus números, o que você mandou bem e o que praticar 💛\n${r.public.url}`;
+  window.open(ph?`https://wa.me/55${String(ph).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+  r.sentAt=todayISO(); save(); renderMeetingNotes();
+}
+async function unpublishReport(id,name){
+  const r=reportFrom(id,name); if(!r?.public||!confirm("Despublicar? O link deixará de funcionar.")) return;
+  try{ await Cloud.notion("unpublishReport",{pageId:r.public.pageId}); }catch(e){}
+  r.public=null; save(); renderMeetingNotes();
+}
+const RPT_LISTS=[["strengths","O que mandou bem"],["improved","O que melhorou"],["topics","Assuntos"],["stories","Histórias / momentos divertidos"],["nextSteps","Próximos passos"]];
+const RPT_PAIRS=[["errors","Erros (disse → correto | explicação)","said","correct","why"],["wrongWords","Palavras para lapidar (disse → correto | dica)","said","correct","note"],["ptToEn","Português → inglês (pt → en)","pt","en",""],["newVocab","Palavras novas (palavra → significado)","word","meaning",""]];
+function editReport(src,name){
+  const r=reportFrom(src,name); if(!r) return; const a=r.ai||{};
+  const sc=a.scores||{};
+  showModal(`<div class="modalhead"><div><h2>✏️ Relatório de ${esc(name)}</h2><div class="muted small">Ajuste o que quiser. Uma linha por item.</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  <div class="formgrid">
+    <div class="full"><label>Frase de abertura</label><input id="rpHeadline" value="${esc(a.headline||"")}"></div>
+    ${["fluency","grammar","vocabulary","confidence","participation"].map(k=>`<div><label>${{fluency:"Fluência",grammar:"Gramática",vocabulary:"Vocabulário",confidence:"Confiança",participation:"Participação"}[k]} (0–10)</label><input type="number" min="0" max="10" step="0.5" id="rpS_${k}" value="${esc(sc[k]??"")}"></div>`).join("")}
+    <div><label>Idioma do relatório</label><select id="rpLang"><option value="pt" ${r.lang!=="en"?"selected":""}>Português</option><option value="en" ${r.lang==="en"?"selected":""}>English</option></select></div>
+    ${RPT_LISTS.map(([k,l])=>`<div class="full"><label>${l}</label><textarea id="rpL_${k}" rows="3">${esc((a[k]||[]).join("\n"))}</textarea></div>`).join("")}
+    ${RPT_PAIRS.map(([k,l,x,y,z])=>`<div class="full"><label>${l}</label><textarea id="rpP_${k}" rows="4">${esc((a[k]||[]).map(o=>typeof o==="string"?o:`${o[x]||""} → ${o[y]||""}${z&&o[z]?` | ${o[z]}`:""}`).join("\n"))}</textarea></div>`).join("")}
+    <div class="full"><label>Recado da teacher</label><textarea id="rpMsg" rows="4">${esc(a.message||"")}</textarea></div>
+  </div>
+  <div class="toolbar" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" onclick='saveReportEdit(${JSON.stringify(src)},${JSON.stringify(name)})'>Salvar alterações</button></div>`);
+}
+function saveReportEdit(src,name){
+  const r=reportFrom(src,name); if(!r) return; const a=r.ai=r.ai||{};
+  a.headline=rpHeadline.value.trim(); a.message=rpMsg.value.trim(); r.lang=rpLang.value;
+  a.scores={}; ["fluency","grammar","vocabulary","confidence","participation"].forEach(k=>{ const v=document.getElementById("rpS_"+k).value; if(v!=="") a.scores[k]=Math.max(0,Math.min(10,Number(v))); });
+  RPT_LISTS.forEach(([k])=>{ a[k]=document.getElementById("rpL_"+k).value.split("\n").map(x=>x.trim()).filter(Boolean); });
+  RPT_PAIRS.forEach(([k,,x,y,z])=>{ a[k]=document.getElementById("rpP_"+k).value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{ const [lhs,rest=""]=l.split(/\s*(?:→|->|=>)\s*/); const [rhs,note=""]=rest.split(/\s*\|\s*/); const o={[x]:lhs,[y]:rhs||""}; if(z) o[z]=note; return o; }); });
+  if(src!=="draft") save();
+  closeModal(); renderMeetingNotes();
+  if(src!=="draft"&&r.public&&confirm("Atualizar também o link já publicado?")) publishReport(src,name);
+}
+function reportButtons(src,name,r){
+  const pub=src!=="draft"&&r.public;
+  return `<button class="btn small" onclick='viewReport(${JSON.stringify(src)},${JSON.stringify(name)})'>👁️ Ver</button>
+    <button class="btn small" onclick='editReport(${JSON.stringify(src)},${JSON.stringify(name)})'>✏️ Editar</button>
+    <button class="btn small" onclick='downloadReport(${JSON.stringify(src)},${JSON.stringify(name)})'>⬇️ HTML</button>
+    ${src==="draft"?"":(pub?`<button class="btn small" onclick='copyReportLink(${src},${JSON.stringify(name)})'>📋 Link</button><button class="btn small primary" onclick='sendReport(${src},${JSON.stringify(name)})'>💬 Enviar</button><button class="btn small" title="Despublicar" onclick='unpublishReport(${src},${JSON.stringify(name)})'>🔒</button>`:`<button class="btn small primary" onclick='publishReport(${src},${JSON.stringify(name)},this)'>🔗 Publicar link</button>`)}`;
+}
+function reportMini(r){
+  const s=r.stats||{}, sc=r.ai?.scores||{}; const avg=Object.values(sc).filter(v=>v!==""&&v!=null).map(Number);
+  return `<span class="muted small">${s.talkShare!=null?`fala ${s.talkShare}% · `:""}inglês ${100-(s.ptPct||0)}% · ${s.enWords||0} palavras${avg.length?` · média ${(avg.reduce((a,b)=>a+b,0)/avg.length).toFixed(1)}/10`:""}${(r.ai?.errors||[]).length?` · ${(r.ai.errors).length} correções`:""}</span>`;
+}
+
+/* ---- tela ---- */
 function renderMeetingNotes(){
   if(!document.getElementById("meeting")) return;
   recDefaults();
   const notes=[...(DB.meetingNotes||[])].sort((a,b)=>(b.date||b.week||"").localeCompare(a.date||a.week||"") || (b.id-a.id));
   const s=recStudent();
-  const options=DB.students.map(x=>`<option value="${esc(studentKey(x))}" ${studentKey(x)===REC.key?"selected":""}>${esc(x.day)} ${esc(x.time)} · ${esc(x.name)}</option>`).join("");
-  const pend=REC.queue.length+(REC.busy?1:0);
+  const options=DB.students.map(x=>`<option value="${esc(studentKey(x))}" ${studentKey(x)===TR.key?"selected":""}>${esc(x.day)} ${esc(x.time)} · ${esc(x.name)}</option>`).join("");
+  const p=TR.transcript?trAutoRoles():{speakers:[],counts:{},labeled:false,turns:[]};
+  const members=trMembers();
+  const roleSel=sp=>`<select onchange='TR.roles[${JSON.stringify(sp)}]=this.value;renderMeetingNotes()'><option value="">— quem é? —</option><option value="teacher" ${TR.roles[sp]==="teacher"?"selected":""}>👩‍🏫 Professora</option>${members.map(m=>`<option value="${esc(m)}" ${TR.roles[sp]===m?"selected":""}>🎓 ${esc(m)}</option>`).join("")}<option value="ignore" ${TR.roles[sp]==="ignore"?"selected":""}>Ignorar</option></select>`;
+  const drafts=Object.entries(TR.reports||{});
   meeting.innerHTML=`
   <div class="stack">
   <div id="recPanel" class="card rec-panel">
     <div class="toolbar" style="justify-content:space-between;align-items:flex-start">
-      <div><h2 style="margin:0 0 4px">🎙️ Gravar & transcrever aula do Google Meet</h2>
-      <div class="muted small">O painel grava o áudio da guia do Meet + seu microfone, transcreve a cada ~90 s e salva tudo no Notion.</div></div>
+      <div><h2 style="margin:0 0 4px">📄 ${TR.editingId?"Editar registro da aula":"Registrar aula + feedback do aluno"}</h2>
+      <div class="muted small">Cole a transcrição do Google Meet. O Studio calcula os números da aula e a IA monta o relatório de cada aluno (erros, o que melhorou, palavras, assuntos, histórias, % de português…).</div></div>
       <span class="pill-count" title="Status do Notion">${Cloud.enabled()?"☁️":"⚠️"}</span>
     </div>
     <div class="formgrid" style="margin-top:14px">
-      <div><label>Aluno(s) / turma</label><select id="recKey" ${REC.recording?"disabled":""} onchange="REC.key=this.value;renderMeetingNotes()"><option value="">Meeting geral (sem turma)</option>${options}</select></div>
-      <div><label>Título / aula</label><input value="${esc(REC.title)}" oninput="recSet('title',this.value)" placeholder="Ex.: 2B — Describe travel problems"></div>
-      <div><label>Data da aula</label><input type="date" value="${esc(REC.date)}" onchange="recSet('date',this.value)"></div>
-      <div><label>Semana (início)</label><input type="date" value="${esc(REC.week)}" onchange="recSet('week',this.value)"></div>
+      <div><label>Aluno(s) / turma</label><select id="recKey" onchange="TR.key=this.value;TR.roles={};renderMeetingNotes()"><option value="">Meeting geral (sem turma)</option>${options}</select></div>
+      <div><label>Título / aula</label><input value="${esc(TR.title)}" oninput="TR.title=this.value" placeholder="Ex.: 39 — What will you do tonight?"></div>
+      <div><label>Data da aula</label><input type="date" value="${esc(TR.date)}" onchange="TR.date=this.value"></div>
+      <div><label>Idioma do relatório</label><select onchange="TR.lang=this.value"><option value="auto" ${TR.lang==="auto"?"selected":""}>Automático (A1/A2 em português · B1+ em inglês)</option><option value="pt" ${TR.lang==="pt"?"selected":""}>Português</option><option value="en" ${TR.lang==="en"?"selected":""}>English</option></select></div>
     </div>
-    <div class="rec-live">
-      <span id="recDot" class="rec-dot ${REC.recording?"on":""}"></span>
-      <span id="recTimer" class="rec-timer">${mmss(recElapsed())}</span>
-      ${s?.meet?`<a class="btn meet-btn" href="${esc(s.meet)}" target="_blank" rel="noopener">🎥 Abrir Meet de ${esc(s.name.split(" + ")[0])}</a>`:(s?`<button class="btn" onclick="openEditStudent(${DB.students.indexOf(s)})">＋ Adicionar link do Meet</button>`:"")}
-      ${REC.recording
-        ? `<button class="btn danger" onclick="recStop()">⏹️ Encerrar gravação</button>`
-        : `<button class="btn primary" onclick="recStart()">⏺️ Iniciar gravação</button>`}
-      <div id="recStatus" style="flex:1;min-width:220px;font-size:13px"></div>
+    <div class="toolbar" style="justify-content:space-between;align-items:flex-end;margin-top:12px">
+      <label style="margin:0">Transcrição da aula</label>
+      <label class="btn small" style="margin:0;cursor:pointer">📎 Enviar arquivo (.txt / .vtt)<input type="file" accept=".txt,.vtt,.sbv,.srt,.docx,text/plain" style="display:none" onchange="trFile(this)"></label>
     </div>
-    <ol class="rec-steps">
-      <li>Abra a chamada no Google Meet (botão verde) <b>no Chrome do computador</b>.</li>
-      <li>Volte aqui e clique em <b>Iniciar gravação</b> → escolha a guia <b>do Meet</b> → deixe ligado <b>“Compartilhar áudio da guia”</b>.</li>
-      <li>Dê a aula normalmente. A transcrição aparece abaixo enquanto vocês falam. Ao terminar, clique em <b>Encerrar</b>.</li>
-      <li>Revise, gere o <b>resumo com IA</b> e clique em <b>Salvar no Notion</b>. Avise os alunos de que a aula é gravada/transcrita.</li>
-    </ol>
-    <div class="hr"></div>
-    <label>Transcrição ${REC.recording?"(ao vivo — você pode editar)":"(grave a aula ou cole aqui uma transcrição)"}</label>
-    <textarea id="recTranscript" oninput="recSet('transcript',this.value)" placeholder="A transcrição aparece aqui…">${esc(REC.transcript)}</textarea>
+    <textarea id="recTranscript" rows="9" style="margin-top:6px" oninput="TR.transcript=this.value" onchange="TR.transcript=this.value;renderMeetingNotes()" placeholder="Cole aqui o texto da transcrição do Google Meet (Ex.: “Denise Lima: Hi Gustavo, how was your week?”)">${esc(TR.transcript)}</textarea>
+    ${TR.transcript?`<div class="card" style="margin-top:12px;background:var(--cream)">
+      ${p.labeled?`<b class="small">Quem é quem na transcrição</b><div class="muted small">Confirme a professora e cada aluno. Os números de cada aluno saem das falas dele.</div>
+      <div class="formgrid" style="margin-top:8px">${p.speakers.map(sp=>`<div><label>${esc(sp)} <span class="muted">· ${p.counts[sp]} fala(s)</span></label>${roleSel(sp)}</div>`).join("")}</div>`
+      :`<div class="small">⚠️ Não encontrei nomes de quem fala (formato “Nome: texto”). Vou gerar o relatório para ${members.length>1?"todos da turma":"o aluno"} com os números da aula inteira.</div>`}
+    </div>`:""}
     <div class="formgrid" style="margin-top:12px">
-      <div class="full"><div class="toolbar" style="justify-content:space-between;align-items:center"><label style="margin:0">✨ Resumo da aula</label>
-        <button class="btn small" ${REC.summarizing?"disabled":""} onclick="recSummarize()">${REC.summarizing?"Gerando resumo…":"✨ Gerar resumo com IA"}</button></div>
-        <textarea id="recSummary" style="margin-top:8px" oninput="recSet('summary',this.value)" placeholder="Resumo, vocabulário, erros dos alunos e próximos passos.">${esc(REC.summary)}</textarea></div>
-      <div class="full"><label>📝 Notas da professora (opcional)</label><textarea oninput="recSet('teacher',this.value)" rows="3" placeholder="Participação, dificuldades percebidas, pontos para observar...">${esc(REC.teacher)}</textarea></div>
+      <div class="full"><label>📝 Notas da professora (opcional)</label><textarea oninput="TR.teacher=this.value" rows="2" placeholder="Participação, dificuldades percebidas, pontos para observar...">${esc(TR.teacher)}</textarea></div>
     </div>
+    <div class="toolbar" style="margin-top:12px;gap:8px">
+      <button class="btn primary" ${TR.generating?"disabled":""} onclick="trGenerate()">${TR.generating?"✨ Gerando…":drafts.length?"✨ Gerar feedback de novo":"✨ Gerar feedback dos alunos"}</button>
+      <button class="btn" ${TR.summarizing?"disabled":""} onclick="recSummarize()">${TR.summarizing?"Gerando resumo…":"🧾 Resumo para mim"}</button>
+      <span class="small" style="flex:1;min-width:200px">${esc(TR.status||"")}</span>
+    </div>
+    ${drafts.length?`<div class="stack" style="margin-top:12px">${drafts.map(([n,r])=>`<div class="row" style="align-items:center;gap:10px;flex-wrap:wrap"><div class="main"><b>📊 ${esc(n)}</b> <span class="badge">${r.lang==="en"?"EN":"PT"}</span><div>${reportMini(r)}</div>${r.ai?.headline?`<div class="small" style="margin-top:4px"><i>${esc(r.ai.headline)}</i></div>`:""}</div><div class="toolbar">${reportButtons("draft",n,r)}</div></div>`).join("")}</div>`:""}
+    ${TR.summary?`<div class="full" style="margin-top:12px"><label>🧾 Resumo para você (vai para o Notion)</label><textarea rows="6" oninput="TR.summary=this.value">${esc(TR.summary)}</textarea></div>`:""}
     <div class="toolbar" style="justify-content:flex-end;margin-top:12px">
-      <button class="btn" onclick="recDiscard()">Descartar</button>
-      <button class="btn primary" ${REC.recording?"disabled":""} onclick="recSave()">💾 Salvar no Notion${pend?` (aguardando ${pend})`:""}</button>
+      <button class="btn" onclick="recDiscard()">${TR.editingId?"Cancelar":"Descartar"}</button>
+      <button class="btn primary" onclick="recSave()">💾 Salvar registro${Cloud.enabled()?" (e enviar ao Notion)":""}</button>
     </div>
   </div>
 
-  <div class="card"><div class="toolbar" style="justify-content:space-between"><h2 style="margin:0">Registros salvos</h2><span class="muted small">${notes.length} registro(s)</span></div>
-    ${notes.length?notes.map(n=>`<div class="row note-card" style="align-items:flex-start;margin-top:10px"><div class="main">
-        <b>${esc(n.student||"Meeting geral")}</b> ${n.source==="recorded"?'<span class="badge conv">🎙️ gravada</span>':""}
+  <div class="card"><div class="toolbar" style="justify-content:space-between"><h2 style="margin:0">Registros das aulas</h2><span class="muted small">${notes.length} registro(s)</span></div>
+    ${notes.length?notes.map(n=>{ const reps=Object.entries(n.reports||{}); return `<div class="row note-card" style="align-items:flex-start;margin-top:10px"><div class="main">
+        <b>${esc(n.student||"Meeting geral")}</b>
         <div class="muted small">${n.date?dateBR(n.date):"Semana "+dateBR(n.week)} · ${esc(n.title||"Sem título")}${n.durationMin?` · ${n.durationMin} min`:""}
           · ${n.notionUrl?`<a href="${esc(n.notionUrl)}" target="_blank" rel="noopener">abrir no Notion ↗</a>`:(Cloud.enabled()?"enviando ao Notion…":"só neste navegador")}</div>
-        ${n.summary?`<div style="white-space:pre-wrap;margin-top:8px;font-size:13px">${esc(n.summary)}</div>`:""}
+        ${reps.map(([nm,r])=>`<div class="row" style="margin-top:8px;align-items:center;gap:8px;flex-wrap:wrap;background:var(--cream)"><div class="main"><b class="small">📊 ${esc(nm)}</b> ${r.public?`<span class="chip ok">link publicado</span>`:""} ${r.sentAt?`<span class="chip ok">enviado ${dateBR(r.sentAt).slice(0,5)}</span>`:""}<div>${reportMini(r)}</div></div><div class="toolbar">${reportButtons(n.id,nm,r)}</div></div>`).join("")}
+        ${n.summary?`<details style="margin-top:8px"><summary>Resumo da aula</summary><div style="white-space:pre-wrap;font-size:13px">${esc(n.summary)}</div></details>`:""}
         ${n.teacherNotes?`<div class="meta" style="white-space:pre-wrap;margin-top:6px"><b>Notas da professora:</b> ${esc(n.teacherNotes)}</div>`:""}
         ${n.transcript?`<details><summary>Ver transcrição</summary><div class="transcript">${esc(n.transcript)}</div></details>`:(n.transcriptInNotion?`<div class="meta" style="margin-top:6px">Transcrição completa no Notion.</div>`:"")}
       </div><div class="toolbar" style="flex-direction:column;align-items:stretch">
+        <button class="btn small" onclick="editMeetingNote(${n.id})">✏️ Abrir</button>
         <button class="btn small" onclick="copyMeetingNote(${n.id})">📋 Copiar</button>
         ${Cloud.enabled()&&!n.notionUrl?`<button class="btn small" onclick="resendMeeting(${n.id})">☁️ Reenviar</button>`:""}
-        <button class="btn small danger" onclick="deleteMeetingNote(${n.id})">Excluir</button></div></div>`).join(""):`<div class="muted" style="margin-top:10px">Nenhum registro salvo ainda.</div>`}
+        <button class="btn small danger" onclick="deleteMeetingNote(${n.id})">Excluir</button></div></div>`}).join(""):`<div class="muted" style="margin-top:10px">Nenhum registro salvo ainda.</div>`}
   </div>
   </div>`;
-  recUpdateLive();
 }
+
 function resendMeeting(id){
   const n=(DB.meetingNotes||[]).find(x=>x.id===id); if(!n) return;
   if(!n.transcript && n.transcriptInNotion){ alert("Esta nota já está no Notion."); return; }
@@ -1437,7 +1498,8 @@ function copyMeetingNote(id){
   navigator.clipboard.writeText(text).then(()=>alert("Texto copiado!")).catch(()=>prompt("Copie o texto abaixo:",text));
 }
 function deleteMeetingNote(id){
-  if(!confirm("Excluir este registro? Ele também será arquivado no Notion."))return;
+  if(!confirm("Excluir este registro? Ele também será arquivado no Notion e os links de relatório deixam de funcionar."))return;
+  const gone=(DB.meetingNotes||[]).find(x=>x.id===id); Object.values(gone?.reports||{}).forEach(r=>{ if(r.public?.pageId) Cloud.notion("unpublishReport",{pageId:r.public.pageId}).catch(()=>{}); });
   DB.meetingNotes=(DB.meetingNotes||[]).filter(x=>x.id!==id);save();renderMeetingNotes();
   Cloud.enqueue("deleteMeeting",{id});
 }
@@ -1465,11 +1527,6 @@ var Cloud = {
     return data;
   },
   notion(action,payload={}){ return this.call("notion",{action,...payload}); },
-  async transcribe(blob){
-    const b64 = await new Promise((ok,fail)=>{ const fr=new FileReader(); fr.onload=()=>ok(String(fr.result).split(",")[1]||""); fr.onerror=fail; fr.readAsDataURL(blob); });
-    const r = await this.call("transcribe",{audio:b64,mimeType:blob.type});
-    return r.text||"";
-  },
   setState(state,msg){
     this.state=state; this.msg=msg||"";
     const c=document.getElementById("cloudChip"); if(!c) return;
@@ -1594,7 +1651,7 @@ async function cloudConnect(){
   try{
     const r=await Cloud.notion("ping");
     localStorage.setItem("ewd_cloud_pw",pw);
-    out.innerHTML=`✅ Conectado ao Notion. ${r.transcription?"Transcrição de aulas ativa.":"⚠️ Falta a variável OPENAI_API_KEY na Vercel para transcrever."}`;
+    out.innerHTML=`✅ Conectado ao Notion. ${r.transcription?"IA de feedback ativa.":"⚠️ Falta a variável OPENAI_API_KEY na Vercel para gerar os feedbacks."}`;
     await Cloud.init();
   }catch(e){
     out.innerHTML="❌ "+esc(e.message);
@@ -2633,8 +2690,8 @@ function fichaRelatorios(s){
     <div class="card span6"><h3>📝 Relatório de desempenho</h3><p class="muted small">Gera o documento de notas e avaliação (Word ou impressão) já com o nome e o nível preenchidos.</p>
       ${groupMembers(s).map(n=>`<button class="btn small" style="margin:4px 6px 0 0" onclick='fichaAssessment(${JSON.stringify(n)},${JSON.stringify(s.level)})'>Gerar para ${esc(n)}</button>`).join("")}</div>
     <div class="card span6"><h3>🎁 Wrappeds</h3>${(DB.wrappeds||[]).filter(w=>groupMembers(s).includes(w.name)).map(w=>`<div class="small" style="margin:6px 0"><b>${esc(w.name)}</b> · ${esc(w.period||"")} · <a href="${esc(w.url)}" target="_blank" rel="noopener">abrir ↗</a> ${w.sent?`<span class="chip ok">enviado</span>`:""}</div>`).join("")||`<div class="muted small">Nenhum Wrapped registrado. <a href="#" onclick="go('wrapped');return false">Registrar</a></div>`}</div>
-    <div class="card span6"><h3>🎙️ Resumos das aulas transcritas</h3>
-      ${notes.map(n=>`<div class="tl-item"><div class="tl-date">${dateBR(n.date||n.week).slice(0,5)}</div><div><b class="small">${esc(n.title||"Aula")}</b>${n.notionUrl?` · <a class="small" href="${esc(n.notionUrl)}" target="_blank" rel="noopener">Notion ↗</a>`:""}<div class="small muted" style="white-space:pre-wrap;margin-top:4px">${esc((n.summary||"").slice(0,600))}</div></div></div>`).join("")||`<div class="muted small">Nenhuma aula transcrita ainda. Use 🎙️ Meeting Notes para gravar.</div>`}</div>
+    <div class="card span6"><h3>📊 Aulas & feedbacks</h3>
+      ${notes.map(n=>`<div class="tl-item"><div class="tl-date">${dateBR(n.date||n.week).slice(0,5)}</div><div><b class="small">${esc(n.title||"Aula")}</b>${n.notionUrl?` · <a class="small" href="${esc(n.notionUrl)}" target="_blank" rel="noopener">Notion ↗</a>`:""}${Object.entries(n.reports||{}).filter(([nm])=>groupMembers(s).includes(nm)).map(([nm,r])=>`<div class="small" style="margin-top:4px">📊 <b>${esc(nm)}</b> · ${reportMini(r)} · <a href="#" onclick='viewReport(${n.id},${JSON.stringify(nm)});return false'>ver</a>${r.public?` · <a href="${esc(r.public.url)}" target="_blank" rel="noopener">link ↗</a>`:""}</div>`).join("")}<div class="small muted" style="white-space:pre-wrap;margin-top:4px">${esc((n.summary||"").slice(0,400))}</div></div></div>`).join("")||`<div class="muted small">Nenhuma aula registrada ainda. Use 📄 Aulas & Feedback.</div>`}</div>
   </div>`;
 }
 function fichaAssessment(name,level){ assessmentDraft.student=name; if(["A1","A2","B1","B2","C1","C2"].includes(level)) assessmentDraft.level=level; go("assessment"); }

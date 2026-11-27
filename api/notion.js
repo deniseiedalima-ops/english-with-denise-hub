@@ -126,6 +126,18 @@ async function saveMeeting({ meeting }) {
   const children = [];
   if (m.summary) { children.push(h2("✨ Resumo da aula")); children.push(...L.paragraphs(m.summary)); }
   if (m.teacherNotes) { children.push(h2("📝 Notas da professora")); children.push(...L.paragraphs(m.teacherNotes)); }
+  for (const [name, r] of Object.entries(m.reports || {})) {
+    const a = (r && r.ai) || {}, st = (r && r.stats) || {};
+    children.push(h2(`📊 Feedback — ${name}`));
+    const lines = [
+      a.headline || "",
+      `Fala: ${st.talkShare ?? "—"}% · Inglês: ${100 - (st.ptPct || 0)}% · Palavras em inglês: ${st.enWords ?? "—"}`,
+      a.scores ? "Notas: " + Object.entries(a.scores).map(([k, v]) => `${k} ${v}`).join(" · ") : "",
+      ...(a.errors || []).map((e) => `✗ ${e.said} → ${e.correct}${e.why ? ` (${e.why})` : ""}`),
+      r.public && r.public.url ? `Link do aluno: ${r.public.url}` : "",
+    ].filter(Boolean).join("\n");
+    children.push(...L.paragraphs(lines));
+  }
   children.push(h2("🎙️ Transcrição"));
   children.push(...(m.transcript ? L.paragraphs(m.transcript) : L.paragraphs("(sem transcrição)")));
 
@@ -139,6 +151,25 @@ async function saveMeeting({ meeting }) {
 async function deleteMeeting({ id }) {
   const page = await L.findByText(IDS.meetings, "ID EWD", String(id));
   if (page) await notion(`/pages/${page.id}`, "PATCH", { archived: true });
+  return { ok: true };
+}
+
+// ---------- Relatórios de aula publicados (link para o aluno) ----------
+async function publishReport({ report, pageId }) {
+  if (!report || !report.key) throw new Error("Relatório sem chave.");
+  if (pageId) await notion(`/pages/${pageId}`, "PATCH", { archived: true }).catch(() => {});
+  const json = JSON.stringify(report);
+  const children = [];
+  for (let i = 0; i < json.length; i += 100 * 1990) children.push({ object: "block", type: "code", code: { language: "json", rich_text: L.rt(json.slice(i, i + 100 * 1990), 100) } });
+  const created = await notion("/pages", "POST", {
+    parent: { page_id: IDS.snapshot },
+    properties: { title: L.title(`📊 Relatório · ${report.student || ""} · ${report.date || ""}`) },
+    children: children.slice(0, 90),
+  });
+  return { pageId: created.id };
+}
+async function unpublishReport({ pageId }) {
+  if (pageId) await notion(`/pages/${pageId}`, "PATCH", { archived: true }).catch(() => {});
   return { ok: true };
 }
 
@@ -222,7 +253,7 @@ async function ping() {
   return { ok: true, page: p.url, transcription: !!process.env.OPENAI_API_KEY };
 }
 
-const ACTIONS = { ping, load: loadSnapshot, save: ({ data }) => saveSnapshot(data), upsertStudent, upsertRecord, saveMeeting, deleteMeeting, upsertProject, upsertPost, deleteItem };
+const ACTIONS = { ping, load: loadSnapshot, save: ({ data }) => saveSnapshot(data), upsertStudent, upsertRecord, saveMeeting, deleteMeeting, publishReport, unpublishReport, upsertProject, upsertPost, deleteItem };
 
 module.exports = async (req, res) => {
   if (!L.checkAuth(req, res)) return;
