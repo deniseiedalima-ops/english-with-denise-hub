@@ -2924,12 +2924,28 @@ function delAviso(id){ DB.avisos=DB.avisos.filter(x=>x.id!==id); save(); renderA
 
 /* ---------- Wrappeds ---------- */
 const WRAPPED_BASE="https://2026wrapped-nine.vercel.app/";
-function allMemberNames(){ const out=[]; DB.students.forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:studentKey(s),active:true}))); (DB.inactiveStudents||[]).forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:"",active:false}))); const seen=new Set(); return out.filter(x=>!seen.has(x.n)&&seen.add(x.n)).sort((a,b)=>a.n.localeCompare(b.n)); }
+function allMemberNames(){ const out=[]; DB.students.forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:studentKey(s),active:true}))); (DB.inactiveStudents||[]).forEach(s=>groupMembers(s).forEach(n=>out.push({n,key:"",active:false}))); const seen=new Set(); return out.filter(x=>!/^a adicionar$/i.test(x.n)&&!seen.has(x.n)&&seen.add(x.n)).sort((a,b)=>a.n.localeCompare(b.n)); }
 function memberPhone(name){ for(const s of [...DB.students,...(DB.inactiveStudents||[])]){ const p=(s.memberInfo||{})[name]?.phone; if(p) return p; } return ""; }
+const WRAPPED_SEED_2026=[["Alex Campos","alex-campos-tcdwh13v5wvh"],["Ana Karoline","ana-karoline-f90f3b3v83sh"],["Antonio Kawan Freitas","antonio-kawan-freitas-0qbeebkx2fk7"],["Claudia Abreu","claudia-abreu-26fvu1okdexj"],["Emilly Fonseca","emilly-fonseca-c0trwmla0b73"],["Fernanda de Sousa","fernanda-de-sousa-89s3929pp6uz"],["Geovanna Inácio Araújo","geovanna-inacio-araujo-ctazrb1go2an"],["Gustavo Mailho Machado","gustavo-mailho-machado-8g4c5alqfiat"],["Isadora Lacerda Cunha","isadora-lacerda-cunha-84c8iyj9zjtd"],["Lorenna Benício","lorenna-benicio-0d6vi31as81r"],["Maria Isabella Costa Silva","maria-isabella-costa-silva-ua3ivccbc18r"],["Milena Inácio da Rosa","milena-inacio-da-rosa-9bp9uz55ilar"],["Naize Santos Alves","naize-santos-alves-hvmluklutvnk"],["Rafael Feitosa","rafael-feitosa-n0vok79wunqe"],["Raphaella Fonseca","raphaella-fonseca-7q2pbwd1yiq8"],["Virginia Guerra Magre","virginia-guerra-magre-v1h2nwpa6hzs"]];
+const normName=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+function matchMember(full){
+  const tok=normName(full).split(/\s+/), names=allMemberNames().map(x=>x.n);
+  const exact=names.find(n=>normName(n)===normName(full)); if(exact) return exact;
+  const score=n=>{ const nt=normName(n).split(/\s+/); return nt.filter(t=>tok.includes(t)).length*2+(nt[0]===tok[0]?1:0)+(nt[0].slice(0,4)===tok[0].slice(0,4)?1:0); };
+  let best=null,bs=1; names.forEach(n=>{ const sc=score(n); if(sc>bs){bs=sc;best=n;} });
+  return best||full;
+}
+function seedWrappeds(){
+  if(DB.wrappedSeed2026) return;
+  DB.wrappeds=DB.wrappeds||[];
+  WRAPPED_SEED_2026.forEach(([full,slug],i)=>{ const url=WRAPPED_BASE+"w/"+slug; if(DB.wrappeds.some(w=>w.url===url)) return;
+    DB.wrappeds.push({id:Date.now()+i,name:matchMember(full),fullName:full,period:"2026",url,note:"",sent:""}); });
+  DB.wrappedSeed2026=true; save();
+}
 function renderWrapped(){
   const box=document.getElementById("wrapped"); if(!box||!box.classList.contains("active")) return;
-  DB.wrappeds=DB.wrappeds||[];
-  const W=[...DB.wrappeds].sort((a,b)=>(b.period||"").localeCompare(a.period||"")||a.name.localeCompare(b.name));
+  DB.wrappeds=DB.wrappeds||[]; seedWrappeds();
+  const W=[...DB.wrappeds].sort((a,b)=>(b.period||"").localeCompare(a.period||"")||(!!a.sent-!!b.sent)||a.name.localeCompare(b.name));
   const names=allMemberNames(), withW=new Set(W.map(w=>w.name));
   const missing=names.filter(x=>x.active&&!withW.has(x.n));
   box.innerHTML=`
@@ -2949,10 +2965,10 @@ function renderWrapped(){
       <button class="btn primary" style="margin-top:12px;width:100%" onclick="addWrapped()">Salvar</button>
       ${missing.length?`<div class="small muted" style="margin-top:12px"><b>Sem Wrapped ainda:</b> ${missing.map(x=>esc(x.n)).join(", ")}</div>`:""}
     </div>
-    <div class="card span8 tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Período</th><th>Link</th><th>Status</th><th></th></tr></thead><tbody>
-      ${W.map(w=>{const ph=memberPhone(w.name);return `<tr><td><b>${esc(w.name)}</b>${w.note?`<div class="muted small">${esc(w.note)}</div>`:""}</td><td>${esc(w.period||"")}</td><td><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(String(w.url).replace(/^https?:\/\//,"").slice(0,42))}</a></td>
-        <td>${w.sent?`<span class="chip ok">✓ Enviado ${dateBR(w.sent).slice(0,5)}</span>`:`<span class="chip warn">Não enviado</span>`}</td>
-        <td style="white-space:nowrap"><button class="btn small" onclick="copyWrapped(${w.id})">📋</button> ${ph?`<button class="btn small primary" onclick="sendWrapped(${w.id})">💬 Enviar</button>`:""} <button class="btn small" onclick="toggleWrappedSent(${w.id})">${w.sent?"Desmarcar":"Marcar enviado"}</button> <button class="btn small danger" onclick="delWrapped(${w.id})">✕</button></td></tr>`}).join("")||`<tr><td colspan="5" class="muted">Nenhum Wrapped registrado ainda.</td></tr>`}
+    <div class="card span8 tablewrap"><table class="table"><thead><tr><th style="width:70px">Enviado</th><th>Aluno</th><th>Período</th><th>Link</th><th></th></tr></thead><tbody>
+      ${W.map(w=>{const ph=memberPhone(w.name);return `<tr style="${w.sent?"opacity:.75":""}"><td style="text-align:center"><input type="checkbox" style="width:20px;height:20px;accent-color:var(--or)" ${w.sent?"checked":""} onchange="toggleWrappedSent(${w.id})" title="Marcar como enviado">${w.sent?`<div class="muted small">${dateBR(w.sent).slice(0,5)}</div>`:""}</td><td><b>${esc(w.name)}</b>${w.fullName&&w.fullName!==w.name?`<div class="muted small">${esc(w.fullName)}</div>`:""}${w.note?`<div class="muted small">${esc(w.note)}</div>`:""}</td><td>${esc(w.period||"")}</td><td><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(String(w.url).replace(/^https?:\/\//,"").slice(0,42))}</a></td>
+
+        <td style="white-space:nowrap"><button class="btn small" onclick="copyWrapped(${w.id})">📋</button> ${ph?`<button class="btn small primary" onclick="sendWrapped(${w.id})">💬 Enviar</button>`:""} <button class="btn small danger" onclick="delWrapped(${w.id})">✕</button></td></tr>`}).join("")||`<tr><td colspan="5" class="muted">Nenhum Wrapped registrado ainda.</td></tr>`}
     </tbody></table></div>
   </div>`;
 }
