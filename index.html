@@ -849,7 +849,7 @@ function renderToday(){
         <div class="quick-add"><input id="dPdQuick" placeholder="+ Adicionar pendência… (Enter)" onkeydown="if(event.key==='Enter')quickPend('dPdQuick','')"></div>
         ${pend.slice(0,6).map(p=>pendRow(p,true)).join("")}
         ${pend.length>6?`<div class="muted small" style="margin-top:6px">+ ${pend.length-6} pendência(s)</div>`:""}
-        ${auto.length?`<div class="dash-sub">⚡ Encontradas pelo Studio</div>${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="go('${x.go}')"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")}`:""}
+        ${auto.length?`<div class="dash-sub">⚡ Encontradas pelo Studio</div>${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="${x.go==='__incomplete'?'openIncomplete()':`go('${x.go}')`}"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")}`:""}
         ${!pend.length&&!auto.length?`<div class="empty-state small">${STAR_SVG}<div>Tudo em dia ✨</div></div>`:""}
       </div>
       <div class="card dash-av">
@@ -3218,6 +3218,24 @@ function addAviso(){ openAviso(); }
 function toggleAviso(id){ const a=DB.avisos.find(x=>x.id===id); if(a){a.done=!a.done; save(); renderAvisos(); renderToday();} }
 function delAviso(id){ if(!confirm("Excluir este aviso?")) return; DB.avisos=DB.avisos.filter(x=>x.id!==id); save(); renderAvisos(); renderToday(); }
 
+
+/* ---------- Cadastros incompletos (sem mensalidade / sem aniversário) ---------- */
+function incompleteRegs(){
+  const out=[];
+  DB.students.forEach(st=>groupMembers(st).filter(n=>!/^a adicionar$/i.test(n)).forEach(n=>{
+    const noFee=memberFee(st,n)===null, noBday=!memberField(st,n,"birthday","");
+    if(noFee||noBday) out.push({name:n,turma:st.name,key:studentKey(st),noFee,noBday});
+  }));
+  const seen=new Set(); return out.filter(x=>{ const k=x.name+"|"+x.noFee+x.noBday; if(seen.has(x.name)) return false; seen.add(x.name); return true; }).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function openIncomplete(){
+  const L=incompleteRegs(), f=L.filter(x=>x.noFee).length, b=L.filter(x=>x.noBday).length;
+  showModal(`<div class="modalhead"><div><h2>🧾 Cadastros incompletos</h2><div class="muted small">${f} sem valor de mensalidade · ${b} sem data de aniversário</div></div><button class="btn" onclick="closeModal()">Fechar</button></div>
+  ${L.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Turma</th><th>Mensalidade</th><th>Aniversário</th><th></th></tr></thead><tbody>
+  ${L.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td class="muted small">${esc(x.turma)}</td><td>${x.noFee?'<span class="chip warn">falta</span>':'<span class="chip ok">ok</span>'}</td><td>${x.noBday?'<span class="chip warn">falta</span>':'<span class="chip ok">ok</span>'}</td><td><button class="btn small primary" onclick='closeModal();openFicha(${JSON.stringify(x.key)},"cadastro")'>Preencher</button></td></tr>`).join("")}
+  </tbody></table></div>`:`<div class="empty-state">${STAR_SVG}<div>Todos os alunos ativos têm mensalidade e aniversário cadastrados ✨</div></div>`}`);
+}
+
 /* ---------- Pendências ---------- */
 const PEND_PRI=["🔴 Alta","🟠 Média","⚪ Baixa"];
 var PEND_UI={view:"abertas"};
@@ -3232,6 +3250,7 @@ function autoPendencias(){
   else if(started&&st.pend) out.push({ic:"📑",t:`${st.pend} contrato(s) ${y} a renovar`,go:"contratos"});
   const wr=(DB.wrappeds||[]).filter(w=>!w.sent).length; if(wr) out.push({ic:"🎁",t:`${wr} Wrapped(s) ainda não enviado(s)`,go:"wrapped"});
   let rp=0; (DB.meetingNotes||[]).forEach(n=>Object.values(n.reports||{}).forEach(r=>{ if(!r.sentAt) rp++; })); if(rp) out.push({ic:"📊",t:`${rp} relatório(s) de aula não enviado(s)`,go:"meeting"});
+  const inc=incompleteRegs(); if(inc.length){ const f=inc.filter(x=>x.noFee).length, b=inc.filter(x=>x.noBday).length; out.push({ic:"🧾",t:`Cadastros incompletos: ${f} sem mensalidade · ${b} sem aniversário`,go:"__incomplete"}); }
   const posts=(DB.ideas||[]).filter(i=>i.date===todayISO()&&i.stage!=="Postado").length; if(posts) out.push({ic:"📱",t:`${posts} post(s) agendado(s) para hoje`,go:"ideas"});
   return out;
 }
@@ -3266,7 +3285,7 @@ function renderPendencias(){
       ${list.map(p=>pendRow(p)).join("")||`<div class="empty-state">${STAR_SVG}<div>${PEND_UI.view==="feitas"?"Nada concluído ainda.":"Nenhuma pendência aberta. ✨"}</div></div>`}
     </div>
     <div class="card span4"><h3>⚡ Pendências automáticas</h3><div class="muted small" style="margin:-4px 0 10px">O Studio encontra sozinho o que está faltando.</div>
-      ${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="go('${x.go}')"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")||`<div class="muted small">Tudo em dia ✨</div>`}
+      ${auto.map(x=>`<div class="auto-item ${x.hot?"hot":""}" onclick="${x.go==='__incomplete'?'openIncomplete()':`go('${x.go}')`}"><span>${x.ic}</span><b>${esc(x.t)}</b><span class="go">→</span></div>`).join("")||`<div class="muted small">Tudo em dia ✨</div>`}
     </div>
   </div>`;
 }
