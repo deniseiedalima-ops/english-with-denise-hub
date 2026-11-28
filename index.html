@@ -532,7 +532,7 @@ body.nav-collapsed .nav-toggle span:nth-child(1){width:12px}
 body.nav-collapsed .nav-toggle span:nth-child(3){width:14px}
 @media(max-width:900px){body.nav-collapsed aside{display:none}body.nav-collapsed .app{grid-template-columns:1fr}}
 </style>
-<style id="ewd-bdaydisc">.bday-disc .bd-first td{border-top:2px solid var(--or-l)}.switch-lbl{display:flex;gap:6px;align-items:center;background:var(--or-ll);border:1px solid var(--or-l);border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}.switch-lbl input{accent-color:var(--or);width:16px;height:16px}</style>
+<style id="ewd-bdaydisc">.bday-disc tr.bd-done td{background:#F6FBF7}.switch-lbl{display:flex;gap:6px;align-items:center;background:var(--or-ll);border:1px solid var(--or-l);border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}.switch-lbl input{accent-color:var(--or);width:16px;height:16px}</style>
 </head>
 <body>
 <div class="app">
@@ -2901,7 +2901,10 @@ function togglePaid(m,name,key){
   save(); renderFinance(); renderFicha(); renderToday();
 }
 /* ---------- Desconto de aniversário (presente) ---------- */
-function bdayCfg(){ DB.bdayDiscount=DB.bdayDiscount||{on:false,pct:10}; return DB.bdayDiscount; }
+function bdayCfg(){ const c=DB.bdayDiscount=DB.bdayDiscount||{on:false,pct:10}; if(!c.mode){ c.mode="fixed"; c.amount=25; } c.given=c.given||{}; return c; }
+function bdayDiscValue(gross){ const c=bdayCfg(); if(gross===null||gross===undefined) return 0; return c.mode==="fixed"?Math.min(Number(c.amount)||0,gross):Math.round(gross*c.pct)/100; }
+function bdayLabel(){ const c=bdayCfg(); return c.mode==="fixed"?fmtBRL(c.amount):`${c.pct}%`; }
+var BDAY_UI={year:new Date().getFullYear()};
 // Regra: aniversário até o dia do vencimento → desconto na mensalidade daquele mês; depois do vencimento → no mês seguinte.
 function bdayDiscMonth(s,n,year){
   const b=String(memberField(s,n,"birthday","")||""); const mm=+b.slice(5,7), dd=+b.slice(8,10); if(!mm||!dd) return "";
@@ -2914,46 +2917,55 @@ function bdayDiscFor(s,n,month){
 function finRows(m){
   const rows=[], cfg=bdayCfg();
   DB.students.forEach(s=>groupMembers(s).forEach(n=>{ const gross=memberFee(s,n); let st=payStatus(s,n,m); if(gross===null&&!st.paid) st={cls:"",label:"Sem valor",paid:false,nofee:true};
-    let fee=gross, disc=0; if(cfg.on&&gross!==null&&bdayDiscFor(s,n,m)){ disc=Math.round(gross*cfg.pct)/100; fee=+(gross-disc).toFixed(2); }
+    let fee=gross, disc=0; if(cfg.on&&gross!==null&&bdayDiscFor(s,n,m)){ disc=bdayDiscValue(gross); fee=+(gross-disc).toFixed(2); }
     rows.push({s,n,fee,gross,disc,st}); }));
   return rows;
 }
-function bdayForecast(fromMonth,months=12){
-  const cfg=bdayCfg(), list=[], seen=new Set(), missing=[];
-  DB.students.forEach(s=>groupMembers(s).filter(n=>!/^a adicionar$/i.test(n)).forEach(n=>{
+function bdayYearRows(y){
+  const out=[], seen=new Set();
+  [...DB.students.map(s=>[s,true]),...(DB.inactiveStudents||[]).map(s=>[s,false])].forEach(([s,act])=>groupMembers(s).filter(n=>!/^a adicionar$/i.test(n)).forEach(n=>{
     if(seen.has(n)) return; seen.add(n);
-    const fee=memberFee(s,n), b=memberField(s,n,"birthday","");
-    if(fee===null||!b){ missing.push(n); return; }
-    for(let k=0;k<months;k++){ const m=addMonths(fromMonth,k); if(bdayDiscFor(s,n,m)){ const d=Math.round(fee*cfg.pct)/100; list.push({m,n,s,fee,disc:d,net:+(fee-d).toFixed(2),bday:b,due:memberDue(s,n)}); } }
+    const gross=memberFee(s,n), b=memberField(s,n,"birthday",""), key=`${y}|${n}`, g=bdayCfg().given[key];
+    if(!act&&!g) return;
+    const m=b?bdayDiscMonth(s,n,y):"";
+    let auto=false; if(!g&&bdayCfg().on&&m&&act){ const r=finRows(m).find(x=>x.n===n&&x.s===s); auto=!!(r&&r.disc&&r.st.paid); }
+    out.push({n,s,act,b,m,gross,value:g?Number(g.amount):bdayDiscValue(gross),given:g||null,auto,key});
   }));
-  return {list:list.sort((a,b)=>a.m.localeCompare(b.m)||a.n.localeCompare(b.n)),missing};
+  return out.sort((a,b)=>(a.m||"9999").localeCompare(b.m||"9999")||a.n.localeCompare(b.n));
+}
+function toggleBdayGiven(key,amount,month){
+  const c=bdayCfg(); if(c.given[key]) delete c.given[key]; else c.given[key]={date:todayISO(),amount:Number(amount)||0,month};
+  save(); renderFinance();
 }
 function bdayForecastHTML(){
-  const cfg=bdayCfg(), from=monthISO(), {list,missing}=bdayForecast(from,12);
-  const tot=list.reduce((a,x)=>a+x.disc,0), months=[...new Set(list.map(x=>x.m))];
-  const peak=months.map(m=>({m,v:list.filter(x=>x.m===m).reduce((a,x)=>a+x.disc,0)})).sort((a,b)=>b.v-a.v)[0];
-  const avgRev=finRows(from).reduce((a,r)=>a+(r.gross||0),0);
+  const cfg=bdayCfg(), y=BDAY_UI.year, rows=bdayYearRows(y), cur=monthISO();
+  const done=rows.filter(r=>r.given||r.auto), todo=rows.filter(r=>!r.given&&!r.auto&&r.m), missing=rows.filter(r=>!r.m||r.gross===null);
+  const sum=a=>a.reduce((t,r)=>t+(r.value||0),0);
+  const status=r=>r.given?`<span class="chip ok">✓ Recebeu ${r.given.month?esc(monthLabel(r.given.month).split(" de ")[0].toLowerCase()):""}</span>`:r.auto?`<span class="chip ok">✓ Descontado (pago)</span>`:!r.m?`<span class="chip">sem aniversário</span>`:r.m<cur?`<span class="chip warn">não registrado</span>`:r.m===cur?`<span class="chip or">este mês</span>`:`<span class="chip">previsto</span>`;
   return `<div class="card span12 bday-disc">
     <div class="toolbar" style="justify-content:space-between;align-items:flex-start">
-      <div><h3 style="margin:0">🎂 Presente de aniversário: ${cfg.pct}% de desconto na mensalidade</h3>
-        <div class="muted small" style="margin-top:4px">Aniversário <b>até o dia do vencimento</b> → desconto na mensalidade daquele mês · aniversário <b>depois do vencimento</b> → desconto no mês seguinte.</div></div>
+      <div><h3 style="margin:0">🎂 Presente de aniversário · desconto de ${bdayLabel()}</h3>
+        <div class="muted small" style="margin-top:4px">Aniversário <b>até o dia do vencimento</b> → desconto na mensalidade daquele mês · <b>depois do vencimento</b> → no mês seguinte. Marque ✓ quem já recebeu o presente.</div></div>
       <div class="toolbar" style="align-items:center">
-        <label class="small" style="margin:0">Desconto</label><input type="number" min="1" max="100" value="${cfg.pct}" style="width:70px;padding:6px 8px" onchange="bdayCfg().pct=Math.max(1,Math.min(100,+this.value||10));save();renderFinance()"><span class="small">%</span>
-        <label class="switch-lbl small"><input type="checkbox" ${cfg.on?"checked":""} onchange="bdayCfg().on=this.checked;save();renderFinance();renderToday()"> Aplicar nas mensalidades</label>
+        <select style="width:auto;padding:6px 8px" onchange="bdayCfg().mode=this.value;save();renderFinance()"><option value="fixed" ${cfg.mode==="fixed"?"selected":""}>Valor fixo</option><option value="pct" ${cfg.mode==="pct"?"selected":""}>Porcentagem</option></select>
+        ${cfg.mode==="fixed"?`<span class="small">R$</span><input type="number" min="1" step="1" value="${cfg.amount}" style="width:80px;padding:6px 8px" onchange="bdayCfg().amount=Math.max(0,+this.value||0);save();renderFinance()">`:`<input type="number" min="1" max="100" value="${cfg.pct}" style="width:70px;padding:6px 8px" onchange="bdayCfg().pct=Math.max(1,Math.min(100,+this.value||10));save();renderFinance()"><span class="small">%</span>`}
+        <label class="switch-lbl small"><input type="checkbox" ${cfg.on?"checked":""} onchange="bdayCfg().on=this.checked;save();renderFinance();renderToday()"> Descontar nas mensalidades</label>
       </div>
     </div>
-    <div class="kpis" style="margin-top:12px">
-      <div class="kpic hl"><div class="k">Total em descontos (12 meses)</div><div class="v money" style="font-size:24px">${fmtBRL(tot)}</div><div class="d">${list.length} aluno(s) presenteado(s)</div></div>
-      <div class="kpic"><div class="k">Média por mês</div><div class="v money" style="font-size:24px">${fmtBRL(tot/12)}</div><div class="d">${avgRev?`≈ ${(tot/12/avgRev*100).toFixed(1)}% da receita mensal`:""}</div></div>
-      <div class="kpic"><div class="k">Mês com mais desconto</div><div class="v" style="font-size:22px">${peak?esc(monthLabel(peak.m).split(" de ")[0]):"—"}</div><div class="d">${peak?fmtBRL(peak.v):""}</div></div>
-      <div class="kpic"><div class="k">Status</div><div class="v" style="font-size:20px">${cfg.on?"✅ Ativo":"⏸️ Só previsão"}</div><div class="d">${cfg.on?"já descontado no Financeiro":"marque “Aplicar” para descontar"}</div></div>
+    <div class="toolbar" style="align-items:center;margin-top:10px"><button class="btn small" onclick="BDAY_UI.year--;renderFinance()">‹</button><b>Aniversários de ${y}</b><button class="btn small" onclick="BDAY_UI.year++;renderFinance()">›</button></div>
+    <div class="kpis" style="margin-top:10px">
+      <div class="kpic hl"><div class="k">Total do ano</div><div class="v money" style="font-size:24px">${fmtBRL(sum(rows.filter(r=>r.m)))}</div><div class="d">${rows.filter(r=>r.m).length} aluno(s)</div></div>
+      <div class="kpic"><div class="k">Já receberam</div><div class="v money" style="font-size:24px">${fmtBRL(sum(done))}</div><div class="d">${done.length} aluno(s)</div></div>
+      <div class="kpic"><div class="k">Ainda vão receber</div><div class="v money" style="font-size:24px">${fmtBRL(sum(todo.filter(r=>r.m>=cur)))}</div><div class="d">${todo.filter(r=>r.m>=cur).length} aluno(s)</div></div>
+      <div class="kpic"><div class="k">Passou sem registro</div><div class="v" style="font-size:24px;color:${todo.filter(r=>r.m<cur).length?"#B4472F":"inherit"}">${todo.filter(r=>r.m<cur).length}</div><div class="d">aniversários antes de ${esc(monthLabel(cur).split(" de ")[0].toLowerCase())}</div></div>
     </div>
-    <div class="tablewrap"><table class="table"><thead><tr><th>Mês do desconto</th><th>Aluno</th><th>Aniversário</th><th>Vence</th><th>Mensalidade</th><th>Desconto</th><th>Fica</th></tr></thead><tbody>
-    ${months.map(m=>{ const L=list.filter(x=>x.m===m); return L.map((x,i)=>`<tr ${i===0?'class="bd-first"':""}>
-      <td>${i===0?`<b>${esc(monthLabel(m))}</b><div class="muted small">${fmtBRL(L.reduce((a,y)=>a+y.disc,0))} no mês</div>`:""}</td>
-      <td><b>${esc(x.n)}</b></td><td>${esc(dateBR(x.bday).slice(0,5))}</td><td>dia ${x.due}</td><td class="money">${fmtBRL(x.fee)}</td><td class="money" style="color:#2F7A4F">− ${fmtBRL(x.disc)}</td><td class="money"><b>${fmtBRL(x.net)}</b></td></tr>`).join(""); }).join("")||`<tr><td colspan="7" class="muted">Sem aniversários cadastrados.</td></tr>`}
+    <div class="tablewrap"><table class="table"><thead><tr><th style="width:70px">Recebeu</th><th>Aluno</th><th>Aniversário</th><th>Vence</th><th>Mês do desconto</th><th>Presente</th><th>Status</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr class="${r.given||r.auto?"bd-done":""}">
+      <td style="text-align:center">${r.m?`<input type="checkbox" class="bigcheck" ${r.given||r.auto?"checked":""} ${r.auto?"disabled title='Já descontado numa mensalidade paga'":""} onchange='toggleBdayGiven(${JSON.stringify(r.key)},${r.value||0},${JSON.stringify(r.m)})'>`:""}</td>
+      <td><b>${esc(r.n)}</b>${r.act?"":` <span class="chip">inativo</span>`}</td><td>${r.b?esc(dateBR(r.b).slice(0,5)):"—"}</td><td>dia ${memberDue(r.s,r.n)}</td>
+      <td>${r.m?esc(monthLabel(r.m)):"—"}</td><td class="money" style="color:#2F7A4F">${r.value?fmtBRL(r.value):"—"}</td><td>${status(r)}${r.given?`<div class="muted small">registrado ${dateBR(r.given.date)}</div>`:""}</td></tr>`).join("")||`<tr><td colspan="7" class="muted">Nenhum aluno com aniversário cadastrado.</td></tr>`}
     </tbody></table></div>
-    ${missing.length?`<div class="notice small" style="margin-top:10px">Fora da previsão (sem mensalidade ou aniversário): ${missing.map(esc).join(", ")}</div>`:""}
+    ${missing.length?`<div class="notice small" style="margin-top:10px">Sem aniversário ou sem mensalidade: ${missing.map(r=>esc(r.n)).join(", ")}</div>`:""}
   </div>`;
 }
 function lateCount(){ let c=0; const cur=monthISO(); [-2,-1,0].forEach(k=>{ finRows(addMonths(cur,k)).forEach(r=>{ if(r.st.late&&r.fee) c++; }); }); return c; }
@@ -2979,7 +2991,7 @@ function renderFinance(){
   <div class="grid">
     <div class="card span8"><h3>Mensalidades de ${monthLabel(m).split(" de ")[0].toLowerCase()}</h3>
       <div class="tablewrap"><table class="table"><thead><tr><th>Aluno</th><th>Turma</th><th>Vence</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody>
-      ${rows.sort((a,b)=>(a.st.paid-b.st.paid)||a.n.localeCompare(b.n)).map(r=>`<tr><td><b>${esc(r.n)}</b></td><td><a href="#" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"financeiro");return false'>${esc(r.s.name===r.n?"Individual":r.s.name)}</a></td><td>dia ${memberDue(r.s,r.n)}</td><td class="money">${r.fee===null?"—":r.disc?`<s class="muted small">${fmtBRL(r.gross)}</s> ${fmtBRL(r.fee)}<div class="small" style="color:#2F7A4F">🎂 −${bdayCfg().pct}% aniversário</div>`:fmtBRL(r.fee)}</td><td><span class="chip ${r.st.cls}">${r.st.label}</span></td>
+      ${rows.sort((a,b)=>(a.st.paid-b.st.paid)||a.n.localeCompare(b.n)).map(r=>`<tr><td><b>${esc(r.n)}</b></td><td><a href="#" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"financeiro");return false'>${esc(r.s.name===r.n?"Individual":r.s.name)}</a></td><td>dia ${memberDue(r.s,r.n)}</td><td class="money">${r.fee===null?"—":r.disc?`<s class="muted small">${fmtBRL(r.gross)}</s> ${fmtBRL(r.fee)}<div class="small" style="color:#2F7A4F">🎂 −${fmtBRL(r.disc)} aniversário</div>`:fmtBRL(r.fee)}</td><td><span class="chip ${r.st.cls}">${r.st.label}</span></td>
         <td>${r.st.na?"":r.st.nofee?`<button class="btn small" onclick='openFicha(${JSON.stringify(studentKey(r.s))},"cadastro")'>Definir valor</button>`:`<button class="btn small ${r.st.paid?"":"primary"}" onclick='togglePaid(${JSON.stringify(m)},${JSON.stringify(r.n)},${JSON.stringify(studentKey(r.s))})'>${r.st.paid?"Desfazer":"Marcar pago"}</button>`}${r.s.memberInfo?.[r.n]?.phone&&!r.st.paid?` <a class="btn small" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/55${String(r.s.memberInfo[r.n].phone).replace(/\D/g,"").replace(/^55/,"")}?text=${encodeURIComponent(`Oi ${r.n.split(" ")[0]}! Passando para lembrar da mensalidade de ${monthLabel(m)} 💛`)}">💬</a>`:""}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">Nenhum aluno ativo.</td></tr>`}
       </tbody></table></div></div>
     <div class="card span4"><h3>Outras entradas e saídas</h3>
