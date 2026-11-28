@@ -731,7 +731,8 @@ function memberStatus(record,name){
 function warmHistory(name){return (DB.warmupUsage||[]).filter(r=>r.student===name).sort((a,b)=>b.date.localeCompare(a.date))}
 function currentDay(){return DAYMAP[new Date().getDay()]}
 function dateBR(iso){if(!iso)return""; const [y,m,d]=iso.slice(0,10).split("-"); return `${d}/${m}/${y}`}
-function todayISO(){return new Date().toISOString().slice(0,10)}
+function localISO(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function todayISO(){return localISO()}
 
 function go(view){
   document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
@@ -892,7 +893,7 @@ function renderStudents(){
   const inact=DB.inactiveStudents||[];
   const isAct=STUDENTS_UI.view!=="inativos";
   students.innerHTML=`
-    <div class="searchbar"><input id="studentSearch" placeholder="Buscar aluno..." oninput="filterStudents()"><button class="btn primary" onclick="openAddStudent()">+ Novo aluno</button></div>
+    <div class="searchbar"><input id="studentSearch" placeholder="Buscar aluno..." oninput="filterStudents()"><button class="btn" onclick="exportStudentsCSV()" title="Baixar todos os alunos e turmas em CSV (abre no Excel/Google Sheets)">⬇️ CSV</button><button class="btn primary" onclick="openAddStudent()">+ Novo aluno</button></div>
     <div class="pills" style="margin:4px 0 14px">
       <button class="pill ${isAct?"on":""}" onclick="STUDENTS_UI.view='ativos';renderStudents()">🟢 Ativos (${DB.students.length})</button>
       <button class="pill ${!isAct?"on":""}" onclick="STUDENTS_UI.view='inativos';renderStudents()">⏸️ Inativos (${inact.length})</button>
@@ -988,12 +989,12 @@ function getMondayISO(d=new Date()){
   const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   const day=x.getDay();
   x.setDate(x.getDate()+(day===0?-6:1-day));
-  return x.toISOString().slice(0,10);
+  return localISO(x);
 }
 function addDaysISO(iso,days){
   const d=new Date(iso+"T12:00:00");
   d.setDate(d.getDate()+days);
-  return d.toISOString().slice(0,10);
+  return localISO(d);
 }
 function planningKey(week,s){
   return `${week}|${s.name}|${s.day}|${s.time}`;
@@ -1093,12 +1094,12 @@ function renderPlanning(){
 }
 
 
-let assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:new Date().toISOString().slice(0,10),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};
+let assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:localISO(),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};
 
 function assessmentDateBR(v){if(!v)return"";return new Date(v+"T12:00:00").toLocaleDateString("pt-BR")}
 function calcAssessmentTotal(){let x=[["aScore","aMax"],["bScore","bMax"],["cScore","cMax"]].map(([s,m])=>({s:parseFloat(assessmentDraft[s]),m:parseFloat(assessmentDraft[m])})).filter(x=>!isNaN(x.s)&&!isNaN(x.m)&&x.m>0);return{x:x,total:x.reduce((a,y)=>a+y.s,0),max:x.reduce((a,y)=>a+y.m,0)}}
 function setAssessmentField(f,v){assessmentDraft[f]=v;let t=calcAssessmentTotal(),e=document.getElementById("assessmentTotalPreview");if(e)e.textContent=t.max?`${t.total}/${t.max} pontos`:""}
-function clearAssessment(){if(!confirm("Limpar todos os campos desta avaliação?"))return;assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:new Date().toISOString().slice(0,10),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};renderAssessment()}
+function clearAssessment(){if(!confirm("Limpar todos os campos desta avaliação?"))return;assessmentDraft={student:"",level:"A1",assessmentTitle:"Avaliação de Nível",date:localISO(),aScore:"",aMax:"50",aFeedback:"",bScore:"",bMax:"20",bFeedback:"",cScore:"",cMax:"20",cFeedback:"",attention:"",direction:"",general:"",practiceTitle:"",practiceBefore:"",practiceQuestions:"",homeworkAttention:"",homeworkInstructions:""};renderAssessment()}
 function assessmentSection(title,s,max,fb){return`<h2>${title}</h2>${s!==""?`<p><b>● Pontuação:</b> ${esc(s)}/${esc(max)} pts</p>`:""}${fb?`<p>${esc(fb).replace(/\n/g,"<br>")}</p>`:""}`}
 function generateAssessmentHTML(){
  const d=assessmentDraft,t=calcAssessmentTotal(),attention=d.attention?d.attention.split("\n").filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join(""):"",questions=d.practiceQuestions?d.practiceQuestions.split("\n").filter(Boolean).map((x,i)=>`<p><b>${i+1}</b> ${esc(x)}</p>`).join(""):"";
@@ -2967,7 +2968,7 @@ function renderFinance(){
   const noFee=rows.filter(r=>r.fee===null).length;
   box.innerHTML=`
   <div class="page-head"><div class="muted small">Mensalidades dos alunos e outras entradas e saídas do mês.</div>
-    <div class="toolbar" style="align-items:center"><button class="btn small" onclick="FIN_UI.month=addMonths(FIN_UI.month,-1);renderFinance()">‹</button><b style="min-width:150px;text-align:center">${monthLabel(m)}</b><button class="btn small" onclick="FIN_UI.month=addMonths(FIN_UI.month,1);renderFinance()">›</button></div></div>
+    <div class="toolbar" style="align-items:center"><button class="btn small" onclick="FIN_UI.month=addMonths(FIN_UI.month,-1);renderFinance()">‹</button><b style="min-width:150px;text-align:center">${monthLabel(m)}</b><button class="btn small" onclick="FIN_UI.month=addMonths(FIN_UI.month,1);renderFinance()">›</button><button class="btn small" onclick="exportFinanceCSV()" title="Baixar as mensalidades e lançamentos deste mês em CSV">⬇️ CSV do mês</button><button class="btn small" onclick="exportFinanceYearCSV()" title="Baixar o ano inteiro em CSV">⬇️ CSV do ano</button></div></div>
   <div class="kpis">
     <div class="kpic hl"><div class="k">Recebido</div><div class="v money" style="font-size:26px">${fmtBRL(rec+rcv)}</div><div class="d">mensalidades + outras receitas</div></div>
     <div class="kpic"><div class="k">Previsto (mensalidades)</div><div class="v money" style="font-size:26px">${fmtBRL(prev)}</div><div class="d">${rows.length} aluno(s) ativo(s)</div></div>
@@ -3648,6 +3649,38 @@ function toggleSidebar(force){
 }
 try{ if(localStorage.getItem("ewd_nav_collapsed")==="1") document.body.classList.add("nav-collapsed"); }catch(e){}
 document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key==="\\"){ e.preventDefault(); toggleSidebar(); } });
+
+
+/* ---------- Exportar CSV (abre no Excel / Google Sheets) ---------- */
+function downloadCSV(name,header,rows){
+  const cell=v=>{ v=v===null||v===undefined?"":String(v); return /[";\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; };
+  const num=v=>v===null||v===undefined||v===""?"":String(v).replace(".",",");
+  const csv="\ufeff"+[header,...rows.map(r=>r.map((v,i)=>typeof v==="number"?num(v):v))].map(r=>r.map(cell).join(";")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportStudentsCSV(){
+  const rows=[];
+  const add=(s,active)=>groupMembers(s).filter(n=>!/^a adicionar$/i.test(n)).forEach(n=>{
+    const mi=(s.memberInfo||{})[n]||{}, fee=memberFee(s,n);
+    rows.push([n,s.name,active?"Ativo":"Inativo",s.level||"",s.group||"",s.day||"",s.time||"",mi.phone||s.phone||"",mi.email||s.email||"",memberField(s,n,"birthday","")?dateBR(memberField(s,n,"birthday","")):"",fee===null?"":fee,active?memberDue(s,n):"",memberField(s,n,"payMethod",""),memberField(s,n,"startDate","")?dateBR(memberField(s,n,"startDate","")):"",s.last||"",(s.meet||""),active?"":(s.reason||"")]);
+  });
+  DB.students.forEach(s=>add(s,true)); (DB.inactiveStudents||[]).forEach(s=>add(s,false));
+  downloadCSV(`EWD_alunos_${todayISO()}.csv`,["Aluno","Turma","Situação","Nível","Formato","Dia","Horário","WhatsApp","E-mail","Aniversário","Mensalidade (R$)","Vencimento (dia)","Forma de pagamento","Aluno desde","Última aula","Link do Meet","Motivo (inativo)"],rows);
+}
+function exportFinanceCSV(){
+  const m=FIN_UI.month, rows=finRows(m).sort((a,b)=>a.n.localeCompare(b.n));
+  const out=rows.map(r=>["Mensalidade",r.n,r.s.name===r.n?"Individual":r.s.name,`dia ${memberDue(r.s,r.n)}`,r.gross===null?"":r.gross,r.disc?r.disc:"",r.fee===null?"":r.fee,r.st.label||"",memberField(r.s,r.n,"payMethod","")]);
+  (DB.finance||[]).filter(e=>(e.date||"").startsWith(m)).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach(e=>out.push([e.type==="despesa"?"Despesa":"Receita",e.desc||"",e.category||"",dateBR(e.date),"", "",e.type==="despesa"?-Number(e.amount||0):Number(e.amount||0),"",""]));
+  downloadCSV(`EWD_financeiro_${m}.csv`,["Tipo","Aluno / descrição","Turma / categoria","Vencimento / data","Valor cheio (R$)","Desconto (R$)","Valor (R$)","Status","Forma de pagamento"],out);
+}
+function exportFinanceYearCSV(){
+  const y=FIN_UI.month.slice(0,4), out=[];
+  for(let k=1;k<=12;k++){ const m=`${y}-${String(k).padStart(2,"0")}`;
+    finRows(m).forEach(r=>{ if(r.fee===null&&!r.st.paid) return; out.push([monthLabel(m),"Mensalidade",r.n,r.s.name===r.n?"Individual":r.s.name,r.gross===null?"":r.gross,r.disc||"",r.fee===null?"":r.fee,r.st.label||""]); });
+    (DB.finance||[]).filter(e=>(e.date||"").startsWith(m)).forEach(e=>out.push([monthLabel(m),e.type==="despesa"?"Despesa":"Receita",e.desc||"",e.category||"","","",e.type==="despesa"?-Number(e.amount||0):Number(e.amount||0),dateBR(e.date)]));
+  }
+  downloadCSV(`EWD_financeiro_${y}.csv`,["Mês","Tipo","Aluno / descrição","Turma / categoria","Valor cheio (R$)","Desconto (R$)","Valor (R$)","Status / data"],out);
+}
 
 /* ================= Projetos 2027 ================= */
 const PROJ_TYPES=["🎬 Clube cultural","🎤 Palestra / convidados","📚 Curso","🛍️ Produto","📅 Evento","✨ Outro"];
