@@ -2901,10 +2901,10 @@ function togglePaid(m,name,key){
   save(); renderFinance(); renderFicha(); renderToday();
 }
 /* ---------- Desconto de aniversário (presente) ---------- */
-function bdayCfg(){ const c=DB.bdayDiscount=DB.bdayDiscount||{on:false,pct:10}; if(!c.mode){ c.mode="fixed"; c.amount=25; } c.given=c.given||{}; return c; }
+function bdayCfg(){ const c=DB.bdayDiscount=DB.bdayDiscount||{on:false,pct:10}; if(!c.mode){ c.mode="fixed"; c.amount=25; } if(!c.startYear) c.startYear=2027; c.given=c.given||{}; return c; }
 function bdayDiscValue(gross){ const c=bdayCfg(); if(gross===null||gross===undefined) return 0; return c.mode==="fixed"?Math.min(Number(c.amount)||0,gross):Math.round(gross*c.pct)/100; }
 function bdayLabel(){ const c=bdayCfg(); return c.mode==="fixed"?fmtBRL(c.amount):`${c.pct}%`; }
-var BDAY_UI={year:new Date().getFullYear()};
+var BDAY_UI={year:Math.max(new Date().getFullYear(),2027)};
 // Regra: aniversário até o dia do vencimento → desconto na mensalidade daquele mês; depois do vencimento → no mês seguinte.
 function bdayDiscMonth(s,n,year){
   const b=String(memberField(s,n,"birthday","")||""); const mm=+b.slice(5,7), dd=+b.slice(8,10); if(!mm||!dd) return "";
@@ -2912,7 +2912,7 @@ function bdayDiscMonth(s,n,year){
   return `${y}-${String(m).padStart(2,"0")}`;
 }
 function bdayDiscFor(s,n,month){
-  const y=+month.slice(0,4); return [bdayDiscMonth(s,n,y),bdayDiscMonth(s,n,y-1)].includes(month);
+  const y=+month.slice(0,4), st=bdayCfg().startYear||0; return [y,y-1].some(by=>by>=st&&bdayDiscMonth(s,n,by)===month);
 }
 function finRows(m){
   const rows=[], cfg=bdayCfg();
@@ -2938,14 +2938,16 @@ function toggleBdayGiven(key,amount,month){
   save(); renderFinance();
 }
 function bdayForecastHTML(){
-  const cfg=bdayCfg(), y=BDAY_UI.year, rows=bdayYearRows(y), cur=monthISO();
+  const cfg=bdayCfg(), y=BDAY_UI.year, cur=monthISO();
+  if(y<cfg.startYear) return `<div class="card span12 bday-disc"><div class="toolbar" style="align-items:center"><h3 style="margin:0">🎂 Presente de aniversário</h3><button class="btn small" onclick="BDAY_UI.year--;renderFinance()">‹</button><b>${y}</b><button class="btn small" onclick="BDAY_UI.year++;renderFinance()">›</button></div><div class="notice" style="margin-top:10px">O presente de aniversário começa em <b>${cfg.startYear}</b>. Não há descontos em ${y}.</div></div>`;
+  const rows=bdayYearRows(y);
   const done=rows.filter(r=>r.given||r.auto), todo=rows.filter(r=>!r.given&&!r.auto&&r.m), missing=rows.filter(r=>!r.m||r.gross===null);
   const sum=a=>a.reduce((t,r)=>t+(r.value||0),0);
   const status=r=>r.given?`<span class="chip ok">✓ Recebeu ${r.given.month?esc(monthLabel(r.given.month).split(" de ")[0].toLowerCase()):""}</span>`:r.auto?`<span class="chip ok">✓ Descontado (pago)</span>`:!r.m?`<span class="chip">sem aniversário</span>`:r.m<cur?`<span class="chip warn">não registrado</span>`:r.m===cur?`<span class="chip or">este mês</span>`:`<span class="chip">previsto</span>`;
   return `<div class="card span12 bday-disc">
     <div class="toolbar" style="justify-content:space-between;align-items:flex-start">
       <div><h3 style="margin:0">🎂 Presente de aniversário · desconto de ${bdayLabel()}</h3>
-        <div class="muted small" style="margin-top:4px">Aniversário <b>até o dia do vencimento</b> → desconto na mensalidade daquele mês · <b>depois do vencimento</b> → no mês seguinte. Marque ✓ quem já recebeu o presente.</div></div>
+        <div class="muted small" style="margin-top:4px">Começa nos aniversários de <b>${cfg.startYear}</b>. Aniversário <b>até o dia do vencimento</b> → desconto na mensalidade daquele mês · <b>depois do vencimento</b> → no mês seguinte. Marque ✓ quem já recebeu o presente.</div></div>
       <div class="toolbar" style="align-items:center">
         <select style="width:auto;padding:6px 8px" onchange="bdayCfg().mode=this.value;save();renderFinance()"><option value="fixed" ${cfg.mode==="fixed"?"selected":""}>Valor fixo</option><option value="pct" ${cfg.mode==="pct"?"selected":""}>Porcentagem</option></select>
         ${cfg.mode==="fixed"?`<span class="small">R$</span><input type="number" min="1" step="1" value="${cfg.amount}" style="width:80px;padding:6px 8px" onchange="bdayCfg().amount=Math.max(0,+this.value||0);save();renderFinance()">`:`<input type="number" min="1" max="100" value="${cfg.pct}" style="width:70px;padding:6px 8px" onchange="bdayCfg().pct=Math.max(1,Math.min(100,+this.value||10));save();renderFinance()"><span class="small">%</span>`}
